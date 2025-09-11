@@ -1,14 +1,24 @@
-<script>
-function sendData() {
-  fetch("https://shironekoserver.com/save", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ user: "Alice", score: 123 })
-  })
-  .then(res => res.json())
-  .then(data => console.log("Server replied:", data))
-  .catch(err => console.error("Error:", err));
-}
-</script>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Send Data</title>
+</head>
+<body>
+  <h1>Send Data to Server</h1>
+  <button onclick="sendData()">Send Data</button>
 
-<button onclick="sendData()">Send Data</button>
+  <script>
+    function sendData() {
+      fetch("http://shironekoserver.com:3000/save", { // replace with your server URL or HTTPS when ready
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user: "Alice", score: 123 })
+      })
+      .then(res => res.json())
+      .then(data => console.log("Server replied:", data))
+      .catch(err => console.error("Error:", err));
+    }
+  </script>
+</body>
+</html>
