@@ -10,7 +10,7 @@
 
   <script>
     function sendData() {
-      fetch("http://shironekoserver.com:3000/save", { // replace with your server URL or HTTPS when ready
+      fetch("https://sv2.shironekoserver.com/save", { // HTTPS through reverse proxy
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ user: "Alice", score: 123 })
