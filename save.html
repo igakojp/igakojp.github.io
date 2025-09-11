@@ -1,6 +1,6 @@
 <script>
 function sendData() {
-  fetch("https://shironekoserver.com:3000/save", {
+  fetch("https://shironekoserver.com/save", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ user: "Alice", score: 123 })
