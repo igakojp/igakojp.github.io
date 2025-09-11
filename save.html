@@ -1,0 +1,14 @@
+<script>
+function sendData() {
+  fetch("https://shironekoserver.com:3000/save", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ user: "Alice", score: 123 })
+  })
+  .then(res => res.json())
+  .then(data => console.log("Server replied:", data))
+  .catch(err => console.error("Error:", err));
+}
+</script>
+
+<button onclick="sendData()">Send Data</button>
