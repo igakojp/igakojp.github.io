@@ -1,24 +1,45 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Send Data</title>
+  <title>Send Data to Server</title>
 </head>
 <body>
-  <h1>Send Data to Server</h1>
-  <button onclick="sendData()">Send Data</button>
+  <h1>Send Data to Node.js Server</h1>
+
+  <label for="user">User:</label>
+  <input type="text" id="user" placeholder="Enter your name"><br><br>
+
+  <label for="score">Score:</label>
+  <input type="number" id="score" placeholder="Enter score"><br><br>
+
+  <button id="sendBtn">Send Data</button>
+
+  <p id="status"></p>
 
   <script>
-    function sendData() {
-      fetch("https://sv2.shironekoserver.com/save", { // HTTPS through reverse proxy
+    document.getElementById("sendBtn").onclick = function() {
+      const user = document.getElementById("user").value;
+      const score = parseInt(document.getElementById("score").value);
+
+      if (!user || isNaN(score)) {
+        document.getElementById("status").textContent = "Please enter valid user and score.";
+        return;
+      }
+
+      fetch("https://sv2.shironekoserver.com/save", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user: "Alice", score: 123 })
+        body: JSON.stringify({ user, score })
       })
       .then(res => res.json())
-      .then(data => console.log("Server replied:", data))
-      .catch(err => console.error("Error:", err));
-    }
+      .then(data => {
+        document.getElementById("status").textContent = "Server replied: " + JSON.stringify(data);
+      })
+      .catch(err => {
+        document.getElementById("status").textContent = "Error: " + err;
+      });
+    };
   </script>
 </body>
 </html>
