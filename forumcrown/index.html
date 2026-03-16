@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Forum Crown • Home</title>
+
+<!-- Favicon -->
+<link rel="icon" href="./logo.jpg" type="image/x-icon">
+
 <style>
 body{
     font-family: Arial, Helvetica, sans-serif;
@@ -11,7 +15,11 @@ body{
     color:#e6e6e6;
     margin:0;
     padding:0;
+    opacity:0;
+    transition: opacity 0.7s ease-in-out;
 }
+body.loaded{opacity:1;}
+
 header{
     background:#161b22;
     padding:50px;
@@ -39,16 +47,18 @@ nav a{
     margin:0 20px;
     text-decoration:none;
     font-weight:bold;
+    transition: color 0.3s;
 }
-nav a:hover{
-    text-decoration:underline;
-}
+nav a:hover{color:#3991e6;}
+
 .container{
     max-width:1000px;
     margin:auto;
     padding:60px 20px;
     text-align:center;
 }
+
+/* Pulsing buttons */
 .btn{
     display:inline-block;
     margin:20px;
@@ -60,45 +70,76 @@ nav a:hover{
     font-size:16px;
     cursor:pointer;
     font-weight:bold;
-    transition:all 0.3s ease;
     text-decoration:none;
+    transition: all 0.3s ease;
 }
 .btn:hover{
-    background:#3991e6;
-    transform:scale(1.05);
+    transform:scale(1.1);
+    animation: pulse 1s infinite;
 }
+@keyframes pulse{
+    0% { box-shadow: 0 0 0 #58a6ff50; }
+    50% { box-shadow: 0 0 20px #58a6ff80; }
+    100% { box-shadow: 0 0 0 #58a6ff50; }
+}
+
 footer{
     text-align:center;
     padding:30px;
     border-top:1px solid #30363d;
     opacity:0.7;
 }
+
+/* Scroll fade animation for sections */
+.fade-section{
+    opacity:0;
+    transform: translateY(50px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+}
+.fade-section.visible{
+    opacity:1;
+    transform: translateY(0);
+}
 </style>
 </head>
 <body>
 
-<header>
+<header class="fade-section">
 <h1>Forum Crown</h1>
 <p>Powerful Discord forum management bot</p>
 </header>
 
-<nav>
-<a href="terms">Terms of Service</a>
-<a href="privacy">Privacy Policy</a>
-<a href="features">Features</a>
+<nav class="fade-section">
+<a href="terms.html">Terms of Service</a>
+<a href="privacy.html">Privacy Policy</a>
+<a href="features.html">Features</a>
 </nav>
 
-<div class="container">
+<div class="container fade-section">
 <p>Manage your Discord forums efficiently with automation, threads, reactions, and statistics.</p>
 
-<a href="https://discord.com/oauth2/authorize?client_id=1373938165047496784" class="btn">Add Bot</a>
-<a href="https://discord.gg/yBP79TqqCr" class="btn">Join Support Server</a>
-
+<a href="YOUR_BOT_INVITE_LINK" class="btn">Add Bot</a>
+<a href="YOUR_SUPPORT_SERVER_LINK" class="btn">Join Support Server</a>
 </div>
 
-<footer>
+<footer class="fade-section">
 Forum Crown • Operated by igakojp
 </footer>
+
+<script>
+// Fade-in body
+window.addEventListener('DOMContentLoaded', () => { document.body.classList.add('loaded'); });
+
+// Scroll-based fade
+const faders = document.querySelectorAll('.fade-section');
+const options = { threshold: 0.1 };
+const observer = new IntersectionObserver((entries, observer) => {
+    entries.forEach(entry => {
+        if(entry.isIntersecting){ entry.target.classList.add('visible'); observer.unobserve(entry.target);}
+    });
+}, options);
+faders.forEach(fader => observer.observe(fader));
+</script>
 
 </body>
 </html>
