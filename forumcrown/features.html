@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Forum Crown • Features</title>
+<link rel="icon" href="assets/images/favicon.ico" type="image/x-icon">
+
 <style>
 body{
     font-family: Arial, Helvetica, sans-serif;
@@ -11,38 +13,24 @@ body{
     color:#e6e6e6;
     margin:0;
     padding:0;
+    opacity:0;
+    transition: opacity 0.7s ease-in-out;
 }
+body.loaded{opacity:1;}
+
 header{
     background:#161b22;
     padding:50px;
     text-align:center;
     border-bottom:1px solid #30363d;
 }
-header h1{
-    color:#58a6ff;
-    margin:0;
-    font-size:48px;
-}
-header p{
-    opacity:0.8;
-    margin-top:10px;
-    font-size:18px;
-}
-nav{
-    text-align:center;
-    padding:20px;
-    background:#0d1117;
-    border-bottom:1px solid #30363d;
-}
-nav a{
-    color:#58a6ff;
-    margin:0 20px;
-    text-decoration:none;
-    font-weight:bold;
-}
-nav a:hover{
-    text-decoration:underline;
-}
+header h1{color:#58a6ff; margin:0; font-size:48px;}
+header p{opacity:0.8; margin-top:10px; font-size:18px;}
+
+nav{text-align:center; padding:20px; background:#0d1117; border-bottom:1px solid #30363d;}
+nav a{color:#58a6ff; margin:0 20px; text-decoration:none; font-weight:bold; transition: color 0.3s;}
+nav a:hover{color:#3991e6;}
+
 .container{
     max-width:1000px;
     margin:auto;
@@ -51,32 +39,36 @@ nav a:hover{
     grid-template-columns: repeat(auto-fit, minmax(280px,1fr));
     gap:40px;
 }
+
 .card{
     background:#161b22;
-    padding:30px;
+    padding:20px;
     border-radius:15px;
     border:1px solid #30363d;
     text-align:center;
-    transition: transform 0.4s ease, box-shadow 0.4s ease;
+    overflow:hidden;
+    position:relative;
+    opacity:0;
+    transform: translateY(50px);
+    transition: all 0.6s ease;
+}
+.card.visible{opacity:1; transform: translateY(0);}
+.card img{
+    width:80px;
+    margin-bottom:15px;
+    transition: transform 0.5s ease;
+}
+.card:hover img{
+    transform: rotate(15deg) scale(1.1);
 }
 .card:hover{
     transform: translateY(-10px);
     box-shadow: 0 0 30px #58a6ff70;
 }
-.card h3{
-    color:#58a6ff;
-    margin-bottom:15px;
-}
-.card p{
-    font-size:16px;
-    opacity:0.85;
-}
-footer{
-    text-align:center;
-    padding:30px;
-    border-top:1px solid #30363d;
-    opacity:0.7;
-}
+.card h3{color:#58a6ff; margin-bottom:15px;}
+.card p{font-size:16px; opacity:0.85;}
+
+footer{text-align:center; padding:30px; border-top:1px solid #30363d; opacity:0.7;}
 </style>
 </head>
 <body>
@@ -93,42 +85,29 @@ footer{
 </nav>
 
 <div class="container">
-
-<div class="card">
-<h3>Thread Management</h3>
-<p>Close, reopen, rename threads and manage tags with simple slash commands.</p>
+<div class="card"><img src="assets/images/thread.png" alt="Thread"><h3>Thread Management</h3><p>Close, reopen, rename threads and manage tags with slash commands.</p></div>
+<div class="card"><img src="assets/images/automation.png" alt="Automation"><h3>Forum Automation</h3><p>Set rules, required tags, automatic pinning, and notifications.</p></div>
+<div class="card"><img src="assets/images/reactions.png" alt="Reactions"><h3>Reaction Templates</h3><p>Automatically add reactions based on tags, roles, users, or words.</p></div>
+<div class="card"><img src="assets/images/stats.png" alt="Stats"><h3>Statistics & Insights</h3><p>Track top contributors, thread activity, and forum performance.</p></div>
+<div class="card"><img src="assets/images/unlimited.png" alt="Unlimited"><h3>Unlimited Forums</h3><p>Support for unlimited forum channels per server with slash commands.</p></div>
+<div class="card"><img src="assets/images/composer.png" alt="Composer"><h3>Post Composer</h3><p>Send structured messages and notifications easily through the bot.</p></div>
 </div>
 
-<div class="card">
-<h3>Forum Automation</h3>
-<p>Set rules, required tags, automatic pinning, and message notifications for new threads.</p>
-</div>
+<footer>Forum Crown • Operated by igakojp</footer>
 
-<div class="card">
-<h3>Reaction Templates</h3>
-<p>Automatically add reactions based on tags, roles, users, or words across multiple forums.</p>
-</div>
+<script>
+window.addEventListener('DOMContentLoaded', () => { document.body.classList.add('loaded'); });
 
-<div class="card">
-<h3>Statistics & Insights</h3>
-<p>Track top contributors, thread activity, and overall forum performance metrics.</p>
-</div>
-
-<div class="card">
-<h3>Unlimited Forums</h3>
-<p>Support for unlimited forum channels per server with modern slash commands.</p>
-</div>
-
-<div class="card">
-<h3>Post Composer</h3>
-<p>Send structured messages and notifications in forums easily through the bot.</p>
-</div>
-
-</div>
-
-<footer>
-Forum Crown • Operated by igakojp
-</footer>
+// Scroll fade-in for each card
+const cards = document.querySelectorAll('.card');
+const options = { threshold: 0.2 };
+const observer = new IntersectionObserver((entries, observer)=>{
+    entries.forEach(entry => {
+        if(entry.isIntersecting){ entry.target.classList.add('visible'); observer.unobserve(entry.target); }
+    });
+}, options);
+cards.forEach(card => observer.observe(card));
+</script>
 
 </body>
 </html>
