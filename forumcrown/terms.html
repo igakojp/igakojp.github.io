@@ -15,24 +15,13 @@ nav{text-align:center;padding:20px;background:#161b22;}
 nav a{color:#58a6ff;margin:0 20px;text-decoration:none;font-weight:bold;}
 nav a:hover{color:#1fb6ff;}
 .container{max-width:800px;margin:auto;padding:40px 20px;}
-h2{color:#58a6ff;margin-top:30px;cursor:pointer;}
+h2{color:#58a6ff;margin-top:30px;}
 p, li{opacity:0.85;}
 ul{margin-left:20px;margin-bottom:20px;}
 footer{text-align:center;padding:30px;border-top:1px solid #30363d;opacity:0.7;}
-
-/* Accordion */
-.accordion-content{max-height:0;overflow:hidden;transition:max-height 0.5s ease;padding-left:10px;}
-.accordion-content p, .accordion-content ul{margin-bottom:15px;}
-.accordion-open .accordion-content{max-height:1000px;}
-
-/* Fade-in sections */
 .fade-section{opacity:0;transform:translateY(50px);transition:opacity 0.8s ease,transform 0.8s ease;}
 .fade-section.visible{opacity:1;transform:translateY(0);}
-
-/* TOC */
-#toc{position:sticky;top:20px;background:#161b22;padding:15px;border-radius:10px;border:1px solid #30363d;margin-bottom:20px;}
-#toc a{display:block;color:#58a6ff;text-decoration:none;margin-bottom:5px;}
-#toc a:hover{color:#1fb6ff;text-shadow:0 0 10px #1fb6ff;}
+strong{color:#1fb6ff;}
 </style>
 </head>
 <body>
@@ -48,23 +37,10 @@ footer{text-align:center;padding:30px;border-top:1px solid #30363d;opacity:0.7;}
 </nav>
 
 <div class="container fade-section">
-<div id="toc">
-<strong>Table of Contents</strong>
-<a href="#introduction">1. Introduction</a>
-<a href="#data-collection">2. Data Collection</a>
-<a href="#premium">3. Premium Features</a>
-<a href="#termination">4. Account Termination</a>
-<a href="#changes">5. Changes</a>
-</div>
-
-<div class="accordion">
-<h2 id="introduction">1. Introduction</h2>
-<div class="accordion-content">
+<h2>1. Introduction</h2>
 <p>Welcome to <strong>Forum Crown</strong>. By using our bot, you agree to these <strong>terms of service</strong>. Please read them carefully.</p>
-</div>
 
-<h2 id="data-collection">2. Data Collection</h2>
-<div class="accordion-content">
+<h2>2. Data Collection</h2>
 <p><strong>Forum Crown</strong> stores:</p>
 <ul>
 <li>Server IDs and user IDs</li>
@@ -72,23 +48,15 @@ footer{text-align:center;padding:30px;border-top:1px solid #30363d;opacity:0.7;}
 <li>Premium server information</li>
 <li>Messages are read temporarily but <strong>not stored</strong></li>
 </ul>
-</div>
 
-<h2 id="premium">3. Premium Features</h2>
-<div class="accordion-content">
+<h2>3. Premium Features</h2>
 <p>Premium access is granted via Discord server boosts. Multiple boosts provide multiple premium benefits.</p>
-</div>
 
-<h2 id="termination">4. Account Termination</h2>
-<div class="accordion-content">
+<h2>4. Account Termination</h2>
 <p>Users may remove their data, which may disable certain bot features. The operator may remove the bot from servers or terminate access at any time.</p>
-</div>
 
-<h2 id="changes">5. Changes to Terms</h2>
-<div class="accordion-content">
+<h2>5. Changes to Terms</h2>
 <p><strong>Forum Crown</strong> may update these terms. Continued use after changes constitutes acceptance.</p>
-</div>
-</div>
 </div>
 
 <footer class="fade-section">Forum Crown • Operated by igakojp</footer>
@@ -105,14 +73,6 @@ const observer=new IntersectionObserver((entries,obs)=>{
   });
 },{threshold:0.1});
 faders.forEach(fader=>observer.observe(fader));
-
-// Accordion functionality
-const accHeaders=document.querySelectorAll('.accordion h2');
-accHeaders.forEach(header=>{
-  header.addEventListener('click',()=>{
-    header.parentElement.classList.toggle('accordion-open');
-  });
-});
 </script>
 
 </body>

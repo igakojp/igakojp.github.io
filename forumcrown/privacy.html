@@ -15,18 +15,13 @@ nav{text-align:center;padding:20px;background:#161b22;}
 nav a{color:#58a6ff;margin:0 20px;text-decoration:none;font-weight:bold;}
 nav a:hover{color:#1fb6ff;}
 .container{max-width:800px;margin:auto;padding:40px 20px;}
-h2{color:#58a6ff;margin-top:30px;cursor:pointer;}
+h2{color:#58a6ff;margin-top:30px;}
 p, li{opacity:0.85;}
 ul{margin-left:20px;margin-bottom:20px;}
 footer{text-align:center;padding:30px;border-top:1px solid #30363d;opacity:0.7;}
-.accordion-content{max-height:0;overflow:hidden;transition:max-height 0.5s ease;padding-left:10px;}
-.accordion-content p, .accordion-content ul{margin-bottom:15px;}
-.accordion-open .accordion-content{max-height:1000px;}
 .fade-section{opacity:0;transform:translateY(50px);transition:opacity 0.8s ease,transform 0.8s ease;}
 .fade-section.visible{opacity:1;transform:translateY(0);}
-#toc{position:sticky;top:20px;background:#161b22;padding:15px;border-radius:10px;border:1px solid #30363d;margin-bottom:20px;}
-#toc a{display:block;color:#58a6ff;text-decoration:none;margin-bottom:5px;}
-#toc a:hover{color:#1fb6ff;text-shadow:0 0 10px #1fb6ff;}
+strong{color:#1fb6ff;}
 </style>
 </head>
 <body>
@@ -42,68 +37,44 @@ footer{text-align:center;padding:30px;border-top:1px solid #30363d;opacity:0.7;}
 </nav>
 
 <div class="container fade-section">
-<div id="toc">
-<strong>Table of Contents</strong>
-<a href="#data-collect">1. Data We Collect</a>
-<a href="#data-use">2. How We Use Your Data</a>
-<a href="#data-removal">3. Data Removal</a>
-<a href="#security">4. Security</a>
-<a href="#updates">5. Updates</a>
-</div>
-
-<div class="accordion">
-<h2 id="data-collect">1. Data We Collect</h2>
-<div class="accordion-content">
+<h2>1. Data We Collect</h2>
 <ul>
 <li>Server IDs and user IDs</li>
 <li>Server configuration settings and premium server info</li>
 <li>Messages read temporarily for features; <strong>messages are not stored</strong></li>
 </ul>
-</div>
 
-<h2 id="data-use">2. How We Use Your Data</h2>
-<div class="accordion-content">
+<h2>2. How We Use Your Data</h2>
 <ul>
 <li>Provide forum management and automation features</li>
 <li>Track premium boosts for premium access</li>
 <li>Show statistics like top contributors and forum activity</li>
 </ul>
-</div>
 
-<h2 id="data-removal">3. Data Removal</h2>
-<div class="accordion-content">
+<h2>3. Data Removal</h2>
 <p>Users may request data removal. Some features may stop functioning if relevant data is deleted.</p>
-</div>
 
-<h2 id="security">4. Security</h2>
-<div class="accordion-content">
+<h2>4. Security</h2>
 <p>All data is stored securely on our servers. Access is limited to the bot operator.</p>
-</div>
 
-<h2 id="updates">5. Updates</h2>
-<div class="accordion-content">
+<h2>5. Updates</h2>
 <p>This privacy policy may change. Continued use after changes constitutes acceptance.</p>
-</div>
-</div>
 </div>
 
 <footer class="fade-section">Forum Crown • Operated by igakojp</footer>
 
 <script>
+// Fade-in body
 window.addEventListener('DOMContentLoaded',()=>{document.body.classList.add('loaded');});
+
+// Scroll fade-in
 const faders=document.querySelectorAll('.fade-section');
 const observer=new IntersectionObserver((entries,obs)=>{
-  entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('visible'); obs.unobserve(entry.target);}});
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){entry.target.classList.add('visible'); obs.unobserve(entry.target);}
+  });
 },{threshold:0.1});
 faders.forEach(fader=>observer.observe(fader));
-
-// Accordion functionality
-const accHeaders=document.querySelectorAll('.accordion h2');
-accHeaders.forEach(header=>{
-  header.addEventListener('click',()=>{
-    header.parentElement.classList.toggle('accordion-open');
-  });
-});
 </script>
 
 </body>
