@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Forum Crown • Features</title>
+<style>
+body{
+    font-family: Arial, Helvetica, sans-serif;
+    background:#0f1117;
+    color:#e6e6e6;
+    margin:0;
+    padding:0;
+}
+header{
+    background:#161b22;
+    padding:50px;
+    text-align:center;
+    border-bottom:1px solid #30363d;
+}
+header h1{
+    color:#58a6ff;
+    margin:0;
+    font-size:48px;
+}
+header p{
+    opacity:0.8;
+    margin-top:10px;
+    font-size:18px;
+}
+nav{
+    text-align:center;
+    padding:20px;
+    background:#0d1117;
+    border-bottom:1px solid #30363d;
+}
+nav a{
+    color:#58a6ff;
+    margin:0 20px;
+    text-decoration:none;
+    font-weight:bold;
+}
+nav a:hover{
+    text-decoration:underline;
+}
+.container{
+    max-width:1000px;
+    margin:auto;
+    padding:60px 20px;
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px,1fr));
+    gap:40px;
+}
+.card{
+    background:#161b22;
+    padding:30px;
+    border-radius:15px;
+    border:1px solid #30363d;
+    text-align:center;
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
+}
+.card:hover{
+    transform: translateY(-10px);
+    box-shadow: 0 0 30px #58a6ff70;
+}
+.card h3{
+    color:#58a6ff;
+    margin-bottom:15px;
+}
+.card p{
+    font-size:16px;
+    opacity:0.85;
+}
+footer{
+    text-align:center;
+    padding:30px;
+    border-top:1px solid #30363d;
+    opacity:0.7;
+}
+</style>
+</head>
+<body>
+
+<header>
+<h1>Features</h1>
+<p>Explore what Forum Crown can do for your server</p>
+</header>
+
+<nav>
+<a href="index.html">Home</a>
+<a href="terms.html">Terms</a>
+<a href="privacy.html">Privacy</a>
+</nav>
+
+<div class="container">
+
+<div class="card">
+<h3>Thread Management</h3>
+<p>Close, reopen, rename threads and manage tags with simple slash commands.</p>
+</div>
+
+<div class="card">
+<h3>Forum Automation</h3>
+<p>Set rules, required tags, automatic pinning, and message notifications for new threads.</p>
+</div>
+
+<div class="card">
+<h3>Reaction Templates</h3>
+<p>Automatically add reactions based on tags, roles, users, or words across multiple forums.</p>
+</div>
+
+<div class="card">
+<h3>Statistics & Insights</h3>
+<p>Track top contributors, thread activity, and overall forum performance metrics.</p>
+</div>
+
+<div class="card">
+<h3>Unlimited Forums</h3>
+<p>Support for unlimited forum channels per server with modern slash commands.</p>
+</div>
+
+<div class="card">
+<h3>Post Composer</h3>
+<p>Send structured messages and notifications in forums easily through the bot.</p>
+</div>
+
+</div>
+
+<footer>
+Forum Crown • Operated by igakojp
+</footer>
+
+</body>
+</html>
