@@ -2,143 +2,109 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Forum Crown Privacy Policy</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<title>Forum Crown • Privacy Policy</title>
+<link rel="icon" href="assets/images/favicon.ico" type="image/x-icon">
+<meta name="description" content="Forum Crown Privacy Policy - how data is collected and used.">
 <style>
-
-body{
-font-family:Arial,Helvetica,sans-serif;
-background:#0f1117;
-color:#e6e6e6;
-margin:0;
-}
-
-header{
-background:#161b22;
-padding:35px;
-text-align:center;
-border-bottom:1px solid #30363d;
-}
-
-header h1{
-color:#58a6ff;
-}
-
-nav{
-text-align:center;
-padding:15px;
-background:#0d1117;
-border-bottom:1px solid #30363d;
-}
-
-nav a{
-color:#58a6ff;
-margin:0 15px;
-text-decoration:none;
-}
-
-.container{
-max-width:900px;
-margin:auto;
-padding:40px 20px;
-}
-
-section{
-background:#161b22;
-padding:25px;
-border-radius:10px;
-border:1px solid #30363d;
-margin-bottom:25px;
-}
-
-footer{
-text-align:center;
-padding:30px;
-opacity:0.7;
-}
-
+body{font-family:Arial,Helvetica,sans-serif;margin:0;padding:0;background:#0f1117;color:#e6e6e6;line-height:1.6;opacity:0;transition:opacity 0.7s;}
+body.loaded{opacity:1;}
+header{text-align:center;padding:50px 20px;border-bottom:1px solid #30363d;}
+header h1{color:#58a6ff;margin:0;}
+nav{text-align:center;padding:20px;background:#161b22;}
+nav a{color:#58a6ff;margin:0 20px;text-decoration:none;font-weight:bold;}
+nav a:hover{color:#1fb6ff;}
+.container{max-width:800px;margin:auto;padding:40px 20px;}
+h2{color:#58a6ff;margin-top:30px;cursor:pointer;}
+p, li{opacity:0.85;}
+ul{margin-left:20px;margin-bottom:20px;}
+footer{text-align:center;padding:30px;border-top:1px solid #30363d;opacity:0.7;}
+.accordion-content{max-height:0;overflow:hidden;transition:max-height 0.5s ease;padding-left:10px;}
+.accordion-content p, .accordion-content ul{margin-bottom:15px;}
+.accordion-open .accordion-content{max-height:1000px;}
+.fade-section{opacity:0;transform:translateY(50px);transition:opacity 0.8s ease,transform 0.8s ease;}
+.fade-section.visible{opacity:1;transform:translateY(0);}
+#toc{position:sticky;top:20px;background:#161b22;padding:15px;border-radius:10px;border:1px solid #30363d;margin-bottom:20px;}
+#toc a{display:block;color:#58a6ff;text-decoration:none;margin-bottom:5px;}
+#toc a:hover{color:#1fb6ff;text-shadow:0 0 10px #1fb6ff;}
 </style>
 </head>
-
 <body>
 
-<header>
-<h1>Privacy Policy</h1>
+<header class="fade-section">
+<h1>Forum Crown • Privacy Policy</h1>
 </header>
 
-<nav>
+<nav class="fade-section">
 <a href="index.html">Home</a>
 <a href="terms.html">Terms of Service</a>
+<a href="features.html">Features</a>
 </nav>
 
-<div class="container">
-
-<section>
-
-<h3>1. Data Collection</h3>
-<p>
-Forum Crown may store server IDs, user IDs, configuration settings,
-reaction templates, automation rules, and forum statistics.
-</p>
-
-<h3>2. Statistics</h3>
-<p>
-The bot tracks forum activity such as top contributors and post activity.
-This requires storing user IDs and activity counts.
-</p>
-
-<h3>3. Message Content</h3>
-<p>
-Forum Crown reads messages to process commands but does not store
-message content.
-</p>
-
-<h3>4. Automated Messages</h3>
-<p>
-The bot may send automated messages or notifications configured by
-server administrators.
-</p>
-
-<h3>5. Error Logs</h3>
-<p>
-Errors and system issues may be logged for debugging and improvement.
-</p>
-
-<h3>6. Data Storage</h3>
-<p>
-Data is stored in a database controlled by the developer.
-</p>
-
-<h3>7. Data Sharing</h3>
-<p>
-Forum Crown does not sell or share user data with third parties.
-</p>
-
-<h3>8. Data Retention</h3>
-<p>
-Data may remain stored even after the bot leaves a server unless
-a deletion request is made.
-</p>
-
-<h3>9. Data Deletion</h3>
-<p>
-Users may request data deletion through the support server.
-</p>
-
-<h3>10. Information Not Collected</h3>
-<p>
-Forum Crown does not collect IP addresses, device information,
-or location data.
-</p>
-
-</section>
-
+<div class="container fade-section">
+<div id="toc">
+<strong>Table of Contents</strong>
+<a href="#data-collect">1. Data We Collect</a>
+<a href="#data-use">2. How We Use Your Data</a>
+<a href="#data-removal">3. Data Removal</a>
+<a href="#security">4. Security</a>
+<a href="#updates">5. Updates</a>
 </div>
 
-<footer>
-Forum Crown • Operated by igakojp
-</footer>
+<div class="accordion">
+<h2 id="data-collect">1. Data We Collect</h2>
+<div class="accordion-content">
+<ul>
+<li>Server IDs and user IDs</li>
+<li>Server configuration settings and premium server info</li>
+<li>Messages read temporarily for features; <strong>messages are not stored</strong></li>
+</ul>
+</div>
+
+<h2 id="data-use">2. How We Use Your Data</h2>
+<div class="accordion-content">
+<ul>
+<li>Provide forum management and automation features</li>
+<li>Track premium boosts for premium access</li>
+<li>Show statistics like top contributors and forum activity</li>
+</ul>
+</div>
+
+<h2 id="data-removal">3. Data Removal</h2>
+<div class="accordion-content">
+<p>Users may request data removal. Some features may stop functioning if relevant data is deleted.</p>
+</div>
+
+<h2 id="security">4. Security</h2>
+<div class="accordion-content">
+<p>All data is stored securely on our servers. Access is limited to the bot operator.</p>
+</div>
+
+<h2 id="updates">5. Updates</h2>
+<div class="accordion-content">
+<p>This privacy policy may change. Continued use after changes constitutes acceptance.</p>
+</div>
+</div>
+</div>
+
+<footer class="fade-section">Forum Crown • Operated by igakojp</footer>
+
+<script>
+window.addEventListener('DOMContentLoaded',()=>{document.body.classList.add('loaded');});
+const faders=document.querySelectorAll('.fade-section');
+const observer=new IntersectionObserver((entries,obs)=>{
+  entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('visible'); obs.unobserve(entry.target);}});
+},{threshold:0.1});
+faders.forEach(fader=>observer.observe(fader));
+
+// Accordion functionality
+const accHeaders=document.querySelectorAll('.accordion h2');
+accHeaders.forEach(header=>{
+  header.addEventListener('click',()=>{
+    header.parentElement.classList.toggle('accordion-open');
+  });
+});
+</script>
 
 </body>
 </html>

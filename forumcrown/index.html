@@ -4,105 +4,88 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Forum Crown • Home</title>
-
 <link rel="icon" href="assets/images/favicon.ico" type="image/x-icon">
-
+<meta name="description" content="Forum Crown is a powerful Discord bot for managing forums with automation, reactions, and stats.">
 <style>
-/* Global */
+/* Global Styles */
 body{
-    font-family: 'Segoe UI', Arial, sans-serif;
-    margin:0; padding:0;
-    background: linear-gradient(120deg,#0f1117,#161b22);
-    color:#e6e6e6;
-    overflow-x:hidden;
-    opacity:0;
-    transition: opacity 0.7s ease-in-out;
+  font-family:'Segoe UI', Arial, sans-serif;
+  margin:0; padding:0;
+  background: linear-gradient(120deg,#0f1117,#161b22);
+  color:#e6e6e6;
+  overflow-x:hidden;
+  opacity:0;
+  transition: opacity 0.7s ease-in-out;
 }
 body.loaded{opacity:1;}
 
+/* Hero Animation */
+@keyframes gradientMove{
+  0%{background-position:0% 50%;}
+  50%{background-position:100% 50%;}
+  100%{background-position:0% 50%;}
+}
 header{
-    text-align:center;
-    padding:60px 20px;
+  text-align:center;
+  padding:80px 20px;
+  background:linear-gradient(120deg,#0f1117,#161b22);
+  background-size:200% 200%;
+  animation: gradientMove 15s ease infinite;
 }
 header h1{
-    font-size:50px;
-    color:#58a6ff;
-    margin:0;
+  font-size:50px;color:#58a6ff;margin:0;
 }
-header p{
-    font-size:18px;
-    opacity:0.8;
-    margin-top:10px;
-}
+header p{font-size:18px;opacity:0.8;margin-top:10px;}
 
 /* Nav */
 nav{
-    text-align:center;
-    padding:20px;
-    margin-bottom:40px;
+  text-align:center;padding:20px;margin-bottom:40px;
 }
 nav a{
-    color:#58a6ff;
-    margin:0 20px;
-    font-weight:bold;
-    text-decoration:none;
-    transition: all 0.3s;
+  color:#58a6ff;margin:0 20px;font-weight:bold;text-decoration:none;transition:all 0.3s;
 }
 nav a:hover{
-    color:#1fb6ff;
-    text-shadow:0 0 10px #1fb6ff;
+  color:#1fb6ff;
+  text-shadow:0 0 10px #1fb6ff;
 }
 
-/* Container */
-.container{
-    max-width:1000px;
-    margin:auto;
-    text-align:center;
-    padding:20px;
-}
+/* Buttons */
 .btn{
-    display:inline-block;
-    margin:20px;
-    padding:15px 30px;
-    font-size:16px;
-    font-weight:bold;
-    border-radius:12px;
-    text-decoration:none;
-    color:#0f1117;
-    background:#58a6ff;
-    box-shadow: 0 0 10px #58a6ff70;
-    transition: all 0.3s ease;
+  display:inline-block;margin:20px;padding:15px 30px;
+  font-size:16px;font-weight:bold;border-radius:12px;text-decoration:none;
+  color:#0f1117;background:#58a6ff;box-shadow:0 0 10px #58a6ff70;
+  transition:all 0.3s ease;position:relative;
 }
 .btn:hover{
-    transform: scale(1.1);
-    box-shadow: 0 0 30px #58a6ffcc;
-    animation: pulse 1s infinite;
+  transform:scale(1.1);
+  box-shadow:0 0 30px #58a6ffcc;
+  animation: pulse 1s infinite;
+}
+.btn[data-tooltip]:hover::after{
+  content:attr(data-tooltip);
+  position:absolute;bottom:120%;left:50%;transform:translateX(-50%);
+  background:#161b22;padding:5px 10px;border-radius:5px;
+  font-size:12px;white-space:nowrap;opacity:0.9;
 }
 @keyframes pulse{
-    0% { box-shadow: 0 0 15px #58a6ff70; }
-    50% { box-shadow: 0 0 25px #58a6ff99; }
-    100% { box-shadow: 0 0 15px #58a6ff70; }
+  0%{box-shadow:0 0 15px #58a6ff70;}
+  50%{box-shadow:0 0 25px #58a6ff99;}
+  100%{box-shadow:0 0 15px #58a6ff70;}
 }
 
-/* Fade-in sections */
+/* Section Fade */
 .fade-section{
-    opacity:0;
-    transform: translateY(50px);
-    transition: opacity 0.8s ease, transform 0.8s ease;
+  opacity:0;
+  transform:translateY(50px);
+  transition:opacity 0.8s ease,transform 0.8s ease;
 }
-.fade-section.visible{
-    opacity:1;
-    transform: translateY(0);
-}
+.fade-section.visible{opacity:1;transform:translateY(0);}
+
+/* Container */
+.container{text-align:center;max-width:1000px;margin:auto;padding:20px;}
 
 /* Footer */
-footer{
-    text-align:center;
-    margin-top:60px;
-    padding:30px 10px;
-    border-top:1px solid #30363d;
-    opacity:0.7;
-}
+footer{text-align:center;padding:30px 10px;border-top:1px solid #30363d;opacity:0.7;}
 </style>
 </head>
 <body>
@@ -120,25 +103,22 @@ footer{
 
 <div class="container fade-section">
 <p>Manage your Discord forums efficiently with automation, threads, reactions, and statistics.</p>
-
-<a href="YOUR_BOT_INVITE_LINK" class="btn">Add Bot</a>
-<a href="YOUR_SUPPORT_SERVER_LINK" class="btn">Join Support Server</a>
+<a href="YOUR_BOT_INVITE_LINK" class="btn" data-tooltip="Invite Forum Crown to your server!">Add Bot</a>
+<a href="YOUR_SUPPORT_SERVER_LINK" class="btn" data-tooltip="Join our support server for help!">Support Server</a>
 </div>
 
-<footer class="fade-section">
-Forum Crown • Operated by igakojp
-</footer>
+<footer class="fade-section">Forum Crown • Operated by igakojp</footer>
 
 <script>
 // Fade-in body
-window.addEventListener('DOMContentLoaded', ()=>{document.body.classList.add('loaded');});
+window.addEventListener('DOMContentLoaded',()=>{document.body.classList.add('loaded');});
 
 // Scroll fade-in
 const faders=document.querySelectorAll('.fade-section');
 const observer=new IntersectionObserver((entries,obs)=>{
-    entries.forEach(entry=>{
-        if(entry.isIntersecting){entry.target.classList.add('visible'); obs.unobserve(entry.target);}
-    });
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){entry.target.classList.add('visible'); obs.unobserve(entry.target);}
+  });
 },{threshold:0.1});
 faders.forEach(fader=>observer.observe(fader));
 </script>
