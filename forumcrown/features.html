@@ -1,163 +1,137 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Forum Crown • Features</title>
-<link rel="icon" href="./assets/images/favicon.ico" type="image/x-icon">
-<meta name="description" content="Forum Crown Discord bot features overview including automation, reactions, and premium functionality.">
-<style>
-body {
-  font-family:'Segoe UI',Arial,sans-serif;
-  margin:0;padding:0;
-  background: linear-gradient(120deg,#0f1117,#161b22);
-  color:#e6e6e6;
-  opacity:0;
-  transition:opacity 0.7s;
-}
-body.loaded {opacity:1;}
-header{text-align:center;padding:60px 20px;}
-header h1{color:#58a6ff;margin:0;}
-nav{text-align:center;padding:20px;}
-nav a{color:#58a6ff;margin:0 20px;text-decoration:none;font-weight:bold;}
-nav a:hover{color:#1fb6ff;text-shadow:0 0 10px #1fb6ff;}
-.container{max-width:1000px;margin:auto;padding:40px 20px;text-align:center;}
-.fade-section{opacity:0;transform:translateY(50px);transition:opacity 0.8s ease,transform 0.8s ease;}
-.fade-section.visible{opacity:1;transform:translateY(0);}
-.btn {
-  position:relative;
-  display:inline-block;
-  margin:15px;
-  padding:15px 30px;
-  font-size:16px;
-  font-weight:bold;
-  border-radius:12px;
-  text-decoration:none;
-  color:#0f1117;
-  background:#58a6ff;
-  box-shadow:0 0 10px #58a6ff70;
-  overflow:hidden;
-  transition:all 0.3s ease;
-}
-.btn:hover {transform:scale(1.05); box-shadow:0 0 25px #58a6ffcc;}
-.btn::before {
-  content:'';
-  position:absolute;
-  top:0; left:0; width:100%; height:100%;
-  background:rgba(0,0,0,0.2);
-  opacity:0;
-  transition:opacity 0.3s;
-}
-.btn:hover::before {opacity:1;}
-.feature-section {margin-bottom:50px;}
-.feature-section h2 {color:#58a6ff;margin-bottom:20px;text-align:left;}
-.feature-card {
-  background:#161b22;
-  border:1px solid #30363d;
-  border-radius:12px;
-  padding:25px;
-  margin-bottom:20px;
-  transition:transform 0.3s,box-shadow 0.3s;
-  text-align:left;
-}
-.feature-card:hover {transform:translateY(-5px); box-shadow:0 0 20px #58a6ff50;}
-.feature-card img {max-width:100%; border-radius:8px; margin-bottom:15px;}
-.feature-card h3 {color:#1fb6ff; margin-top:0; display:flex; align-items:center; gap:8px;}
-footer{text-align:center;padding:30px;border-top:1px solid #30363d;font-size:14px;opacity:0.8;}
-</style>
-</head>
-<body>
-
-<header class="fade-section">
-<h1>Forum Crown • Features</h1>
-<p>Discover the powerful tools to manage your Discord forums.</p>
-</header>
-
-<nav class="fade-section">
-<a href="index.html">Home</a>
-<a href="terms.html" target="_blank" rel="noopener noreferrer">Terms of Service</a>
-<a href="privacy.html" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
-</nav>
-
-<div class="container fade-section">
-<a href="https://discord.com/oauth2/authorize?client_id=1373938165047496784&permissions=8&scope=bot%20applications.commands" class="btn">Add Bot</a>
-<a href="https://discord.gg/yBP79TqqCr" class="btn">Support Server</a>
-</div>
-
+<!-- Commands Reference Section -->
 <div class="container fade-section">
 
-<!-- Section 1: Thread Management -->
+<h2 class="fade-section">👑 Forum Crown — Command Reference</h2>
+
+<!-- Reactions -->
 <div class="feature-section fade-section">
-<h2>🧵 Thread Management</h2>
+<h3>⚙️ Reactions</h3>
 <div class="feature-card fade-section">
-  <h3>⚡ Close / Reopen Threads</h3>
-  <p>Administrators can manage threads quickly using simple slash commands.</p>
-</div>
-<div class="feature-card fade-section">
-  <h3>🏷️ Tag Management</h3>
-  <p>Add or remove required tags, control allowed thread topics, and organize forums.</p>
+<ul>
+<li><strong>/reactions</strong> — Open the reaction manager dashboard</li>
+<li><strong>/condition add_role/add_user/add_tag/add_word</strong> — Conditional reaction triggers</li>
+<li><strong>/condition list/remove</strong> — Manage conditions</li>
+<li><strong>/template save/view/list/apply/delete</strong> — Reaction templates</li>
+<li><strong>/special_reaction add/remove/clear/list</strong> — Premium bonus reactions</li>
+</ul>
 </div>
 </div>
 
-<!-- Section 2: Automation -->
+<!-- Welcome Messages -->
 <div class="feature-section fade-section">
-<h2>🤖 Automation</h2>
+<h3>👋 Welcome Messages</h3>
 <div class="feature-card fade-section">
-  <h3>📌 Auto-Pinning & Welcome Messages</h3>
-  <p>Automatically pin important messages and send structured welcome messages in threads.</p>
-</div>
-<div class="feature-card fade-section">
-  <h3>⏱️ Cooldowns & Thread Rules</h3>
-  <p>Set thread cooldowns, control discussion behavior, and enforce forum rules automatically.</p>
+<ul>
+<li><strong>/welcome set</strong> — Set a welcome message for a forum</li>
+<li><strong>/welcome remove/list/preview</strong> — Manage welcome messages</li>
+<li><strong>/welcome placeholders</strong> — See all available variables</li>
+</ul>
 </div>
 </div>
 
-<!-- Section 3: Reaction System -->
+<!-- Notifications -->
 <div class="feature-section fade-section">
-<h2>🎯 Reaction System</h2>
+<h3>🔔 Notifications</h3>
 <div class="feature-card fade-section">
-  <h3>👍 Auto-Reactions</h3>
-  <p>Add reactions based on tags, users, roles, or specific keywords. Use templates across forums.</p>
+<ul>
+<li><strong>/notify add_role/remove_role</strong> — Ping roles on new threads</li>
+<li><strong>/notify set_channel/remove_channel</strong> — Announce to a channel</li>
+<li><strong>/notify toggle_tags/toggle_preview/list/clear</strong></li>
+</ul>
 </div>
 </div>
 
-<!-- Section 4: Statistics -->
+<!-- Automod -->
 <div class="feature-section fade-section">
-<h2>📊 Forum Statistics</h2>
+<h3>🛡 Automod</h3>
 <div class="feature-card fade-section">
-  <h3>📈 Track Activity</h3>
-  <p>View forum activity, top contributors, and thread statistics to keep your community organized.</p>
+<ul>
+<li><strong>/automod pin/slowmode/cooldown</strong> — Thread auto-settings</li>
+<li><strong>/automod require_tag/remove_required_tag</strong> — Tag enforcement</li>
+<li><strong>/automod archive_after/rename_prefix</strong> — Auto-management</li>
+<li><strong>/automod settings/clear</strong> — View or reset config</li>
+</ul>
 </div>
 </div>
 
-<!-- Section 5: Premium Features -->
+<!-- Special Tags -->
 <div class="feature-section fade-section">
-<h2>💎 Premium Features</h2>
+<h3>🏷 Special Tags</h3>
 <div class="feature-card fade-section">
-  <h3>🌟 Boost to Unlock</h3>
-  <p>Gain premium by boosting the support server. No levels; use features responsibly.</p>
+<ul>
+<li><strong>/special_tag set/remove/list</strong> — Assign behaviors to forum tags</li>
+<li><strong>/special_tag allow/deny/allowed_users</strong> — Manage read-only access</li>
+<li><strong>/special_tag behaviors</strong> — See all behavior types</li>
+</ul>
+</div>
+</div>
+
+<!-- Thread Tools -->
+<div class="feature-section fade-section">
+<h3>🧵 Thread Tools</h3>
+<div class="feature-card fade-section">
+<ul>
+<li><strong>/thread info/close/reopen/rename</strong> — Manage threads</li>
+<li><strong>/thread tag_add/tag_remove/bump/slowmode/pin_message</strong></li>
+</ul>
+</div>
+</div>
+
+<!-- Statistics -->
+<div class="feature-section fade-section">
+<h3>📊 Statistics</h3>
+<div class="feature-card fade-section">
+<ul>
+<li><strong>/stats forum/top/me/server</strong> — Forum posting statistics</li>
+<li><strong>/overview</strong> — Full server settings dashboard</li>
+</ul>
+</div>
+</div>
+
+<!-- Post Composer -->
+<div class="feature-section fade-section">
+<h3>✉️ Post Composer</h3>
+<div class="feature-card fade-section">
+<ul>
+<li><strong>/post compose/list/delete_file</strong> — Compose & send messages as the bot</li>
+</ul>
+</div>
+</div>
+
+<!-- Settings -->
+<div class="feature-section fade-section">
+<h3>⚙️ Settings</h3>
+<div class="feature-card fade-section">
+<ul>
+<li><strong>/settings view</strong> — View all server settings</li>
+<li><strong>/settings log_channel/ignore_bots</strong> — Core settings</li>
+<li><strong>/settings blacklist_add/blacklist_remove/blacklist_view</strong></li>
+</ul>
+</div>
+</div>
+
+<!-- Premium & Boosts -->
+<div class="feature-section fade-section">
+<h3>✨ Premium & Boosts</h3>
+<div class="feature-card fade-section">
+<ul>
+<li><strong>/premium status</strong> — Check your tier</li>
+<li><strong>/key redeem</strong> — Redeem a Premium key</li>
+<li><strong>/boost apply/remove/credits</strong> — Use boost credits for Premium</li>
+<li><strong>/premium grant/revoke</strong> — Owner only</li>
+<li><strong>/key generate/list/revoke</strong> — Owner key management</li>
+</ul>
+</div>
+</div>
+
+<!-- Info -->
+<div class="feature-section fade-section">
+<h3>ℹ️ Info</h3>
+<div class="feature-card fade-section">
+<ul>
+<li><strong>/bot invite</strong> · <strong>/bot limits</strong> · Support Server</li>
+</ul>
 </div>
 </div>
 
 </div>
-
-<footer class="fade-section">
-Forum Crown v1.0 | Operated by igakojp | All rights reserved | 2026
-</footer>
-
-<script>
-// Fade-in body
-window.addEventListener('DOMContentLoaded',()=>{document.body.classList.add('loaded');});
-
-// Scroll fade-in
-const faders=document.querySelectorAll('.fade-section');
-const observer=new IntersectionObserver((entries,obs)=>{
-  entries.forEach(entry=>{
-    if(entry.isIntersecting){entry.target.classList.add('visible'); obs.unobserve(entry.target);}
-  });
-},{threshold:0.1});
-faders.forEach(fader=>observer.observe(fader));
-</script>
-
-</body>
-</html>
