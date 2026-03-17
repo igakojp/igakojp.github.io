@@ -7,7 +7,6 @@
 <link rel="icon" href="./assets/images/favicon.ico" type="image/x-icon">
 <meta name="description" content="Forum Crown Discord bot features overview including automation, reactions, and premium functionality.">
 <style>
-/* Global Styles */
 body {
   font-family:'Segoe UI',Arial,sans-serif;
   margin:0;padding:0;
@@ -50,6 +49,8 @@ nav a:hover{color:#1fb6ff;text-shadow:0 0 10px #1fb6ff;}
   transition:opacity 0.3s;
 }
 .btn:hover::before {opacity:1;}
+.feature-section {margin-bottom:50px;}
+.feature-section h2 {color:#58a6ff;margin-bottom:20px;text-align:left;}
 .feature-card {
   background:#161b22;
   border:1px solid #30363d;
@@ -73,45 +74,69 @@ footer{text-align:center;padding:30px;border-top:1px solid #30363d;font-size:14p
 </header>
 
 <nav class="fade-section">
-<a href="https://igakojp.github.io/forumcrown/">Home</a>
-<a href="terms" target="_blank" rel="noopener noreferrer">Terms of Service</a>
-<a href="privacy" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
+<a href="index.html">Home</a>
+<a href="terms.html" target="_blank" rel="noopener noreferrer">Terms of Service</a>
+<a href="privacy.html" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
 </nav>
 
 <div class="container fade-section">
-<a href="invite" class="btn">Add Bot</a>
-<a href="support" class="btn">Support Server</a>
+<a href="https://discord.com/oauth2/authorize?client_id=1373938165047496784&permissions=8&scope=bot%20applications.commands" class="btn">Add Bot</a>
+<a href="https://discord.gg/yBP79TqqCr" class="btn">Support Server</a>
 </div>
 
 <div class="container fade-section">
 
-<!-- Example Feature Card 1 -->
+<!-- Section 1: Thread Management -->
+<div class="feature-section fade-section">
+<h2>🧵 Thread Management</h2>
 <div class="feature-card fade-section">
-  <!-- Optional image: add your image src below, or remove img tag if no image -->
-  <!-- <img src="./assets/images/feature1.png" alt="Feature 1 Image"> -->
-  <h3>⚡ Thread Automation</h3>
-  <p>Manage your forum threads automatically. Close or reopen threads, rename them, manage tags, add slowmode, and welcome messages effortlessly.</p>
+  <h3>⚡ Close / Reopen Threads</h3>
+  <p>Administrators can manage threads quickly using simple slash commands.</p>
+</div>
+<div class="feature-card fade-section">
+  <h3>🏷️ Tag Management</h3>
+  <p>Add or remove required tags, control allowed thread topics, and organize forums.</p>
+</div>
 </div>
 
-<!-- Example Feature Card 2 -->
+<!-- Section 2: Automation -->
+<div class="feature-section fade-section">
+<h2>🤖 Automation</h2>
 <div class="feature-card fade-section">
-  <!-- <img src="./assets/images/feature2.png" alt="Feature 2 Image"> -->
-  <h3>🎯 Reaction System</h3>
-  <p>Automatically add reactions based on tags, users, roles, or specific words. Create reusable reaction templates for multiple forums.</p>
+  <h3>📌 Auto-Pinning & Welcome Messages</h3>
+  <p>Automatically pin important messages and send structured welcome messages in threads.</p>
+</div>
+<div class="feature-card fade-section">
+  <h3>⏱️ Cooldowns & Thread Rules</h3>
+  <p>Set thread cooldowns, control discussion behavior, and enforce forum rules automatically.</p>
+</div>
 </div>
 
-<!-- Example Feature Card 3 -->
+<!-- Section 3: Reaction System -->
+<div class="feature-section fade-section">
+<h2>🎯 Reaction System</h2>
 <div class="feature-card fade-section">
-  <!-- <img src="./assets/images/feature3.png" alt="Feature 3 Image"> -->
-  <h3>📊 Forum Statistics</h3>
-  <p>Track forum activity, top contributors, and thread statistics to keep your community organized and informed.</p>
+  <h3>👍 Auto-Reactions</h3>
+  <p>Add reactions based on tags, users, roles, or specific keywords. Use templates across forums.</p>
+</div>
 </div>
 
-<!-- Example Feature Card 4 -->
+<!-- Section 4: Statistics -->
+<div class="feature-section fade-section">
+<h2>📊 Forum Statistics</h2>
 <div class="feature-card fade-section">
-  <!-- <img src="./assets/images/feature4.png" alt="Feature 4 Image"> -->
-  <h3>💎 Premium Features</h3>
-  <p>Unlock premium by boosting the support server. No levels, just use features responsibly and enhance your forums.</p>
+  <h3>📈 Track Activity</h3>
+  <p>View forum activity, top contributors, and thread statistics to keep your community organized.</p>
+</div>
+</div>
+
+<!-- Section 5: Premium Features -->
+<div class="feature-section fade-section">
+<h2>💎 Premium Features</h2>
+<div class="feature-card fade-section">
+  <h3>🌟 Boost to Unlock</h3>
+  <p>Gain premium by boosting the support server. No levels; use features responsibly.</p>
+</div>
 </div>
 
 </div>
