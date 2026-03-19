@@ -67,6 +67,35 @@ nav a:hover{color:#1fb6ff;text-shadow:0 0 10px #1fb6ff;}
 .feature-card h3 {color:#1fb6ff; margin-top:0; display:flex; align-items:center; gap:8px;}
 .feature-card ul{padding-left:20px; opacity:0.9;}
 footer{text-align:center;padding:30px;border-top:1px solid #30363d;font-size:14px;opacity:0.8;}
+
+.scroll-hint {
+  position:fixed;
+  bottom:20px;
+  left:50%;
+  transform:translateX(-50%);
+  font-size:14px;
+  opacity:0;
+  background:#161b22;
+  padding:8px 14px;
+  border-radius:20px;
+  border:1px solid #30363d;
+  pointer-events:none;
+  z-index:9999;
+  transition:opacity 0.5s ease;
+}
+
+.scroll-hint.visible {
+  opacity:0.7;
+}
+
+.scroll-hint.bounce {
+  animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+  0%,100% {transform:translate(-50%,0);}
+  50% {transform:translate(-50%,6px);}
+}
 </style>
 </head>
 <body>
@@ -85,6 +114,10 @@ footer{text-align:center;padding:30px;border-top:1px solid #30363d;font-size:14p
 <div class="container fade-section">
 <a href="invite" class="btn">Add Bot</a>
 <a href="support" class="btn">Support Server</a>
+</div>
+
+<div class="scroll-hint fade-section">
+⬇ Scroll down to see all the features
 </div>
 
 <div class="container fade-section">
@@ -145,108 +178,125 @@ footer{text-align:center;padding:30px;border-top:1px solid #30363d;font-size:14p
 <div class="feature-section fade-section">
 <h2>👑 Forum Crown — Command Reference</h2>
 
-<!-- Reactions -->
 <div class="feature-card fade-section">
 <h3>⚙️ Reactions</h3>
 <ul>
 <li><strong>/reactions</strong> — Open the reaction manager dashboard</li>
-<li><strong>/condition add_role/add_user/add_tag/add_word</strong> — Conditional reaction triggers</li>
-<li><strong>/condition list/remove</strong> — Manage conditions</li>
-<li><strong>/template save/view/list/apply/delete</strong> — Reaction templates</li>
-<li><strong>/special_reaction add/remove/clear/list</strong> — Premium bonus reactions</li>
+<li><strong>/condition add_role/add_user/add_tag/add_word</strong></li>
+<li><strong>/condition list/remove</strong></li>
+<li><strong>/template save/view/list/apply/delete</strong></li>
+<li><strong>/special_reaction add/remove/clear/list</strong></li>
 </ul>
 </div>
 
-<!-- Welcome Messages -->
 <div class="feature-card fade-section">
 <h3>👋 Welcome Messages</h3>
 <ul>
-<li><strong>/welcome set</strong> — Set a welcome message for a forum</li>
-<li><strong>/welcome remove/list/preview</strong> — Manage welcome messages</li>
-<li><strong>/welcome placeholders</strong> — See all available variables</li>
+<li><strong>/welcome set</strong></li>
+<li><strong>/welcome remove/list/preview</strong></li>
+<li><strong>/welcome placeholders</strong></li>
 </ul>
 </div>
 
-<!-- Notifications -->
 <div class="feature-card fade-section">
 <h3>🔔 Notifications</h3>
 <ul>
-<li><strong>/notify add_role/remove_role</strong> — Ping roles on new threads</li>
-<li><strong>/notify set_channel/remove_channel</strong> — Announce to a channel</li>
+<li><strong>/notify add_role/remove_role</strong></li>
+<li><strong>/notify set_channel/remove_channel</strong></li>
 <li><strong>/notify toggle_tags/toggle_preview/list/clear</strong></li>
 </ul>
 </div>
 
-<!-- Automod -->
 <div class="feature-card fade-section">
 <h3>🛡 Automod</h3>
 <ul>
-<li><strong>/automod pin/slowmode/cooldown</strong> — Thread auto-settings</li>
-<li><strong>/automod require_tag/remove_required_tag</strong> — Tag enforcement</li>
-<li><strong>/automod archive_after/rename_prefix</strong> — Auto-management</li>
-<li><strong>/automod settings/clear</strong> — View or reset config</li>
+<li><strong>/automod pin/slowmode/cooldown</strong></li>
+<li><strong>/automod require_tag/remove_required_tag</strong></li>
+<li><strong>/automod flair_lock/flair_unlock</strong></li>
+<li><strong>/automod min_length</strong></li>
+<li><strong>/automod posting_hours</strong></li>
+<li><strong>/automod max_threads</strong></li>
+<li><strong>/automod require_attachment</strong></li>
+<li><strong>/automod no_duplicate_titles</strong></li>
+<li><strong>/automod bump_reminder</strong></li>
+<li><strong>/automod archive_after/lock_after/rename_prefix</strong></li>
+<li><strong>/automod settings/clear</strong></li>
 </ul>
 </div>
 
-<!-- Special Tags -->
+<div class="feature-card fade-section">
+<h3>🚫 Word Filter</h3>
+<ul>
+<li><strong>/wordfilter add/remove/list</strong></li>
+<li><strong>/wordfilter action</strong></li>
+<li><strong>/wordfilter clear</strong></li>
+</ul>
+</div>
+
 <div class="feature-card fade-section">
 <h3>🏷 Special Tags</h3>
 <ul>
-<li><strong>/special_tag set/remove/list</strong> — Assign behaviors to forum tags</li>
-<li><strong>/special_tag allow/deny/allowed_users</strong> — Manage read-only access</li>
-<li><strong>/special_tag behaviors</strong> — See all behavior types</li>
+<li><strong>/special_tag set/remove/list</strong></li>
+<li><strong>/special_tag allow/deny/allowed_users</strong></li>
+<li><strong>/special_tag behaviors</strong></li>
 </ul>
 </div>
 
-<!-- Thread Tools -->
 <div class="feature-card fade-section">
 <h3>🧵 Thread Tools</h3>
 <ul>
-<li><strong>/thread info/close/reopen/rename</strong> — Manage threads</li>
+<li><strong>/thread info/close/reopen/rename</strong></li>
 <li><strong>/thread tag_add/tag_remove/bump/slowmode/pin_message</strong></li>
+<li><strong>/thread solve</strong></li>
 </ul>
 </div>
 
-<!-- Statistics -->
 <div class="feature-card fade-section">
 <h3>📊 Statistics</h3>
 <ul>
-<li><strong>/stats forum/top/me/server</strong> — Forum posting statistics</li>
-<li><strong>/overview</strong> — Full server settings dashboard</li>
+<li><strong>/stats forum/top/me/server</strong></li>
+<li><strong>/overview</strong></li>
 </ul>
 </div>
 
-<!-- Post Composer -->
 <div class="feature-card fade-section">
 <h3>✉️ Post Composer</h3>
 <ul>
-<li><strong>/post compose/list/delete_file</strong> — Compose & send messages as the bot</li>
+<li><strong>/post compose/list/delete_file</strong></li>
 </ul>
 </div>
 
-<!-- Settings -->
 <div class="feature-card fade-section">
 <h3>⚙️ Settings</h3>
 <ul>
-<li><strong>/settings view</strong> — View all server settings</li>
-<li><strong>/settings log_channel/ignore_bots</strong> — Core settings</li>
+<li><strong>/settings view</strong></li>
+<li><strong>/settings log_channel/ignore_bots</strong></li>
 <li><strong>/settings blacklist_add/blacklist_remove/blacklist_view</strong></li>
 </ul>
 </div>
 
-<!-- Premium & Boosts -->
 <div class="feature-card fade-section">
 <h3>✨ Premium & Boosts</h3>
 <ul>
-<li><strong>/premium status</strong> — Check your tier</li>
-<li><strong>/key redeem</strong> — Redeem a Premium key</li>
-<li><strong>/boost apply/remove/credits</strong> — Use boost credits for Premium</li>
-<li><strong>/premium grant/revoke</strong> — Owner only</li>
-<li><strong>/key generate/list/revoke</strong> — Owner key management</li>
+<li><strong>/premium status</strong></li>
+<li><strong>/key redeem</strong></li>
+<li><strong>/boost apply/remove/credits</strong></li>
+<li><strong>/premium grant/revoke</strong></li>
+<li><strong>/key generate/list/revoke</strong></li>
 </ul>
 </div>
 
-<!-- Info -->
+<div class="feature-card fade-section">
+<h3>🔒 Admin (Owner Only)</h3>
+<ul>
+<li><strong>/admin deletealldata server_id:</strong></li>
+<li><strong>/admin blacklist add server_id: reason:</strong></li>
+<li><strong>/admin blacklist remove server_id:</strong></li>
+<li><strong>/admin blacklist list</strong></li>
+<li><strong>/admin servers</strong></li>
+</ul>
+</div>
+
 <div class="feature-card fade-section">
 <h3>ℹ️ Info</h3>
 <ul>
@@ -261,10 +311,7 @@ Forum Crown v1.0 | Operated by igakojp | All rights reserved | 2026
 </footer>
 
 <script>
-// Fade-in body
 window.addEventListener('DOMContentLoaded',()=>{document.body.classList.add('loaded');});
-
-// Scroll fade-in
 const faders=document.querySelectorAll('.fade-section');
 const observer=new IntersectionObserver((entries,obs)=>{
   entries.forEach(entry=>{
@@ -272,6 +319,25 @@ const observer=new IntersectionObserver((entries,obs)=>{
   });
 },{threshold:0.1});
 faders.forEach(fader=>observer.observe(fader));
+
+// Scroll hint behavior
+const scrollHint = document.querySelector('.scroll-hint');
+
+window.addEventListener('load', () => {
+  scrollHint.classList.add('visible', 'bounce');
+});
+
+window.addEventListener('scroll', () => {
+  const scrollY = window.scrollY;
+
+  if (scrollY > 50) {
+    scrollHint.classList.remove('visible');
+    scrollHint.classList.remove('bounce');
+  } else {
+    scrollHint.classList.add('visible');
+    scrollHint.classList.add('bounce');
+  }
+});
 </script>
 
 </body>
