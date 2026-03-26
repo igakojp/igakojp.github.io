@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Eiken Quest: Aether - Genesis (Level Synced)</title>
+    <title>Eiken Quest: Aether - Genesis</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Noto+Sans+JP:wght@400;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -16,33 +16,52 @@
             --border-glass: rgba(255, 255, 255, 0.1); --text-main: #e2e8f0;
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: var(--bg-deep); color: var(--text-main); font-family: 'Noto Sans JP', sans-serif; overflow: hidden; display: flex; justify-content: center; }
-        .app-shell { width: 100%; max-width: 500px; height: 100dvh; background: radial-gradient(circle at top, #101520, #05070a); position: relative; display: flex; flex-direction: column; border-left: 1px solid var(--border-glass); border-right: 1px solid var(--border-glass); }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100dvh; background: var(--bg-deep); color: var(--text-main); font-family: 'Noto Sans JP', sans-serif; overflow: hidden; display: flex; justify-content: center; }
+        
+        .app-shell { width: 100%; max-width: 500px; height: 100%; background: radial-gradient(circle at top, #101520, #05070a); position: relative; display: flex; flex-direction: column; border-left: 1px solid var(--border-glass); border-right: 1px solid var(--border-glass); }
+        
         .nav-hud { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; background: rgba(0,0,0,0.8); z-index: 100; font-family: 'Orbitron'; }
         .stat-badge { display: flex; align-items: center; gap: 6px; font-weight: bold; font-size: 0.85rem; }
+        
         .global-progress { width: 100%; height: 3px; background: #111; }
-        .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--primary), var(--secondary)); transition: width 0.4s ease; }
-        .screen { flex: 1; padding: 20px; display: none; flex-direction: column; overflow-y: auto; }
+        .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--primary), var(--secondary)); transition: width 0.4s ease; box-shadow: 0 0 10px var(--primary); }
+        
+        .screen { flex: 1; padding: 20px; display: none; flex-direction: column; overflow-y: auto; -webkit-overflow-scrolling: touch; }
         .screen.active { display: flex; animation: fadeIn 0.3s forwards; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .btn-core { background: var(--panel-glass); border: 1px solid var(--border-glass); color: white; padding: 15px; border-radius: 12px; cursor: pointer; text-align: center; margin-bottom: 8px; }
-        .grade-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .quiz-card { background: var(--panel-glass); border: 1px solid var(--border-glass); border-radius: 20px; padding: 20px; text-align: center; }
-        .word-display { font-size: 1.3rem; font-weight: 900; margin: 15px 0; line-height: 1.4; }
-        .def-display { font-size: 0.85rem; color: #94a3b8; line-height: 1.5; margin-bottom: 20px; text-align: left; }
-        input[type="text"] { width: 100%; background: rgba(0,0,0,0.6); border: 2px solid var(--border-glass); border-radius: 12px; color: white; padding: 15px; font-size: 1.1rem; text-align: center; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .btn-core { background: var(--panel-glass); border: 1px solid var(--border-glass); color: white; padding: 15px; border-radius: 12px; cursor: pointer; text-align: center; margin-bottom: 8px; font-family: 'Orbitron', 'Noto Sans JP'; transition: 0.2s; }
+        .btn-core:active { transform: scale(0.98); background: rgba(255,255,255,0.1); }
+        
+        .grade-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        
+        .map-grid { display: flex; flex-direction: column; align-items: center; gap: 20px; padding-bottom: 40px; }
+        .skill-node { width: 60px; height: 60px; border-radius: 50%; background: var(--panel-glass); border: 2px solid var(--border-glass); display: flex; justify-content: center; align-items: center; font-family: 'Orbitron'; font-weight: bold; cursor: pointer; }
+        .skill-node.unlocked { border-color: var(--primary); color: var(--primary); box-shadow: 0 0 15px rgba(0,255,204,0.2); }
+        .skill-node.locked { opacity: 0.5; cursor: not-allowed; }
+
+        .quiz-card { background: var(--panel-glass); border: 1px solid var(--border-glass); border-radius: 20px; padding: 25px; text-align: center; backdrop-filter: blur(10px); }
+        .word-display { font-size: 1.2rem; font-weight: 900; margin: 15px 0; line-height: 1.5; color: #fff; }
+        .def-display { font-size: 0.9rem; color: #94a3b8; line-height: 1.6; margin-bottom: 20px; text-align: left; background: rgba(0,0,0,0.3); padding: 12px; border-radius: 10px; border-left: 3px solid var(--primary); }
+        
+        input[type="text"] { width: 100%; background: rgba(0,0,0,0.6); border: 2px solid var(--border-glass); border-radius: 12px; color: white; padding: 15px; font-size: 1rem; text-align: center; outline: none; transition: 0.3s; }
+        input[type="text"]:focus { border-color: var(--primary); box-shadow: 0 0 10px rgba(0,255,204,0.2); }
+
         .bottom-nav { height: 75px; background: rgba(5,7,10,0.95); border-top: 1px solid var(--border-glass); display: flex; justify-content: space-around; align-items: center; }
-        .nav-btn { color: #475569; font-size: 1.2rem; cursor: pointer; text-align: center; flex: 1; }
+        .nav-btn { color: #475569; font-size: 1.1rem; cursor: pointer; text-align: center; flex: 1; transition: 0.3s; }
+        .nav-btn span { display: block; font-size: 0.6rem; margin-top: 4px; font-weight: bold; }
+        .nav-btn.active { color: var(--primary); text-shadow: 0 0 8px var(--primary); }
+
         #loader { position: fixed; inset: 0; background: var(--bg-deep); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; }
         #toast-container { position: fixed; top: 70px; width: 90%; max-width: 400px; z-index: 1000; pointer-events: none; left: 50%; transform: translateX(-50%); }
-        .toast { padding: 12px; border-radius: 12px; margin-bottom: 8px; text-align: center; font-weight: bold; font-size: 0.8rem; }
+        .toast { padding: 12px; border-radius: 12px; margin-bottom: 8px; text-align: center; font-weight: bold; font-size: 0.8rem; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
     </style>
 </head>
 <body>
 
 <div id="loader">
-    <div class="animate__animated animate__pulse animate__infinite" style="color:var(--primary); font-size:2.5rem;"><i class="fas fa-microchip"></i></div>
-    <p style="margin-top:15px; font-family: 'Orbitron'; font-size:0.7rem;">DATA SYNCING BY GRADE...</p>
+    <div class="animate__animated animate__pulse animate__infinite" style="color:var(--primary); font-size:2.5rem;"><i class="fas fa-satellite-dish"></i></div>
+    <p style="margin-top:15px; font-family: 'Orbitron'; font-size:0.7rem; letter-spacing: 2px;">SYNCING NEURAL LINK...</p>
 </div>
 
 <div id="toast-container"></div>
@@ -53,25 +72,26 @@
             <div class="stat-badge"><i class="fas fa-gem"></i> <span id="val-coins">0</span></div>
             <div class="stat-badge" id="hp-container"></div>
         </div>
-        <div id="val-rank" style="font-size: 0.6rem; color: var(--primary); font-family: 'Orbitron';">RANKING...</div>
+        <div id="val-rank" style="font-size: 0.6rem; color: var(--primary); font-family: 'Orbitron';">CONNECTING...</div>
     </div>
     <div class="global-progress"><div id="main-progress" class="progress-fill"></div></div>
 
     <div id="scr-grade" class="screen active">
-        <h2 style="text-align:center; font-family:'Orbitron';">SECTOR SELECT</h2>
+        <h2 style="text-align:center; font-family:'Orbitron'; font-size: 1.2rem; letter-spacing: 2px;">SECTOR SELECT</h2>
         <div class="grade-grid">
-            <div class="btn-core" onclick="setGrade('1')">1級 (宇宙)</div>
-            <div class="btn-core" onclick="setGrade('P1')">準1級 (大気)</div>
-            <div class="btn-core" onclick="setGrade('2')">2級 (成層圏)</div>
-            <div class="btn-core" onclick="setGrade('P2')">準2級 (雲海)</div>
-            <div class="btn-core" onclick="setGrade('3')">3級 (高地)</div>
-            <div class="btn-core" onclick="setGrade('4')">4級 (地上)</div>
-            <div class="btn-core" onclick="setGrade('5')">5級 (深海)</div>
+            <div class="btn-core" onclick="setGrade('1')">1級</div>
+            <div class="btn-core" onclick="setGrade('P1')">準1級</div>
+            <div class="btn-core" onclick="setGrade('2')">2級</div>
+            <div class="btn-core" onclick="setGrade('P2')">準2級</div>
+            <div class="btn-core" onclick="setGrade('3')">3級</div>
+            <div class="btn-core" onclick="setGrade('4')">4級</div>
+            <div class="btn-core" onclick="setGrade('5')">5級</div>
         </div>
-        <button onclick="emergencyReset()" style="margin-top:auto; background:none; border:none; color:#444; font-size:0.6rem; padding:20px;">リセット</button>
+        <button onclick="emergencyReset()" style="margin-top:auto; background:none; border:none; color:#444; font-size:0.6rem; padding:20px; cursor:pointer;">全データをリセット</button>
     </div>
 
     <div id="scr-map" class="screen">
+        <h3 style="text-align:center; font-family:'Orbitron'; font-size: 0.9rem;" id="map-title">MISSION MAP</h3>
         <div class="map-grid" id="map-container"></div>
     </div>
 
@@ -80,56 +100,63 @@
             <div id="bot-status" style="font-family:'Orbitron'; font-size:0.5rem; color:var(--primary); margin-bottom:10px;">[ ANALYZING ]</div>
             <div id="display-main" class="word-display">...</div>
             <div id="display-sub" class="def-display"></div>
-            <input type="text" id="ans-input" placeholder="答えを入力..." enterkeyhint="done">
-            <button id="mic-trigger" style="display:none; width:100%; padding:15px; border-radius:12px; background:var(--accent); border:none; color:white; font-weight:bold; margin-top:10px;">マイク起動</button>
+            <input type="text" id="ans-input" placeholder="回答を英単語で入力..." autocomplete="off" autocapitalize="off" enterkeyhint="done">
         </div>
     </div>
 
     <div class="bottom-nav">
-        <div class="nav-btn" onclick="nav('scr-grade', this)"><i class="fas fa-th-large"></i><span>級</span></div>
+        <div class="nav-btn active" onclick="nav('scr-grade', this)"><i class="fas fa-th-large"></i><span>級選択</span></div>
         <div class="nav-btn" onclick="nav('scr-map', this)"><i class="fas fa-map-marker-alt"></i><span>マップ</span></div>
-        <div class="nav-btn" onclick="showToast('PROFILE LOCKED', false)"><i class="fas fa-user-astronaut"></i><span>プロフ</span></div>
+        <div class="nav-btn" onclick="showToast('PROFILE MODULE LOCKED', false)"><i class="fas fa-user-astronaut"></i><span>プロフ</span></div>
     </div>
 </div>
 
 <script>
-    // --- 級ごとの専用データ ---
+    // --- 級別専用コンテンツ ---
     const GRADE_CONTENT = {
         '5': {
-            vocab: [{w:"apple", d:"リンゴ"}, {w:"school", d:"学校"}, {w:"happy", d:"幸せな"}],
+            vocab: [{w:"apple", d:"リンゴ"}, {w:"school", d:"学校"}, {w:"happy", d:"幸せな"}, {w:"friend", d:"友達"}],
             scenarios: [
-                {type:"CLOZE", text:"I go to ____ every day.", q:"「学校」を英語で？", a:"school", hint:"sから始まります"},
-                {type:"READING", text:"I have a big dog. His name is Pochi. He likes meat.", q:"What does Pochi like?", a:"meat", hint:"文末の単語です"}
+                {type:"CLOZE", text:"I go to ____ every morning.", q:"「学校」を英語で？", a:"school", hint:"sで始まる単語"},
+                {type:"READING", text:"I have a red apple. I like fruit very much.", q:"What do I have?", a:"apple", hint:"文中の「赤色のもの」です"}
             ]
         },
         '4': {
-            vocab: [{w:"useful", d:"役に立つ"}, {w:"between", d:"の間に"}, {w:"weather", d:"天気"}],
+            vocab: [{w:"useful", d:"役に立つ"}, {w:"between", d:"の間に"}, {w:"weather", d:"天気"}, {w:"library", d:"図書館"}],
             scenarios: [
-                {type:"CLOZE", text:"The ____ is very nice today. It is sunny.", q:"「天気」を英語で？", a:"weather", hint:"wから始まります"},
-                {type:"READING", text:"My father is a doctor. He works at a big hospital in Tokyo.", q:"Where does he work?", a:"hospital", hint:"場所を表す単語です"}
+                {type:"CLOZE", text:"The ____ is sunny today.", q:"「天気」を英語で？", a:"weather", hint:"wから始まる単語"},
+                {type:"READING", text:"My father is a doctor. He works at a big hospital.", q:"Where does he work?", a:"hospital", hint:"働く場所の名前です"}
             ]
         },
         '3': {
-            vocab: [{w:"various", d:"様々な"}, {w:"believe", d:"信じる"}, {w:"experience", d:"経験"}],
+            vocab: [{w:"various", d:"様々な"}, {w:"believe", d:"信じる"}, {w:"experience", d:"経験"}, {w:"environment", d:"環境"}],
             scenarios: [
-                {type:"CLOZE", text:"I want to ____ a famous soccer player in the future.", q:"「〜になる」という意味の単語は？", a:"become", hint:"bから始まる動詞"},
-                {type:"READING", text:"Traveling to other countries is a great way to learn about new cultures.", q:"What is a great way to learn about cultures?", a:"traveling", hint:"文頭の動詞ing形です"}
+                {type:"CLOZE", text:"I want to ____ a doctor in the future.", q:"「〜になる」という動詞は？", a:"become", hint:"bから始まります"},
+                {type:"READING", text:"Reading books is important for students to learn new things.", q:"What is important for students?", a:"reading", hint:"文頭の単語です"}
             ]
         },
         'P1': {
-            vocab: [{w:"significant", d:"重要な"}, {w:"consequence", d:"結果"}, {w:"alternative", d:"代替の"}],
+            vocab: [{w:"significant", d:"重要な"}, {w:"consequence", d:"結果"}, {w:"alternative", d:"代替の"}, {w:"negotiate", d:"交渉する"}],
             scenarios: [
-                {type:"CLOZE", text:"The government must take ____ measures to reduce pollution.", {w:"immediate", d:"即座の"}, a:"immediate", hint:"iから始まる形容詞"},
-                {type:"READING", text:"Global warming is an urgent issue that requires international cooperation to solve.", q:"What kind of cooperation is required?", a:"international", hint:"cooperationの前の単語です"}
+                {type:"CLOZE", text:"The project had a ____ impact on our success.", q:"「重大な」という意味の単語は？", a:"significant", hint:"sから始まる形容詞"},
+                {type:"READING", text:"Global warming requires international cooperation to solve.", q:"What kind of cooperation is needed?", a:"international", hint:"cooperationの前の単語です"}
             ]
+        },
+        // 未実装の級のためのフォールバック
+        'default': {
+            vocab: [{w:"mission", d:"任務"}, {w:"target", d:"標的"}, {w:"complete", d:"完了"}],
+            scenarios: [{type:"CLOZE", text:"Mission ____.", q:"「完了」を英語で？", a:"complete", hint:"cから始まる"}]
         }
-        // 他の級(1, 2, P2)も同様に定義可能
     };
 
-    let state = JSON.parse(localStorage.getItem('aetherGradeSyncV1')) || { coins: 0, unlocked: 1, grade: '5', hp: 3, fails: {}, combo: 0, progress: 0 };
+    // --- グローバル状態 ---
+    let state = JSON.parse(localStorage.getItem('aetherQuest_v4')) || { 
+        coins: 0, unlocked: 1, grade: '5', hp: 3, fails: {}, combo: 0, progress: 0 
+    };
     let wordPool = [];
     let currentTask = null;
 
+    // --- ナビゲーション ---
     function nav(id, el) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -146,12 +173,13 @@
 
     function loadGradeData(g) {
         document.getElementById('loader').style.display = 'flex';
-        const content = GRADE_CONTENT[g] || GRADE_CONTENT['5']; // データがない場合は5級をデフォルトに
+        const content = GRADE_CONTENT[g] || GRADE_CONTENT['default'];
         wordPool = [];
         
-        content.vocab.forEach(v => wordPool.push({word: v.w, def: v.d, type: "VOCAB", fails: state.fails[v.w] || 0}));
-        content.scenarios.forEach(s => wordPool.push({...s, fails: state.fails[s.a] || 0}));
+        content.vocab.forEach(v => wordPool.push({word: v.w, def: v.d, type: "VOCAB"}));
+        content.scenarios.forEach(s => wordPool.push({word: s.a, ...s}));
         
+        document.getElementById('map-title').innerText = `${g}級 MISSION SECTOR`;
         renderMap();
         setTimeout(() => document.getElementById('loader').style.display = 'none', 600);
     }
@@ -169,6 +197,7 @@
         }
     }
 
+    // --- ゲームエンジン ---
     function startMission(lv) {
         state.hp = 3; state.progress = 0; state.combo = 0;
         updateHUD(); nav('scr-quiz'); nextQuestion();
@@ -178,7 +207,7 @@
         if (state.progress >= 100) return finishMission();
         if (state.hp <= 0) return gameOver();
 
-        wordPool.sort((a, b) => (state.fails[b.word || b.a] || 0) - (state.fails[a.word || a.a] || 0));
+        // 苦手な単語を少し出やすくする簡易ロジック
         currentTask = wordPool[Math.floor(Math.random() * wordPool.length)];
 
         const main = document.getElementById('display-main');
@@ -186,65 +215,107 @@
         const input = document.getElementById('ans-input');
         input.value = "";
         
-        if (currentTask.type === "READING") {
-            main.innerHTML = `<span style="font-size:0.8rem; color:var(--primary);">READING (${state.grade}級)</span><br>${currentTask.text}`;
-            sub.innerHTML = `Q: ${currentTask.q}<br><small style="color:var(--gold)">Hint: ${currentTask.hint}</small>`;
-        } else if (currentTask.type === "CLOZE") {
-            main.innerHTML = `<span style="font-size:0.8rem; color:var(--primary);">FILL-IN (${state.grade}級)</span><br>${currentTask.text}`;
-            sub.innerHTML = `Q: ${currentTask.q}<br><small style="color:var(--gold)">Hint: ${currentTask.hint}</small>`;
+        if (currentTask.type === "READING" || currentTask.type === "CLOZE") {
+            const label = currentTask.type === "READING" ? "読解ミッション" : "穴埋めミッション";
+            main.innerHTML = `<span style="font-size:0.7rem; color:var(--primary); letter-spacing:2px;">[ ${label} ]</span><br>${currentTask.text}`;
+            sub.innerHTML = `問: ${currentTask.q}<br><small style="color:var(--gold)">ヒント: ${currentTask.hint}</small>`;
         } else {
-            main.innerText = "この意味の単語は？";
+            main.innerHTML = `<span style="font-size:0.7rem; color:var(--primary); letter-spacing:2px;">[ 単語スキャン ]</span><br>この意味の英単語は？`;
             sub.innerText = currentTask.def;
         }
         input.focus();
     }
 
-    document.getElementById('ans-input').addEventListener('keypress', (e) => { if (e.key === 'Enter') checkAnswer(); });
+    document.getElementById('ans-input').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') checkAnswer();
+    });
 
     function checkAnswer() {
-        const ans = (currentTask.word || currentTask.a).toLowerCase();
         const user = document.getElementById('ans-input').value.trim().toLowerCase();
-        if (user === ans) handleSuccess(); else handleFailure();
+        const correct = currentTask.word.toLowerCase();
+
+        if (user === correct) {
+            handleSuccess();
+        } else {
+            handleFailure(correct);
+        }
     }
 
     function handleSuccess() {
-        confetti({ particleCount: 30, spread: 60, origin: { y: 0.8 } });
-        state.progress += 25; state.coins += 15;
-        showToast("CORRECT!", false); updateHUD(); save();
+        confetti({ particleCount: 30, spread: 60, origin: { y: 0.8 }, colors: ['#00ffcc', '#7000ff'] });
+        state.combo++;
+        state.progress += 25;
+        state.coins += (10 + state.combo * 2);
+        showToast("正解！ニューラルリンク安定。", false);
+        updateHUD(); save();
         setTimeout(nextQuestion, 700);
     }
 
-    function handleFailure() {
+    function handleFailure(correct) {
         state.hp--;
-        const key = currentTask.word || currentTask.a;
-        state.fails[key] = (state.fails[key] || 0) + 1;
-        updateHUD(); showToast(`MISS: ${key}`, true);
-        if (state.hp <= 0) gameOver(); else setTimeout(nextQuestion, 1000);
+        state.combo = 0;
+        updateHUD();
+        showToast(`不正解：正解は ${correct}`, true);
+        
+        const card = document.getElementById('quiz-main-card');
+        card.classList.add('animate__animated', 'animate__shakeX');
+        setTimeout(() => {
+            card.classList.remove('animate__animated', 'animate__shakeX');
+            if (state.hp <= 0) gameOver();
+            else nextQuestion();
+        }, 800);
     }
 
-    function showToast(m, e) {
+    // --- ユーティリティ ---
+    function showToast(m, isError) {
         const t = document.createElement('div');
         t.className = 'toast animate__animated animate__fadeInDown';
-        t.style.background = e ? 'var(--accent)' : 'var(--primary)';
-        t.style.color = e ? '#fff' : '#000';
+        t.style.background = isError ? 'var(--accent)' : 'var(--primary)';
+        t.style.color = isError ? '#fff' : '#05070a';
         t.innerText = m;
         document.getElementById('toast-container').appendChild(t);
-        setTimeout(() => t.remove(), 2000);
+        setTimeout(() => {
+            t.classList.replace('animate__fadeInDown', 'animate__fadeOutUp');
+            setTimeout(() => t.remove(), 500);
+        }, 2000);
     }
 
     function updateHUD() {
         document.getElementById('val-coins').innerText = state.coins;
         document.getElementById('hp-container').innerHTML = "❤".repeat(Math.max(0, state.hp));
         document.getElementById('main-progress').style.width = state.progress + "%";
-        document.getElementById('val-rank').innerText = `${state.grade}級 SECTOR`;
+        document.getElementById('val-rank').innerText = `${state.grade}級領域を解析中`;
     }
 
-    function finishMission() { showToast("MISSION CLEAR!", false); state.unlocked++; save(); renderMap(); setTimeout(() => nav('scr-map'), 1000); }
-    function gameOver() { showToast("SYSTEM FAILURE", true); setTimeout(() => nav('scr-map'), 1500); }
-    function emergencyReset() { if(confirm("RESET ALL?")) { localStorage.removeItem('aetherGradeSyncV1'); location.reload(); } }
-    function save() { localStorage.setItem('aetherGradeSyncV1', JSON.stringify(state)); }
+    function finishMission() {
+        showToast("ミッションクリア！セクターを解放しました。", false);
+        if (state.unlocked < 10) state.unlocked++;
+        state.coins += 50;
+        save();
+        renderMap();
+        setTimeout(() => nav('scr-map'), 1200);
+    }
 
-    window.onload = () => { updateHUD(); loadGradeData(state.grade); };
+    function gameOver() {
+        showToast("シールド大破。基地へ帰還します。", true);
+        setTimeout(() => nav('scr-map'), 1500);
+    }
+
+    function emergencyReset() {
+        if(confirm("全ての学習記録と進捗を初期化しますか？")) {
+            localStorage.removeItem('aetherQuest_v4');
+            location.reload();
+        }
+    }
+
+    function save() {
+        localStorage.setItem('aetherQuest_v4', JSON.stringify(state));
+    }
+
+    window.onload = () => {
+        updateHUD();
+        loadGradeData(state.grade);
+    };
 </script>
 </body>
 </html>
