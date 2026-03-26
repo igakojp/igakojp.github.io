@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eiken Quest: Aether - Ultimate Learning</title>
+    <title>Eiken Quest: Aether - Genesis</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Noto+Sans+JP:wght@400;900&family=MuseoModerno:wght@300;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -11,7 +11,7 @@
     
     <style>
         :root {
-            --primary: #00ffcc; /* Aether Neon */
+            --primary: #00ffcc;
             --secondary: #7000ff;
             --accent: #ff0077;
             --gold: #ffcc00;
@@ -21,7 +21,6 @@
             --text-main: #e2e8f0;
         }
 
-        /* Base Setup */
         * { box-sizing: border-box; outline: none; }
         body {
             background-color: var(--bg-deep);
@@ -31,7 +30,6 @@
             display: flex; justify-content: center;
         }
 
-        /* App Container */
         .app-shell {
             width: 100%; max-width: 480px; height: 100vh;
             background: radial-gradient(circle at top, #101520, #05070a);
@@ -40,319 +38,332 @@
             display: flex; flex-direction: column;
         }
 
-        /* Top Navigation HUD */
+        /* HUD */
         .nav-hud {
             display: flex; justify-content: space-between; align-items: center;
             padding: 15px 20px; background: rgba(0,0,0,0.4);
             border-bottom: 1px solid var(--border-glass); z-index: 100;
             font-family: 'Orbitron', sans-serif;
         }
-        .hud-stats { display: flex; gap: 15px; }
-        .stat-badge { display: flex; align-items: center; gap: 5px; font-weight: bold; }
-        .stat-badge i { color: var(--gold); }
+        .hud-stats { display: flex; gap: 12px; }
+        .stat-badge { display: flex; align-items: center; gap: 5px; font-weight: bold; font-size: 0.9rem;}
+        .stat-badge i.fa-gem { color: var(--primary); }
+        .stat-badge i.fa-fire { color: var(--accent); }
+        .stat-badge i.fa-heart { color: #ff4b4b; }
 
-        /* Progress Bar Area */
-        .global-progress { width: 100%; height: 5px; background: #111; position: relative; }
+        .global-progress { width: 100%; height: 5px; background: #111; }
         .progress-fill {
             height: 100%; width: 0%; background: linear-gradient(90deg, var(--primary), var(--secondary));
-            box-shadow: 0 0 10px var(--primary); transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+            box-shadow: 0 0 10px var(--primary); transition: width 0.4s ease;
         }
 
-        /* Screen Management */
+        /* Screens */
         .screen {
-            position: absolute; inset: 0; top: 60px; /* HUDの下から */
+            position: absolute; inset: 0; top: 65px; bottom: 75px;
             padding: 20px; display: none; flex-direction: column; overflow-y: auto;
         }
-        .screen.active { display: flex; }
+        .screen.active { display: flex; animation: fadeIn 0.3s forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* Map & Skill Tree */
-        .map-grid { display: flex; flex-direction: column; align-items: center; gap: 40px; padding: 40px 0 150px; }
-        .skill-node {
-            width: 85px; height: 85px; border-radius: 50%; background: var(--panel-glass);
-            border: 3px solid var(--border-glass); display: flex; flex-direction: column;
-            justify-content: center; align-items: center; cursor: pointer;
-            transition: all 0.3s ease; position: relative;
+        /* Grade Selection Area */
+        .grade-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px; }
+        .grade-card {
+            background: var(--panel-glass); border: 1px solid var(--border-glass);
+            border-radius: 15px; padding: 20px; text-align: center; cursor: pointer;
+            transition: 0.3s; font-family: 'Orbitron';
         }
-        .skill-node.unlocked { border-color: var(--primary); box-shadow: 0 0 15px rgba(0, 255, 204, 0.3); }
-        .skill-node.current { transform: scale(1.15); border-color: var(--gold); box-shadow: 0 0 25px rgba(255, 204, 0, 0.5); }
-        .skill-node.locked { filter: grayscale(1); opacity: 0.5; cursor: not-allowed; }
-        .node-icon { font-size: 1.8rem; margin-bottom: 2px; }
-        .node-label { font-family: 'Orbitron'; font-size: 0.7rem; font-weight: bold; }
+        .grade-card:hover { border-color: var(--primary); background: rgba(0, 255, 204, 0.1); }
+        .grade-card.active { border-color: var(--primary); box-shadow: 0 0 15px var(--primary); }
 
-        /* Quiz UI Elements */
+        /* Map Nodes */
+        .map-grid { display: flex; flex-direction: column; align-items: center; gap: 35px; padding: 20px 0 100px; }
+        .skill-node {
+            width: 70px; height: 70px; border-radius: 50%; background: var(--panel-glass);
+            border: 3px solid var(--border-glass); display: flex; justify-content: center; align-items: center;
+            cursor: pointer; transition: 0.3s; font-family: 'Orbitron'; font-weight: bold;
+        }
+        .skill-node.unlocked { border-color: var(--primary); color: var(--primary); }
+        .skill-node.locked { opacity: 0.3; cursor: not-allowed; }
+
+        /* Quiz UI */
         .quiz-card {
             background: var(--panel-glass); border: 1px solid var(--border-glass);
-            border-radius: 25px; padding: 25px; text-align: center; margin-top: 20px;
-            backdrop-filter: blur(10px);
+            border-radius: 25px; padding: 25px; text-align: center; backdrop-filter: blur(10px);
         }
-        .q-type-label {
-            display: inline-block; padding: 4px 12px; border-radius: 10px;
-            font-size: 0.75rem; font-weight: bold; background: var(--secondary); margin-bottom: 15px;
-        }
-        .word-display { font-size: 2.2rem; font-weight: 900; margin: 20px 0; text-shadow: 0 0 15px rgba(255,255,255,0.2); }
-        .def-display { font-size: 1rem; color: #94a3b8; line-height: 1.6; margin-bottom: 30px; }
-
+        .word-display { font-size: 1.8rem; font-weight: 900; margin: 15px 0; color: var(--primary); }
+        .def-display { font-size: 1rem; color: #94a3b8; line-height: 1.5; margin-bottom: 25px; min-height: 60px; }
+        
         input[type="text"] {
-            width: 100%; background: rgba(0,0,0,0.5); border: 2px solid var(--border-glass);
-            border-radius: 15px; color: white; padding: 18px; font-size: 1.3rem;
-            text-align: center; transition: 0.3s;
+            width: 100%; background: rgba(0,0,0,0.6); border: 2px solid var(--border-glass);
+            border-radius: 15px; color: white; padding: 15px; font-size: 1.2rem; text-align: center;
         }
-        input[type="text"]:focus { border-color: var(--primary); box-shadow: 0 0 20px rgba(0, 255, 204, 0.2); }
 
-        /* Shop & Inventory */
-        .shop-list { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .item-card {
-            background: var(--panel-glass); border: 1px solid var(--border-glass);
-            border-radius: 20px; padding: 15px; text-align: center; transition: 0.3s;
+        /* Toast Notification */
+        #toast-container {
+            position: fixed; top: 80px; left: 50%; transform: translateX(-50%);
+            z-index: 1000; pointer-events: none;
         }
-        .item-card:hover { border-color: var(--primary); }
-        .item-price { color: var(--gold); font-weight: bold; font-family: 'Orbitron'; margin-top: 10px; }
+        .toast {
+            padding: 10px 25px; border-radius: 30px; margin-bottom: 10px;
+            font-weight: bold; font-family: 'Orbitron'; text-align: center;
+            animation: slideInDown 0.3s, fadeOut 0.3s 1.7s;
+        }
 
-        /* Footer Menu */
+        /* Bottom Nav */
         .bottom-nav {
             position: absolute; bottom: 0; width: 100%; height: 75px;
-            background: rgba(10, 15, 25, 0.9); border-top: 1px solid var(--border-glass);
-            display: flex; justify-content: space-around; align-items: center; z-index: 100;
+            background: rgba(5, 7, 10, 0.95); border-top: 1px solid var(--border-glass);
+            display: flex; justify-content: space-around; align-items: center;
         }
-        .nav-btn { color: #64748b; font-size: 1.4rem; cursor: pointer; transition: 0.3s; }
+        .nav-btn { color: #475569; font-size: 1.3rem; cursor: pointer; transition: 0.3s; }
         .nav-btn.active { color: var(--primary); }
 
-        /* Loading Overlay */
+        /* Loading */
         #loader {
             position: fixed; inset: 0; background: var(--bg-deep); z-index: 9999;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
         }
-        .spinner {
-            width: 50px; height: 50px; border: 5px solid var(--panel-glass);
-            border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
 <div id="loader">
-    <div class="spinner"></div>
-    <p style="margin-top: 20px; font-family: 'Orbitron'; letter-spacing: 2px;">SYNCING AETHER DATA...</p>
+    <div class="animate__animated animate__pulse animate__infinite" style="color:var(--primary); font-size:3rem;"><i class="fas fa-atom"></i></div>
+    <p id="loader-text" style="margin-top:20px; font-family: 'Orbitron'; letter-spacing: 2px;">INITIALIZING...</p>
 </div>
+
+<div id="toast-container"></div>
 
 <div class="app-shell">
     <div class="nav-hud">
         <div class="hud-stats">
             <div class="stat-badge"><i class="fas fa-gem"></i> <span id="val-coins">0</span></div>
             <div class="stat-badge"><i class="fas fa-fire"></i> <span id="val-streak">0</span></div>
+            <div class="stat-badge"><i class="fas fa-heart"></i> <span id="val-hp">3</span></div>
         </div>
-        <div id="val-rank" style="font-size: 0.8rem; color: var(--primary);">EXPERT LV.1</div>
+        <div id="val-grade-label" style="font-size: 0.7rem; color: var(--primary); font-family: 'Orbitron';">PRE-1</div>
     </div>
     <div class="global-progress"><div id="main-progress" class="progress-fill"></div></div>
 
-    <div id="scr-map" class="screen active">
+    <div id="scr-grade" class="screen active">
+        <h2 style="font-family:'Orbitron'; text-align:center; color:var(--primary);">SELECT GRADE</h2>
+        <div class="grade-grid">
+            <div class="grade-card" onclick="setGrade('1')">Grade 1</div>
+            <div class="grade-card" onclick="setGrade('P1')">Pre-1</div>
+            <div class="grade-card" onclick="setGrade('2')">Grade 2</div>
+            <div class="grade-card" onclick="setGrade('P2')">Pre-2</div>
+            <div class="grade-card" onclick="setGrade('3')">Grade 3</div>
+            <div class="grade-card" onclick="setGrade('4')">Grade 4</div>
+            <div class="grade-card" onclick="setGrade('5')">Grade 5</div>
+        </div>
+    </div>
+
+    <div id="scr-map" class="screen">
         <div class="map-grid" id="map-container"></div>
     </div>
 
     <div id="scr-quiz" class="screen">
-        <div class="quiz-card animate__animated animate__zoomIn">
-            <div id="quiz-type" class="q-type-label">READING</div>
-            <div id="timer-text" style="font-family: 'Orbitron'; font-size: 0.9rem; color: var(--accent);">15s</div>
-            <div id="display-main" class="word-display">TargetWord</div>
-            <div id="display-sub" class="def-display">Definition goes here...</div>
-            <input type="text" id="ans-input" placeholder="答えを入力...">
-            <button id="mic-trigger" class="skill-node" style="width: 100%; border-radius: 15px; height: 60px; margin-top: 15px; display: none; background: var(--accent);">
+        <div class="quiz-card" id="quiz-main-card">
+            <div id="quiz-type" style="font-family:'Orbitron'; font-size:0.7rem; color:var(--secondary); margin-bottom:10px;">READING</div>
+            <div id="display-main" class="word-display">Ready?</div>
+            <div id="display-sub" class="def-display">Select a level to start.</div>
+            <input type="text" id="ans-input" placeholder="Type answer & Enter..." autocomplete="off">
+            <button id="mic-trigger" class="skill-node" style="width:100%; border-radius:15px; height:50px; margin-top:15px; display:none; background:var(--accent); border:none;">
                 <i class="fas fa-microphone"></i>
             </button>
         </div>
+        <div id="combo-display" style="text-align:center; margin-top:20px; font-family:'Orbitron'; color:var(--gold); font-weight:bold;"></div>
     </div>
 
     <div id="scr-shop" class="screen">
-        <h2 style="font-family: 'Orbitron'; text-align: center;">AETHER SHOP</h2>
-        <div class="shop-list" id="shop-container">
-            </div>
+        <h2 style="font-family:'Orbitron'; text-align:center;">AETHER SHOP</h2>
+        <div id="shop-container" style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"></div>
     </div>
 
     <div class="bottom-nav">
-        <i class="fas fa-map-marked-alt nav-btn active" onclick="nav('scr-map', this)"></i>
+        <i class="fas fa-graduation-cap nav-btn" onclick="nav('scr-grade', this)"></i>
+        <i class="fas fa-map-marked-alt nav-btn" onclick="nav('scr-map', this)"></i>
         <i class="fas fa-shopping-cart nav-btn" onclick="nav('scr-shop', this)"></i>
-        <i class="fas fa-user-circle nav-btn" onclick="nav('scr-profile', this)"></i>
     </div>
 </div>
 
 <script>
-    // --- 構成データ & 定数 ---
-    const CONFIG = {
-        baseWords: ["significant", "consequence", "alternative", "substantial", "prohibit", "adequate", "perspective", "vulnerable", "prevalent", "ambiguous", "incentive", "implement", "sustainable", "feasible", "precisely"],
-        modes: ["READING", "LISTENING", "SPEAKING", "WRITING"],
-        items: [
-            { id: 'fire', name: 'Fire Aura', price: 100, icon: '🔥' },
-            { id: 'ice', name: 'Ice Shield', price: 250, icon: '❄️' },
-            { id: 'bolt', name: 'Thunder Stick', price: 500, icon: '⚡' },
-            { id: 'crown', name: 'Master Crown', price: 1000, icon: '👑' }
-        ]
+    // --- Data Management ---
+    const VOCAB_DATA = {
+        '1': ["ambiguous", "fluctuate", "unprecedented", "mitigate", "deteriorate"],
+        'P1': ["significant", "consequence", "alternative", "substantial", "prohibit"],
+        '2': ["environment", "opportunity", "increase", "reduce", "benefit"],
+        'P2': ["experience", "important", "necessary", "improve", "various"],
+        '3': ["travel", "future", "believe", "difficult", "happen"],
+        '4': ["study", "clean", "dinner", "family", "lunch"],
+        '5': ["apple", "happy", "school", "friend", "book"]
     };
 
-    // --- ゲーム状態 (LocalStorage連携) ---
-    let state = JSON.parse(localStorage.getItem('eikenAetherSave')) || {
-        coins: 0, streak: 0, unlocked: 1, currentLv: 1, progress: 0,
-        inventory: [], lastLogin: ""
+    let state = JSON.parse(localStorage.getItem('eikenGenesisSave')) || {
+        coins: 0, streak: 0, unlocked: 1, grade: 'P1', hp: 3, inventory: [], combo: 0
     };
 
     let wordPool = [];
     let currentTask = null;
     let timerId = null;
 
-    // --- 初期化処理 ---
-    async function initAether() {
-        const loaderMsg = document.querySelector('#loader p');
-        
-        // 1. APIからデータをフェッチ
-        for (let word of CONFIG.baseWords) {
-            loaderMsg.innerText = `FETCHING: ${word}...`;
+    // --- Core Logic ---
+    async function setGrade(g) {
+        state.grade = g;
+        document.getElementById('val-grade-label').innerText = `GRADE ${g}`;
+        save();
+        await loadGradeData(g);
+        nav('scr-map', document.querySelectorAll('.nav-btn')[1]);
+    }
+
+    async function loadGradeData(g) {
+        document.getElementById('loader').style.display = 'flex';
+        const words = VOCAB_DATA[g] || VOCAB_DATA['P1'];
+        wordPool = [];
+        for (let w of words) {
             try {
-                const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
+                const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${w}`);
                 const data = await res.json();
                 if (data[0]) {
                     wordPool.push({
-                        word: word,
+                        word: w,
                         def: data[0].meanings[0].definitions[0].definition,
                         audio: data[0].phonetics.find(p => p.audio)?.audio || ""
                     });
                 }
-            } catch (e) { console.warn("API Fetch Error"); }
+            } catch (e) { console.error(e); }
         }
-
-        // 2. UI反映
-        updateHUD();
         renderMap();
-        renderShop();
-        
-        // 3. ローダー解除
-        setTimeout(() => {
-            document.getElementById('loader').style.display = 'none';
-        }, 800);
+        document.getElementById('loader').style.display = 'none';
     }
 
-    // --- 画面ナビゲーション ---
-    function nav(screenId, el) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById(screenId).classList.add('active');
-        if (el) el.classList.add('active');
-    }
-
-    // --- マップ生成 ---
     function renderMap() {
         const container = document.getElementById('map-container');
         container.innerHTML = "";
-        for (let i = 1; i <= 20; i++) {
+        for (let i = 1; i <= 10; i++) {
             const node = document.createElement('div');
             const isUnlocked = i <= state.unlocked;
-            const isCurrent = i === state.unlocked;
-            
-            node.className = `skill-node ${isUnlocked ? 'unlocked' : 'locked'} ${isCurrent ? 'current' : ''}`;
-            node.innerHTML = `
-                <div class="node-icon"><i class="fas ${isUnlocked ? 'fa-bolt' : 'fa-lock'}"></i></div>
-                <div class="node-label">LV.${i}</div>
-            `;
+            node.className = `skill-node ${isUnlocked ? 'unlocked' : 'locked'}`;
+            node.innerHTML = isUnlocked ? i : '<i class="fas fa-lock"></i>';
             if (isUnlocked) node.onclick = () => startMission(i);
             container.appendChild(node);
         }
     }
 
-    // --- ミッション開始 ---
     function startMission(lv) {
-        state.currentLv = lv;
+        state.hp = 3;
         state.progress = 0;
-        updateProgress();
+        state.combo = 0;
+        updateHUD();
         nav('scr-quiz');
         nextQuestion();
     }
 
-    // --- クイズロジック ---
     function nextQuestion() {
         if (state.progress >= 100) return finishMission();
-        
-        clearInterval(timerId);
+        if (state.hp <= 0) return gameOver();
+
+        const modes = ["READING", "LISTENING", "WRITING", "SPEAKING"];
+        const mode = modes[Math.floor(Math.random() * modes.length)];
         currentTask = wordPool[Math.floor(Math.random() * wordPool.length)];
-        const mode = CONFIG.modes[Math.floor(Math.random() * CONFIG.modes.length)];
-        
+
         document.getElementById('quiz-type').innerText = mode;
         document.getElementById('ans-input').value = "";
-        document.getElementById('ans-input').style.display = "block";
-        document.getElementById('mic-trigger').style.display = "none";
-        
+        document.getElementById('ans-input').style.display = (mode === "SPEAKING") ? "none" : "block";
+        document.getElementById('mic-trigger').style.display = (mode === "SPEAKING") ? "block" : "none";
+        document.getElementById('combo-display').innerText = state.combo > 1 ? `${state.combo} COMBO!` : "";
+
         const main = document.getElementById('display-main');
         const sub = document.getElementById('display-sub');
 
         if (mode === "READING") {
-            main.innerText = "Translate Def";
+            main.innerHTML = `<i class="fas fa-brain"></i> DECODE`;
             sub.innerText = currentTask.def;
         } else if (mode === "LISTENING") {
-            main.innerText = "👂 Listen...";
-            sub.innerText = "Type the word you hear";
+            main.innerHTML = `<i class="fas fa-volume-up"></i> LISTEN`;
+            sub.innerText = "Type the word you hear!";
             playTTS(currentTask.word);
         } else if (mode === "WRITING") {
-            const hint = currentTask.word.charAt(0) + "_".repeat(currentTask.word.length - 2) + currentTask.word.slice(-1);
+            const hint = currentTask.word[0] + "_".repeat(currentTask.word.length - 2) + currentTask.word.slice(-1);
             main.innerText = hint;
             sub.innerText = currentTask.def;
         } else if (mode === "SPEAKING") {
             main.innerText = currentTask.word;
-            sub.innerText = "Pronounce clearly";
-            document.getElementById('ans-input').style.display = "none";
-            document.getElementById('mic-trigger').style.display = "flex";
+            sub.innerText = "Click mic and pronounce!";
             setupSpeech();
         }
-
-        startTimer();
+        document.getElementById('ans-input').focus();
     }
 
-    function startTimer() {
-        let sec = 15;
-        document.getElementById('timer-text').innerText = sec + "s";
-        timerId = setInterval(() => {
-            sec--;
-            document.getElementById('timer-text').innerText = sec + "s";
-            if (sec <= 0) {
-                clearInterval(timerId);
-                alert("TIME OVER! Answer: " + currentTask.word);
-                nextQuestion();
-            }
+    // --- Input & Verification ---
+    document.getElementById('ans-input').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') checkAnswer();
+    });
+
+    function checkAnswer() {
+        const userVal = document.getElementById('ans-input').value.trim().toLowerCase();
+        if (userVal === currentTask.word.toLowerCase()) {
+            handleSuccess();
+        } else {
+            handleFailure();
+        }
+    }
+
+    function handleSuccess() {
+        confetti({ particleCount: 50, spread: 60, origin: { y: 0.7 } });
+        state.combo++;
+        state.progress += 25;
+        state.coins += (10 + (state.combo * 2));
+        showToast("EXCELLENT!", false);
+        updateHUD();
+        save();
+        setTimeout(nextQuestion, 800);
+    }
+
+    function handleFailure() {
+        state.hp--;
+        state.combo = 0;
+        updateHUD();
+        const card = document.getElementById('quiz-main-card');
+        card.classList.add('animate__animated', 'animate__headShake');
+        showToast(`WRONG! Answer: ${currentTask.word}`, true);
+        
+        setTimeout(() => {
+            card.classList.remove('animate__animated', 'animate__headShake');
+            if (state.hp <= 0) gameOver();
+            else nextQuestion();
         }, 1000);
     }
 
-    // --- 判定アルゴリズム ---
-    document.getElementById('ans-input').oninput = function() {
-        if (this.value.toLowerCase() === currentTask.word.toLowerCase()) {
-            handleSuccess();
-        }
-    };
+    // --- Utilities ---
+    function showToast(msg, isError) {
+        const toast = document.createElement('div');
+        toast.className = 'toast animate__animated animate__fadeInDown';
+        toast.style.background = isError ? 'var(--accent)' : 'var(--primary)';
+        toast.style.color = isError ? '#fff' : '#000';
+        toast.innerText = msg;
+        document.getElementById('toast-container').appendChild(toast);
+        setTimeout(() => toast.remove(), 2000);
+    }
 
-    function handleSuccess() {
-        clearInterval(timerId);
-        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-        
-        state.progress += 25;
-        state.coins += 20;
-        updateProgress();
-        updateHUD();
-        save();
-        
-        setTimeout(nextQuestion, 1000);
+    function gameOver() {
+        showToast("GAME OVER - Returning to Map", true);
+        setTimeout(() => nav('scr-map'), 1500);
     }
 
     function finishMission() {
-        alert("MISSION CLEAR! 💎 +100");
+        showToast("MISSION CLEAR! +100 💎", false);
         state.coins += 100;
-        if (state.currentLv === state.unlocked) state.unlocked++;
+        if (state.unlocked < 10) state.unlocked++;
         state.streak++;
         save();
         renderMap();
-        nav('scr-map');
+        setTimeout(() => nav('scr-map'), 1500);
     }
 
-    // --- 音声認識 & 合成 ---
     function playTTS(text) {
         const u = new SpeechSynthesisUtterance(text);
         u.lang = 'en-US';
-        u.rate = 0.8;
         speechSynthesis.speak(u);
     }
 
@@ -361,74 +372,36 @@
         if (!Speech) return;
         const rec = new Speech();
         rec.lang = 'en-US';
-        
         document.getElementById('mic-trigger').onclick = () => {
             rec.start();
-            document.getElementById('mic-trigger').style.background = "#ffcc00";
+            document.getElementById('mic-trigger').style.background = var(--gold);
         };
-        
         rec.onresult = (e) => {
-            const result = e.results[0][0].transcript.toLowerCase();
-            document.getElementById('mic-trigger').style.background = "var(--accent)";
-            if (result.includes(currentTask.word.toLowerCase())) {
-                handleSuccess();
-            } else {
-                alert(`Heard: "${result}". Try again!`);
-            }
+            if (e.results[0][0].transcript.toLowerCase().includes(currentTask.word.toLowerCase())) handleSuccess();
+            else handleFailure();
         };
     }
 
-    // --- ショップ機能 ---
-    function renderShop() {
-        const container = document.getElementById('shop-container');
-        container.innerHTML = "";
-        CONFIG.items.forEach(item => {
-            const isOwned = state.inventory.includes(item.id);
-            const card = document.createElement('div');
-            card.className = "item-card";
-            card.innerHTML = `
-                <div style="font-size: 2rem;">${item.icon}</div>
-                <div style="font-weight: bold; margin-top:5px;">${item.name}</div>
-                <div class="item-price">${isOwned ? 'OWNED' : item.price + ' 💎'}</div>
-                <button class="btn-main" style="width:100%; margin-top:10px; padding:5px; font-size:0.7rem;" 
-                    onclick="buyItem('${item.id}', ${item.price})" ${isOwned ? 'disabled' : ''}>
-                    ${isOwned ? 'EQUIPPED' : 'BUY'}
-                </button>
-            `;
-            container.appendChild(card);
-        });
+    function nav(id, el) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        if (el) el.classList.add('active');
     }
 
-    function buyItem(id, price) {
-        if (state.coins >= price) {
-            state.coins -= price;
-            state.inventory.push(id);
-            save();
-            updateHUD();
-            renderShop();
-            alert("ITEM ACQUIRED!");
-        } else {
-            alert("NOT ENOUGH GEMS!");
-        }
-    }
-
-    // --- ユーティリティ ---
     function updateHUD() {
         document.getElementById('val-coins').innerText = state.coins;
         document.getElementById('val-streak').innerText = state.streak;
-        document.getElementById('val-rank').innerText = `PILOT LV.${state.unlocked}`;
+        document.getElementById('val-hp').innerText = state.hp;
+        document.getElementById('main-progress').style.width = (state.progress || 0) + "%";
     }
 
-    function updateProgress() {
-        document.getElementById('main-progress').style.width = state.progress + "%";
-    }
+    function save() { localStorage.setItem('eikenGenesisSave', JSON.stringify(state)); }
 
-    function save() {
-        localStorage.setItem('eikenAetherSave', JSON.stringify(state));
-    }
-
-    // エントリーポイント
-    window.onload = initAether;
+    window.onload = () => {
+        updateHUD();
+        loadGradeData(state.grade);
+    };
 </script>
 </body>
 </html>
