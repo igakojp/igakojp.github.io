@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eiken Quest Pro - 究極の学習ダッシュボード</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --panel-bg: #1e293b;
+            --primary: #3b82f6;
+            --primary-glow: rgba(59, 130, 246, 0.5);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+        }
+        * { box-sizing: border-box; font-family: 'Poppins', 'Noto Sans JP', sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        
+        #app { width: 100%; max-width: 600px; background: var(--panel-bg); border-radius: 20px; padding: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); overflow: hidden; position: relative; }
+        
+        /* Header & Stats */
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding-bottom: 15px; margin-bottom: 20px; }
+        .level-badge { background: linear-gradient(135deg, var(--primary), #8b5cf6); padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 1.1rem; box-shadow: 0 0 15px var(--primary-glow); }
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; text-align: center; }
+        .stat-box { background: #0f172a; padding: 10px; border-radius: 10px; }
+        .stat-value { font-size: 1.5rem; font-weight: 800; color: var(--primary); }
+        .stat-label { font-size: 0.75rem; color: var(--text-sub); }
+
+        /* Daily Missions */
+        .daily-box { background: rgba(16, 185, 129, 0.1); border: 1px solid var(--success); padding: 10px 15px; border-radius: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .daily-text { font-size: 0.85rem; color: var(--success); font-weight: bold; }
+
+        /* Quiz Area */
+        .quiz-area { text-align: center; padding: 20px 0; }
+        .combo-text { color: var(--warning); font-weight: bold; font-size: 1.2rem; min-height: 30px; animation: pulse 1s infinite; }
+        .question-card { font-size: 2.5rem; font-weight: 800; margin: 10px 0; letter-spacing: 2px; }
+        
+        /* Hints & Examples */
+        .hint-box { background: #334155; font-size: 0.85rem; padding: 10px; border-radius: 8px; margin: 10px 0; color: #cbd5e1; display: none; text-align: left;}
+        .example-sen { color: var(--secondary); font-style: italic; margin-top: 5px; }
+
+        /* Inputs & Buttons */
+        .input-group { display: flex; gap: 10px; margin-top: 20px; }
+        input[type="text"] { flex: 1; padding: 15px; border-radius: 10px; border: 2px solid #334155; background: #0f172a; color: white; font-size: 1.2rem; transition: 0.3s; }
+        input[type="text"]:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 10px var(--primary-glow); }
+        .btn { padding: 15px 25px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 1rem; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: #2563eb; transform: translateY(-2px); }
+        .btn-icon { background: transparent; border: 1px solid #334155; color: var(--text-sub); border-radius: 50%; width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; padding: 0;}
+        .btn-icon:hover { background: #334155; color: white; }
+
+        /* Progress Bar */
+        .progress-wrap { width: 100%; background: #334155; height: 8px; border-radius: 4px; overflow: hidden; margin-top: 20px; }
+        .progress-bar { height: 100%; background: var(--success); width: 0%; transition: width 0.5s ease-out; }
+
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fadeIn 0.4s ease-out; }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <div class="header">
+        <div class="level-badge" id="rank-badge">準1級 - Lv.1</div>
+        <div>EXP: <span id="exp-text" style="font-weight: bold; color: var(--primary);">0</span> / 100</div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-box"><div class="stat-value" id="stat-total">0</div><div class="stat-label">総解答数</div></div>
+        <div class="stat-box"><div class="stat-value" id="stat-streak">0</div><div class="stat-label">連続ログイン</div></div>
+        <div class="stat-box"><div class="stat-value" id="stat-weak">0</div><div class="stat-label">復習待ち</div></div>
+    </div>
+
+    <div class="daily-box">
+        <div class="daily-text">🎯 デイリーミッション：本日あと <span id="daily-left">10</span> 問正解</div>
+        <div id="daily-status">⏳</div>
+    </div>
+
+    <div class="progress-wrap"><div class="progress-bar" id="exp-bar"></div></div>
+
+    <div class="quiz-area fade-in" id="quiz-container">
+        <div class="combo-text" id="combo-display"></div>
+        <div style="font-size: 0.9rem; color: var(--text-sub);">日本語の意味から英単語をタイピングせよ</div>
+        <div class="question-card" id="q-text">読み込み中...</div>
+        
+        <div class="hint-box" id="hint-box">
+            <strong>💡 覚え方のヒント:</strong> <span id="hint-text"></span><br>
+            <div class="example-sen">例文: <span id="ex-text"></span></div>
+        </div>
+
+        <div style="display: flex; justify-content: center; gap: 15px; margin-top: 10px;">
+            <button class="btn btn-icon" onclick="speakWord()" title="英語の発音を聞く">🔊</button>
+            <button class="btn btn-icon" onclick="toggleHint()" title="ヒントを見る">💡</button>
+        </div>
+
+        <div class="input-group">
+            <input type="text" id="answer-input" placeholder="Type English here..." autocomplete="off">
+            <button class="btn btn-primary" onclick="checkAnswer()">Enter</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- 拡張版データベース (準1級レベル) ---
+    const wordDB = [
+        { jp: "必然的な", en: "inevitable", hint: "in(否定) + evite(避ける) + able(できる) ＝ 避けられない", ex: "It was an inevitable consequence." },
+        { jp: "洗練された", en: "sophisticated", hint: "sophist(賢者)から派生。高度で複雑なイメージ。", ex: "The system is highly sophisticated." },
+        { jp: "を妥協する", en: "compromise", hint: "com(共に) + promise(約束する) ＝ 歩み寄る", ex: "We cannot compromise on safety." },
+        { jp: "を明らかにする", en: "reveal", hint: "re(後ろに) + veil(ベール) ＝ ベールを剥がす", ex: "The study revealed the truth." },
+        { jp: "豊富な", en: "abundant", hint: "ab(離れて) + und(波打つ) ＝ 溢れ出るほど多い", ex: "Japan has abundant rainfall." }
+    ];
+
+    // --- データ構造 ---
+    let appData = {
+        rank: "準1", level: 1, exp: 0, totalAnswered: 0,
+        loginStreak: 1, lastLoginDate: "", dailySolved: 0,
+        weakWords: [], // 間違えた単語リスト（復習用）
+        combo: 0
+    };
+
+    let currentWord = null;
+
+    // --- 初期化処理 ---
+    window.onload = () => {
+        loadData();
+        checkDaily();
+        nextQuestion();
+        updateUI();
+
+        // Enterキーで回答できるようにする
+        document.getElementById("answer-input").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") checkAnswer();
+        });
+    };
+
+    function loadData() {
+        const saved = localStorage.getItem('eikenQuestPro');
+        if (saved) appData = JSON.parse(saved);
+    }
+    function saveData() { localStorage.setItem('eikenQuestPro', JSON.stringify(appData)); }
+
+    // --- デイリー＆ログイン管理 ---
+    function checkDaily() {
+        const today = new Date().toDateString();
+        if (appData.lastLoginDate !== today) {
+            if (appData.lastLoginDate === new Date(Date.now() - 86400000).toDateString()) {
+                appData.loginStreak++; // 前日ログインしていればストリーク継続
+            } else {
+                appData.loginStreak = 1; // 途切れたらリセット
+            }
+            appData.lastLoginDate = today;
+            appData.dailySolved = 0; // デイリーミッションリセット
+            saveData();
+        }
+    }
+
+    // --- クイズロジック ---
+    function nextQuestion() {
+        document.getElementById('answer-input').value = "";
+        document.getElementById('hint-box').style.display = "none";
+        document.getElementById('answer-input').focus();
+
+        // 20%の確率、または弱点リストに溜まっている場合は復習問題を優先
+        if (appData.weakWords.length > 0 && Math.random() < 0.3) {
+            const wordEn = appData.weakWords[Math.floor(Math.random() * appData.weakWords.length)];
+            currentWord = wordDB.find(w => w.en === wordEn);
+            document.getElementById('q-text').innerText = `【復習】${currentWord.jp}`;
+            document.getElementById('q-text').style.color = "var(--warning)";
+        } else {
+            currentWord = wordDB[Math.floor(Math.random() * wordDB.length)];
+            document.getElementById('q-text').innerText = currentWord.jp;
+            document.getElementById('q-text').style.color = "var(--text-main)";
+        }
+
+        document.getElementById('hint-text').innerText = currentWord.hint;
+        document.getElementById('ex-text').innerText = currentWord.ex;
+    }
+
+    function checkAnswer() {
+        const input = document.getElementById('answer-input').value.trim().toLowerCase();
+        if (!input) return;
+
+        appData.totalAnswered++;
+
+        if (input === currentWord.en) {
+            // 正解
+            appData.combo++;
+            appData.dailySolved++;
+            let expGain = 10 + (appData.combo * 2); // コンボで経験値ボーナス
+            addExp(expGain);
+            
+            // 弱点リストから削除
+            appData.weakWords = appData.weakWords.filter(w => w !== currentWord.en);
+            
+            showComboMsg(`Excellent! +${expGain} EXP`);
+        } else {
+            // 不正解
+            appData.combo = 0;
+            if (!appData.weakWords.includes(currentWord.en)) appData.weakWords.push(currentWord.en);
+            alert(`Oops! 正解は: ${currentWord.en}\n\n覚え方: ${currentWord.hint}`);
+            document.getElementById('combo-display').innerText = "";
+        }
+        
+        saveData();
+        updateUI();
+        nextQuestion();
+    }
+
+    function addExp(amount) {
+        appData.exp += amount;
+        if (appData.exp >= 100) {
+            appData.level++;
+            appData.exp -= 100;
+            showComboMsg("🎉 LEVEL UP !!", true);
+        }
+    }
+
+    // --- UI更新 ---
+    function updateUI() {
+        document.getElementById('rank-badge').innerText = `${appData.rank}級 - Lv.${appData.level}`;
+        document.getElementById('exp-text').innerText = appData.exp;
+        document.getElementById('exp-bar').style.width = `${appData.exp}%`;
+        
+        document.getElementById('stat-total').innerText = appData.totalAnswered;
+        document.getElementById('stat-streak').innerText = `${appData.loginStreak}日`;
+        document.getElementById('stat-weak').innerText = appData.weakWords.length;
+
+        const dailyLeft = Math.max(0, 10 - appData.dailySolved);
+        document.getElementById('daily-left').innerText = dailyLeft;
+        document.getElementById('daily-status').innerText = dailyLeft === 0 ? "✅ 達成！" : "⏳";
+
+        if(appData.combo > 1) {
+            document.getElementById('combo-display').innerText = `${appData.combo} COMBO 🔥`;
+        }
+    }
+
+    // --- 補助機能 ---
+    function toggleHint() {
+        const box = document.getElementById('hint-box');
+        box.style.display = box.style.display === "block" ? "none" : "block";
+    }
+
+    function speakWord() {
+        if(!currentWord) return;
+        const uttr = new SpeechSynthesisUtterance(currentWord.en);
+        uttr.lang = 'en-US';
+        speechSynthesis.speak(uttr);
+    }
+
+    function showComboMsg(msg, isLevelUp = false) {
+        const comboEl = document.getElementById('combo-display');
+        comboEl.innerText = msg;
+        comboEl.style.color = isLevelUp ? "var(--primary)" : "var(--success)";
+        setTimeout(() => { if(appData.combo > 1) comboEl.innerText = `${appData.combo} COMBO 🔥`; else comboEl.innerText = ""; comboEl.style.color = "var(--warning)"; }, 1500);
+    }
+</script>
+
+</body>
+</html>
