@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Eiken Quest: Aether - Genesis</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Noto+Sans+JP:wght@400;900&display=swap" rel="stylesheet">
+    <title>Eiken Quest: Aether - 4 Skills Mastery</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
@@ -13,60 +13,57 @@
         :root {
             --primary: #00ffcc; --secondary: #7000ff; --accent: #ff0077;
             --gold: #ffcc00; --bg-deep: #05070a; --panel-glass: rgba(255, 255, 255, 0.05);
-            --border-glass: rgba(255, 255, 255, 0.1); --text-main: #e2e8f0;
+            --border-glass: rgba(255, 255, 255, 0.2); --text-main: #e2e8f0;
+            --skill-r: #4ade80; --skill-l: #60a5fa; --skill-w: #f472b6; --skill-s: #fbbf24;
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body, html { margin: 0; padding: 0; width: 100%; height: 100dvh; background: var(--bg-deep); color: var(--text-main); font-family: 'Noto Sans JP', sans-serif; overflow: hidden; display: flex; justify-content: center; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: var(--bg-deep); color: var(--text-main); font-family: 'Noto Sans JP', sans-serif; overflow: hidden; display: flex; justify-content: center; }
+        .app-shell { width: 100%; max-width: 500px; height: 100dvh; background: radial-gradient(circle at top, #101520, #020408); position: relative; display: flex; flex-direction: column; border-left: 1px solid var(--border-glass); border-right: 1px solid var(--border-glass); }
         
-        /* Expanded max-width for Tablets/Laptops */
-        .app-shell { width: 100%; max-width: 800px; height: 100%; background: radial-gradient(circle at top, #101520, #05070a); position: relative; display: flex; flex-direction: column; border-left: 1px solid var(--border-glass); border-right: 1px solid var(--border-glass); margin: 0 auto; box-shadow: 0 0 30px rgba(0,0,0,0.8); }
-        
-        .nav-hud { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: rgba(0,0,0,0.8); z-index: 100; font-family: 'Orbitron'; }
-        .stat-badge { display: flex; align-items: center; gap: 8px; font-weight: bold; font-size: 1rem; color: var(--gold); }
-        
+        /* HUD */
+        .nav-hud { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background: rgba(0,0,0,0.8); z-index: 100; font-family: 'Orbitron'; border-bottom: 1px solid var(--border-glass);}
+        .stat-badge { display: flex; align-items: center; gap: 6px; font-weight: bold; font-size: 0.9rem; }
         .global-progress { width: 100%; height: 4px; background: #111; }
-        .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--primary), var(--secondary)); transition: width 0.4s ease; box-shadow: 0 0 10px var(--primary); }
+        .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--primary), var(--secondary)); transition: width 0.4s ease; box-shadow: 0 0 10px var(--primary);}
         
-        .screen { flex: 1; padding: 20px; display: none; flex-direction: column; overflow-y: auto; -webkit-overflow-scrolling: touch; align-items: center; }
+        /* Screens */
+        .screen { flex: 1; padding: 20px; display: none; flex-direction: column; overflow-y: auto; }
         .screen.active { display: flex; animation: fadeIn 0.3s forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        .btn-core { background: var(--panel-glass); border: 1px solid var(--border-glass); color: white; padding: 15px; border-radius: 12px; cursor: pointer; text-align: center; margin-bottom: 8px; font-family: 'Orbitron', 'Noto Sans JP'; transition: 0.2s; width: 100%; }
-        .btn-core:hover { background: rgba(255,255,255,0.1); border-color: var(--primary); }
-        .btn-core:active { transform: scale(0.98); }
+        /* UI Elements */
+        .btn-core { background: var(--panel-glass); border: 1px solid var(--border-glass); color: white; padding: 15px; border-radius: 12px; cursor: pointer; text-align: center; margin-bottom: 8px; font-weight: bold; transition: 0.2s; }
+        .btn-core:active { transform: scale(0.95); background: rgba(0,255,204,0.1); border-color: var(--primary); }
+        .grade-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         
-        /* Grid layout adjusts based on screen size */
-        .grade-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; width: 100%; max-width: 600px; margin-top: 15px; }
-        
-        .map-grid { display: flex; flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 20px; padding-bottom: 40px; width: 100%; max-width: 600px; }
-        .skill-node { width: 70px; height: 70px; border-radius: 50%; background: var(--panel-glass); border: 2px solid var(--border-glass); display: flex; justify-content: center; align-items: center; font-family: 'Orbitron'; font-weight: bold; font-size: 1.2rem; cursor: pointer; transition: 0.3s; }
+        /* Map Nodes */
+        .map-grid { display: flex; flex-direction: column; align-items: center; gap: 30px; padding: 20px 0 100px; }
+        .skill-node { width: 65px; height: 65px; border-radius: 50%; background: var(--panel-glass); border: 2px solid var(--border-glass); display: flex; flex-direction: column; justify-content: center; align-items: center; font-family: 'Orbitron'; font-weight: bold; cursor: pointer; position: relative; }
         .skill-node.unlocked { border-color: var(--primary); color: var(--primary); box-shadow: 0 0 15px rgba(0,255,204,0.2); }
-        .skill-node.unlocked:hover { transform: scale(1.1); box-shadow: 0 0 25px rgba(0,255,204,0.5); }
-        .skill-node.locked { opacity: 0.4; cursor: not-allowed; }
+        .node-label { font-size: 0.6rem; margin-top: 2px; color: #888; }
+        .unlocked .node-label { color: var(--primary); }
 
-        .quiz-card { background: var(--panel-glass); border: 1px solid var(--border-glass); border-radius: 20px; padding: 30px; text-align: center; backdrop-filter: blur(10px); width: 100%; max-width: 600px; }
-        .word-display { font-size: 1.4rem; font-weight: 900; margin: 20px 0; line-height: 1.5; color: #fff; }
-        .def-display { font-size: 1rem; color: #94a3b8; line-height: 1.6; margin-bottom: 25px; text-align: left; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; border-left: 3px solid var(--primary); }
+        /* Quiz UI */
+        .quiz-card { background: rgba(10, 15, 25, 0.8); border: 1px solid var(--border-glass); border-radius: 20px; padding: 25px 20px; text-align: center; backdrop-filter: blur(10px); }
+        .skill-badge { display: inline-block; padding: 5px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; letter-spacing: 1px; margin-bottom: 15px; font-family: 'Orbitron'; }
         
-        input[type="text"] { width: 100%; background: rgba(0,0,0,0.6); border: 2px solid var(--border-glass); border-radius: 12px; color: white; padding: 18px; font-size: 1.1rem; text-align: center; outline: none; transition: 0.3s; }
+        .word-display { font-size: 1.2rem; font-weight: 700; margin: 10px 0 20px; line-height: 1.5; word-wrap: break-word; }
+        .def-display { font-size: 0.9rem; color: #cbd5e1; line-height: 1.6; margin-bottom: 25px; text-align: left; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; border-left: 3px solid var(--primary); }
+        
+        input[type="text"] { width: 100%; background: rgba(0,0,0,0.8); border: 2px solid var(--border-glass); border-radius: 12px; color: white; padding: 15px; font-size: 1.2rem; text-align: center; transition: 0.3s; }
         input[type="text"]:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(0,255,204,0.3); }
-
-        /* Flashcard Styles */
-        .fc-wrapper { perspective: 1000px; width: 100%; max-width: 500px; height: 300px; margin: 20px 0; }
-        .fc-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1); transform-style: preserve-3d; cursor: pointer; }
-        .fc-inner.is-flipped { transform: rotateY(180deg); }
-        .fc-front, .fc-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center; background: var(--panel-glass); border: 2px solid var(--border-glass); border-radius: 20px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .fc-front { color: #fff; font-size: 1.3rem; font-weight: bold; }
-        .fc-back { transform: rotateY(180deg); background: rgba(0, 255, 204, 0.05); border-color: var(--primary); color: var(--primary); font-size: 1.1rem; }
-        .fc-controls { display: flex; gap: 15px; width: 100%; max-width: 500px; }
         
-        .bottom-nav { height: 80px; background: rgba(5,7,10,0.95); border-top: 1px solid var(--border-glass); display: flex; justify-content: space-around; align-items: center; padding-bottom: env(safe-area-inset-bottom); }
-        .nav-btn { color: #475569; font-size: 1.3rem; cursor: pointer; text-align: center; flex: 1; transition: 0.3s; padding: 10px; }
-        .nav-btn span { display: block; font-size: 0.7rem; margin-top: 6px; font-weight: bold; font-family: 'Orbitron', sans-serif; }
-        .nav-btn.active { color: var(--primary); text-shadow: 0 0 10px var(--primary); }
+        .mic-btn { width: 100%; padding: 18px; border-radius: 12px; background: linear-gradient(45deg, var(--accent), #ff5e62); border: none; color: white; font-weight: bold; font-size: 1.1rem; cursor: pointer; margin-top: 10px; box-shadow: 0 5px 15px rgba(255,0,119,0.3); }
+        .mic-btn.listening { animation: pulse 1s infinite; background: var(--gold); box-shadow: 0 5px 15px rgba(255,204,0,0.4); color: #000; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
 
+        /* Bottom Nav & Utils */
+        .bottom-nav { height: 75px; background: rgba(2, 4, 8, 0.95); border-top: 1px solid var(--border-glass); display: flex; justify-content: space-around; align-items: center; padding-bottom: 10px; }
+        .nav-btn { color: #475569; font-size: 1.3rem; cursor: pointer; text-align: center; flex: 1; transition: 0.3s; }
+        .nav-btn span { display: block; font-size: 0.65rem; margin-top: 5px; font-weight: bold; }
+        .nav-btn.active { color: var(--primary); text-shadow: 0 0 10px var(--primary); }
         #toast-container { position: fixed; top: 80px; width: 90%; max-width: 400px; z-index: 1000; pointer-events: none; left: 50%; transform: translateX(-50%); }
-        .toast { padding: 15px; border-radius: 12px; margin-bottom: 10px; text-align: center; font-weight: bold; font-size: 0.9rem; box-shadow: 0 5px 20px rgba(0,0,0,0.6); }
+        .toast { padding: 15px; border-radius: 12px; margin-bottom: 10px; text-align: center; font-weight: bold; font-size: 0.9rem; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
     </style>
 </head>
 <body>
@@ -75,302 +72,343 @@
 
 <div class="app-shell">
     <div class="nav-hud">
-        <div class="stat-badge"><i class="fas fa-coins"></i> <span id="val-coins">0</span></div>
-        <div id="val-rank" style="font-size: 0.7rem; color: var(--primary); font-family: 'Orbitron'; letter-spacing: 1px;">CONNECTING...</div>
+        <div class="hud-stats">
+            <div class="stat-badge"><i class="fas fa-gem"></i> <span id="val-coins">0</span></div>
+            <div class="stat-badge" id="hp-container"></div>
+        </div>
+        <div id="val-rank" style="font-size: 0.65rem; color: var(--primary); font-family: 'Orbitron'; letter-spacing: 1px;">SECTOR P1</div>
     </div>
     <div class="global-progress"><div id="main-progress" class="progress-fill"></div></div>
 
     <div id="scr-grade" class="screen active">
-        <h2 style="text-align:center; font-family:'Orbitron'; font-size: 1.5rem; letter-spacing: 2px;">SECTOR SELECT</h2>
-        <p style="color:#94a3b8; font-size:0.9rem; text-align:center; margin-bottom: 20px;">学習する級を選択してください</p>
+        <h3 style="text-align:center; font-family:'Orbitron'; margin-bottom: 5px;">TARGET LOCK</h3>
+        <p style="text-align:center; font-size:0.75rem; color:#888; margin-bottom: 25px;">攻略する級（セクター）を選択</p>
         <div class="grade-grid">
-            <div class="btn-core" onclick="setGrade('1')">1級</div>
-            <div class="btn-core" onclick="setGrade('P1')">準1級</div>
-            <div class="btn-core" onclick="setGrade('2')">2級</div>
-            <div class="btn-core" onclick="setGrade('P2')">準2級</div>
-            <div class="btn-core" onclick="setGrade('3')">3級</div>
-            <div class="btn-core" onclick="setGrade('4')">4級</div>
-            <div class="btn-core" onclick="setGrade('5')">5級</div>
+            <div class="btn-core" onclick="setGrade('1')">1級 <span style="font-size:0.6rem;display:block;color:#888;">Master</span></div>
+            <div class="btn-core" onclick="setGrade('P1')">準1級 <span style="font-size:0.6rem;display:block;color:#888;">Advanced</span></div>
+            <div class="btn-core" onclick="setGrade('2')">2級 <span style="font-size:0.6rem;display:block;color:#888;">Upper Int.</span></div>
+            <div class="btn-core" onclick="setGrade('P2')">準2級 <span style="font-size:0.6rem;display:block;color:#888;">Intermediate</span></div>
+            <div class="btn-core" onclick="setGrade('3')">3級 <span style="font-size:0.6rem;display:block;color:#888;">Pre-Int.</span></div>
+            <div class="btn-core" onclick="setGrade('4')">4級 <span style="font-size:0.6rem;display:block;color:#888;">Elementary</span></div>
+            <div class="btn-core" style="grid-column: span 2;" onclick="setGrade('5')">5級 <span style="font-size:0.6rem;display:block;color:#888;">Beginner</span></div>
         </div>
-        <button onclick="emergencyReset()" style="margin-top:40px; background:none; border:none; color:#444; font-size:0.8rem; padding:20px; cursor:pointer; text-decoration: underline;">全データをリセット</button>
     </div>
 
     <div id="scr-map" class="screen">
-        <h2 style="text-align:center; font-family:'Orbitron'; font-size: 1.5rem; margin-bottom: 30px;" id="map-title">MISSION MAP</h2>
+        <div style="text-align:center; margin-bottom: 10px;">
+            <span id="map-grade-title" style="font-family:'Orbitron'; font-size:1.2rem; font-weight:bold; color:var(--primary);">GRADE X</span>
+            <p style="font-size:0.7rem; color:#888;">レベルが上がるほど難易度とスキル要求が高くなります</p>
+        </div>
         <div class="map-grid" id="map-container"></div>
-    </div>
-
-    <div id="scr-learn" class="screen">
-        <h2 style="text-align:center; font-family:'Orbitron'; font-size: 1.5rem;">STUDY MODULE</h2>
-        <p style="color:#94a3b8; font-size:0.9rem; margin-bottom: 10px;">タップしてカードを裏返します</p>
-        
-        <div class="fc-wrapper" onclick="flipCard()">
-            <div class="fc-inner" id="fc-inner">
-                <div class="fc-front" id="fc-front">...</div>
-                <div class="fc-back" id="fc-back">...</div>
-            </div>
-        </div>
-        
-        <div class="fc-controls">
-            <div class="btn-core" onclick="prevCard()"><i class="fas fa-arrow-left"></i> PREV</div>
-            <div class="btn-core" style="background: rgba(0, 255, 204, 0.1); border-color: var(--primary); color: var(--primary);" onclick="nextCard()">NEXT <i class="fas fa-arrow-right"></i></div>
-        </div>
-        <div id="fc-counter" style="margin-top: 15px; font-family: 'Orbitron'; color: #94a3b8;">0 / 0</div>
     </div>
 
     <div id="scr-quiz" class="screen">
         <div class="quiz-card" id="quiz-main-card">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                <div id="bot-status" style="font-family:'Orbitron'; font-size:0.7rem; color:var(--primary);">[ TESTING ]</div>
-                <div style="font-family:'Orbitron'; font-size:0.7rem; color:#94a3b8;" id="quiz-remaining">残り: 0問</div>
-            </div>
+            <div id="skill-badge" class="skill-badge">ANALYZING...</div>
             
             <div id="display-main" class="word-display">...</div>
             <div id="display-sub" class="def-display"></div>
-            <input type="text" id="ans-input" placeholder="回答を英単語で入力..." autocomplete="off" autocapitalize="off" enterkeyhint="done">
+            
+            <input type="text" id="ans-input" placeholder="答えを入力 (Enterで送信)" enterkeyhint="done" autocomplete="off">
+            <button id="mic-trigger" class="mic-btn" style="display:none;" onclick="startSpeechRecognition()">
+                <i class="fas fa-microphone"></i> タップして発音
+            </button>
+            <button id="audio-replay" class="btn-core" style="display:none; width:100%; margin-top:10px; background:var(--skill-l);" onclick="replayAudio()">
+                <i class="fas fa-volume-up"></i> 音声をもう一度聴く
+            </button>
         </div>
-        <button class="btn-core" style="max-width: 600px; margin-top: 20px; background: rgba(255,0,119,0.1); border-color: var(--accent); color: white;" onclick="giveUp()">わからない / 答えを見る</button>
     </div>
 
     <div class="bottom-nav">
-        <div class="nav-btn active" onclick="nav('scr-grade', this)"><i class="fas fa-layer-group"></i><span>GRADE</span></div>
-        <div class="nav-btn" onclick="nav('scr-learn', this)"><i class="fas fa-clone"></i><span>STUDY</span></div>
-        <div class="nav-btn" onclick="nav('scr-map', this)"><i class="fas fa-map-marker-alt"></i><span>MISSIONS</span></div>
+        <div class="nav-btn" onclick="nav('scr-grade', this)"><i class="fas fa-satellite"></i><span>TARGET</span></div>
+        <div class="nav-btn" onclick="nav('scr-map', this)"><i class="fas fa-route"></i><span>MAP</span></div>
+        <div class="nav-btn" onclick="emergencyReset()"><i class="fas fa-power-off"></i><span>RESET</span></div>
     </div>
 </div>
 
 <script>
-    // --- 級別専用コンテンツ ---
-    const GRADE_CONTENT = {
-        '5': {
-            vocab: [{w:"apple", d:"リンゴ"}, {w:"school", d:"学校"}, {w:"happy", d:"幸せな"}, {w:"friend", d:"友達"}],
-            scenarios: [
-                {type:"CLOZE", text:"I go to ____ every morning.", q:"「学校」を英語で？", a:"school", hint:"sで始まる単語"},
-                {type:"READING", text:"I have a red apple. I like fruit very much.", q:"What do I have?", a:"apple", hint:"文中の「赤色のもの」"}
-            ]
-        },
-        '4': {
-            vocab: [{w:"useful", d:"役に立つ"}, {w:"between", d:"の間に"}, {w:"weather", d:"天気"}, {w:"library", d:"図書館"}],
-            scenarios: [
-                {type:"CLOZE", text:"The ____ is sunny today.", q:"「天気」を英語で？", a:"weather", hint:"wから始まる単語"},
-                {type:"READING", text:"My father is a doctor. He works at a big hospital.", q:"Where does he work?", a:"hospital", hint:"働く場所の名前"}
-            ]
-        },
-        '3': {
-            vocab: [{w:"various", d:"様々な"}, {w:"believe", d:"信じる"}, {w:"experience", d:"経験"}, {w:"environment", d:"環境"}],
-            scenarios: [
-                {type:"CLOZE", text:"I want to ____ a doctor in the future.", q:"「〜になる」という動詞は？", a:"become", hint:"bから始まります"},
-                {type:"READING", text:"Reading books is important for students to learn new things.", q:"What is important for students?", a:"reading", hint:"文頭の単語"}
-            ]
-        },
-        'P1': {
-            vocab: [{w:"significant", d:"重要な"}, {w:"consequence", d:"結果"}, {w:"alternative", d:"代替の"}, {w:"negotiate", d:"交渉する"}],
-            scenarios: [
-                {type:"CLOZE", text:"The project had a ____ impact on our success.", q:"「重大な」という意味の単語は？", a:"significant", hint:"sから始まる形容詞"},
-                {type:"READING", text:"Global warming requires international cooperation to solve.", q:"What kind of cooperation is needed?", a:"international", hint:"cooperationの前の単語"}
-            ]
-        },
-        'default': {
-            vocab: [{w:"mission", d:"任務"}, {w:"target", d:"標的"}, {w:"complete", d:"完了"}],
-            scenarios: [{type:"CLOZE", text:"Mission ____.", q:"「完了」を英語で？", a:"complete", hint:"cから始まる"}]
-        }
+    // ==========================================
+    // 1. THE EIKEN MASTER DATABASE (Progressive)
+    // ==========================================
+    // 各級ごとに難易度（difficulty: 1〜10）とスキル（R, L, W, S）を設定
+    // 実際の試験に合わせた内容をオープンソース的に内包します。
+    
+    const EIKEN_DB = {
+        '5': [
+            { diff: 1, skill: "W", q: "I like ____. (りんご)", a: "apples", hint: "aから始まる複数形" },
+            { diff: 2, skill: "L", text: "Hello, my name is Ken.", q: "聴こえた通りに入力してください", a: "hello, my name is ken." },
+            { diff: 5, skill: "R", text: "My mother is a teacher. She works at a school.", q: "Where does she work?", a: "school", hint: "場所を表す単語" },
+            { diff: 8, skill: "S", text: "I play tennis on Sundays.", q: "マイクに向かって読んでください", a: "play tennis" }
+        ],
+        '3': [
+            { diff: 1, skill: "W", q: "She has ____ experiences. (様々な)", a: "various", hint: "vから始まる形容詞" },
+            { diff: 3, skill: "L", text: "Could you tell me the way to the station?", q: "聴こえた通りに入力してください（カンマ不要）", a: "could you tell me the way to the station?" },
+            { diff: 6, skill: "R", text: "Because of the heavy rain, the soccer game was canceled.", q: "Why was the game canceled? Because of the heavy ____.", a: "rain", hint: "天候を表す単語" },
+            { diff: 9, skill: "S", text: "I want to visit Australia in the future.", q: "発音テスト: 画面の英文を読み上げてください", a: "australia" },
+            { diff: 10, skill: "W", q: "It is ____ for us to learn history. (重要である)", a: "important", hint: "iから始まる形容詞" }
+        ],
+        'P1': [
+            { diff: 1, skill: "W", q: "The company announced a ____ increase in profits. (著しい、かなりの)", a: "significant", hint: "sから始まる形容詞" },
+            { diff: 2, skill: "W", q: "We must ____ the negative impacts of climate change. (和らげる、軽減する)", a: "mitigate", hint: "mから始まる動詞" },
+            { diff: 4, skill: "L", text: "The unprecedented economic crisis fluctuated the market.", q: "ディクテーション: The [____] economic crisis...", a: "unprecedented", hint: "「前例のない」という意味の単語" },
+            { diff: 7, skill: "R", text: "Despite initial skepticism, the alternative energy project yielded substantial benefits for the local ecosystem.", q: "What kind of benefits did the project yield?", a: "substantial", hint: "「実質的な、かなりの」という意味の単語" },
+            { diff: 9, skill: "S", text: "The consequences of urban sprawl are deteriorating the environment.", q: "発音テスト: 流暢に読み上げてください", a: "consequences" },
+            { diff: 10, skill: "R", text: "To alleviate traffic congestion, the city council implemented an ambiguous toll policy that exacerbated public dissatisfaction.", q: "What did the policy do to public dissatisfaction?", a: "exacerbated", hint: "「悪化させた」という意味の過去形動詞" }
+        ]
+        // ※データサイズ節約のため、1, 2, P2, 4級は今回はP1/3/5級のデータをフォールバックとして使用します。
     };
 
-    // --- グローバル状態 ---
-    let state = JSON.parse(localStorage.getItem('aetherQuest_v5')) || { 
-        coins: 0, unlocked: 1, grade: '5'
+    // ==========================================
+    // 2. STATE MANAGEMENT & PROGRESSION
+    // ==========================================
+    let state = JSON.parse(localStorage.getItem('aether4Skills')) || {
+        coins: 0, unlockedLevels: { '1':1, 'P1':1, '2':1, 'P2':1, '3':1, '4':1, '5':1 }, 
+        currentGrade: 'P1', hp: 3, progress: 0
     };
     
-    let wordPool = [];
-    let missionQueue = []; // 出題キュー
-    let totalMissionQuestions = 0;
-    
-    // Flashcard variables
-    let fcIndex = 0;
-    let isFlipped = false;
+    let currentLevel = 1;
+    let taskPool = [];
+    let activeTask = null;
+    let currentAudioText = "";
 
-    // --- ナビゲーション ---
+    function save() { localStorage.setItem('aether4Skills', JSON.stringify(state)); }
+
     function nav(id, el) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         if (el) el.classList.add('active');
-        
-        if(id === 'scr-learn') renderFlashcard();
     }
 
+    // ==========================================
+    // 3. DYNAMIC LEVELING ALGORITHM
+    // ==========================================
     function setGrade(g) {
-        state.grade = g;
+        state.currentGrade = g;
+        if (!state.unlockedLevels[g]) state.unlockedLevels[g] = 1;
         save();
-        loadGradeData(g);
-        showToast(`${g}級のデータをロードしました`, false);
-        nav('scr-learn', document.querySelectorAll('.nav-btn')[1]); // 級を選んだらまずSTUDYへ
-    }
-
-    function loadGradeData(g) {
-        const content = GRADE_CONTENT[g] || GRADE_CONTENT['default'];
-        wordPool = [];
-        
-        content.vocab.forEach(v => wordPool.push({word: v.w, def: v.d, type: "VOCAB"}));
-        content.scenarios.forEach(s => wordPool.push({word: s.a, ...s}));
-        
-        document.getElementById('map-title').innerText = `SECTOR: ${g}級`;
-        document.getElementById('val-rank').innerText = `${g}級 解析中`;
-        
-        fcIndex = 0;
+        updateHUD();
         renderMap();
+        nav('scr-map', document.querySelectorAll('.nav-btn')[1]);
     }
 
     function renderMap() {
+        document.getElementById('map-grade-title').innerText = `GRADE ${state.currentGrade}`;
         const container = document.getElementById('map-container');
         container.innerHTML = "";
+        
+        const maxLevel = state.unlockedLevels[state.currentGrade] || 1;
+
         for (let i = 1; i <= 10; i++) {
             const node = document.createElement('div');
-            const unlocked = i <= state.unlocked;
-            node.className = `skill-node ${unlocked ? 'unlocked' : 'locked'}`;
-            node.innerHTML = unlocked ? i : '<i class="fas fa-lock" style="font-size:1rem"></i>';
-            if (unlocked) node.onclick = () => startMission(i);
+            const isUnlocked = i <= maxLevel;
+            
+            node.className = `skill-node ${isUnlocked ? 'unlocked' : 'locked'}`;
+            if (isUnlocked) {
+                node.innerHTML = `LV.${i} <span class="node-label">${getTierName(i)}</span>`;
+                node.onclick = () => startMission(i);
+            } else {
+                node.innerHTML = `<i class="fas fa-lock" style="font-size:1.2rem; color:#444;"></i>`;
+            }
             container.appendChild(node);
         }
     }
 
-    // --- FLASHCARD ENGINE ---
-    function renderFlashcard() {
-        if (wordPool.length === 0) return;
-        const card = wordPool[fcIndex];
-        const front = document.getElementById('fc-front');
-        const back = document.getElementById('fc-back');
-        
-        isFlipped = false;
-        document.getElementById('fc-inner').classList.remove('is-flipped');
-        
-        if (card.type === "VOCAB") {
-            front.innerHTML = `<div style="font-size:0.8rem; color:var(--primary); margin-bottom:10px;">[ 単語 ]</div>${card.word}`;
-            back.innerHTML = `<strong>意味:</strong><br>${card.def}`;
-        } else {
-            const label = card.type === "READING" ? "読解" : "穴埋め";
-            front.innerHTML = `<div style="font-size:0.8rem; color:var(--primary); margin-bottom:10px;">[ ${label} ]</div><div style="font-size:0.9rem; line-height:1.4;">${card.text}<br><br><span style="color:var(--gold)">Q: ${card.q}</span></div>`;
-            back.innerHTML = `<strong>答え:</strong><br><span style="font-size:1.5rem; color:#fff;">${card.word}</span>`;
-        }
-        
-        document.getElementById('fc-counter').innerText = `${fcIndex + 1} / ${wordPool.length}`;
+    function getTierName(lv) {
+        if (lv <= 3) return "BASIC";
+        if (lv <= 7) return "INTERMEDIATE";
+        return "ADVANCED";
     }
 
-    function flipCard() {
-        isFlipped = !isFlipped;
-        document.getElementById('fc-inner').classList.toggle('is-flipped', isFlipped);
-    }
-
-    function nextCard() {
-        fcIndex = (fcIndex + 1) % wordPool.length;
-        renderFlashcard();
-    }
-
-    function prevCard() {
-        fcIndex = (fcIndex - 1 + wordPool.length) % wordPool.length;
-        renderFlashcard();
-    }
-
-    // --- GAME ENGINE (No Repeats, No HP) ---
+    // ==========================================
+    // 4. THE 4-SKILLS ENGINE
+    // ==========================================
     function startMission(lv) {
-        // 毎回ユニークな5問（プールが少ない場合は最大数）をシャッフルして抽出
-        let shuffled = [...wordPool].sort(() => 0.5 - Math.random());
-        missionQueue = shuffled.slice(0, 5); 
-        totalMissionQuestions = missionQueue.length;
+        currentLevel = lv;
+        state.hp = 3;
+        state.progress = 0;
+        updateHUD();
         
-        updateHUD(); 
+        // 難易度フィルター: 選択したレベルに近い難易度の問題を抽出
+        const rawDB = EIKEN_DB[state.currentGrade] || EIKEN_DB['3']; // 未定義級は3級を代用
         
-        // Remove active class from nav buttons since Quiz is a sub-screen
-        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.getElementById('scr-quiz').classList.add('active');
-        
+        // レベルアルゴリズム: Lv1ならdiff 1-3、Lv10ならdiff 8-10を中心に抽出
+        taskPool = rawDB.filter(task => {
+            const diffRange = Math.abs(task.diff - currentLevel);
+            return diffRange <= 3; // レベルに近い問題をプールに入れる
+        });
+
+        // もし抽出できなければ全体を使う（フェイルセーフ）
+        if (taskPool.length === 0) taskPool = [...rawDB];
+
+        nav('scr-quiz');
         nextQuestion();
     }
 
     function nextQuestion() {
-        if (missionQueue.length === 0) return finishMission();
+        if (state.progress >= 100) return finishMission();
+        if (state.hp <= 0) return gameOver();
 
-        currentTask = missionQueue[0]; // キューの先頭を見る
-        document.getElementById('quiz-remaining').innerText = `残り: ${missionQueue.length}問`;
+        // ランダムにタスクを選択
+        activeTask = taskPool[Math.floor(Math.random() * taskPool.length)];
 
+        const badge = document.getElementById('skill-badge');
         const main = document.getElementById('display-main');
         const sub = document.getElementById('display-sub');
         const input = document.getElementById('ans-input');
+        const micBtn = document.getElementById('mic-trigger');
+        const audioBtn = document.getElementById('audio-replay');
+
         input.value = "";
-        
-        if (currentTask.type === "READING" || currentTask.type === "CLOZE") {
-            const label = currentTask.type === "READING" ? "読解ミッション" : "穴埋めミッション";
-            main.innerHTML = `<span style="font-size:0.8rem; color:var(--primary); letter-spacing:2px;">[ ${label} ]</span><br><div style="font-size:1.1rem;">${currentTask.text}</div>`;
-            sub.innerHTML = `問: ${currentTask.q}<br><small style="color:var(--gold); margin-top:5px; display:inline-block;">ヒント: ${currentTask.hint}</small>`;
-        } else {
-            main.innerHTML = `<span style="font-size:0.8rem; color:var(--primary); letter-spacing:2px;">[ 単語スキャン ]</span><br>この意味の英単語は？`;
-            sub.innerHTML = `<strong style="font-size:1.1rem; color:#fff;">${currentTask.def}</strong>`;
+        input.style.display = "block";
+        micBtn.style.display = "none";
+        audioBtn.style.display = "none";
+        micBtn.classList.remove('listening');
+        input.placeholder = "答えを入力してEnter";
+
+        // スキルごとのUI構築
+        switch(activeTask.skill) {
+            case "R":
+                badge.innerText = "📖 READING (読解)";
+                badge.style.background = varColor('--skill-r');
+                badge.style.color = "#000";
+                main.innerHTML = `<div style="font-size:1rem; font-weight:normal; text-align:left;">${activeTask.text}</div>`;
+                sub.innerHTML = `<strong>Q:</strong> ${activeTask.q}<br><span style="color:var(--gold); font-size:0.8rem;">Hint: ${activeTask.hint}</span>`;
+                break;
+                
+            case "L":
+                badge.innerText = "🎧 LISTENING (聴解)";
+                badge.style.background = varColor('--skill-l');
+                badge.style.color = "#000";
+                main.innerHTML = `<i class="fas fa-headphones-alt" style="font-size:2rem; color:var(--skill-l);"></i>`;
+                sub.innerHTML = `<strong>Q:</strong> ${activeTask.q}<br><span style="color:var(--gold); font-size:0.8rem;">Hint: ${activeTask.hint || "音声を聴いて入力"}</span>`;
+                audioBtn.style.display = "block";
+                currentAudioText = activeTask.text;
+                setTimeout(replayAudio, 500); // 0.5秒後に自動再生
+                break;
+                
+            case "W":
+                badge.innerText = "✍️ WRITING (語彙・文法)";
+                badge.style.background = varColor('--skill-w');
+                badge.style.color = "#000";
+                main.innerHTML = "Fill in the blank";
+                sub.innerHTML = `<strong>Q:</strong> ${activeTask.q}<br><span style="color:var(--gold); font-size:0.8rem;">Hint: ${activeTask.hint}</span>`;
+                break;
+                
+            case "S":
+                badge.innerText = "🗣️ SPEAKING (発音・音読)";
+                badge.style.background = varColor('--skill-s');
+                badge.style.color = "#000";
+                main.innerHTML = `<div style="font-size:1.1rem; color:#fff;">"${activeTask.text}"</div>`;
+                sub.innerHTML = `<strong>Task:</strong> ${activeTask.q}`;
+                input.style.display = "none";
+                micBtn.style.display = "block";
+                break;
         }
-        input.focus();
+        
+        if (activeTask.skill !== "S") input.focus();
     }
 
+    // ==========================================
+    // 5. INPUT & VALIDATION
+    // ==========================================
     document.getElementById('ans-input').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') checkAnswer();
+        if (e.key === 'Enter') checkTextAnswer();
     });
 
-    function checkAnswer() {
-        const user = document.getElementById('ans-input').value.trim().toLowerCase();
-        const correct = currentTask.word.toLowerCase();
-
-        if (user === correct) {
-            handleSuccess();
+    function checkTextAnswer() {
+        if (!activeTask) return;
+        const userAns = document.getElementById('ans-input').value.trim().toLowerCase();
+        // 句読点などを除去して判定を緩くする
+        const cleanUser = userAns.replace(/[.,!?]/g, '');
+        const cleanAns = activeTask.a.toLowerCase().replace(/[.,!?]/g, '');
+        
+        if (cleanUser === cleanAns || cleanUser.includes(cleanAns)) {
+            success();
         } else {
-            handleFailure(correct);
+            fail();
         }
     }
 
-    function handleSuccess() {
-        confetti({ particleCount: 40, spread: 70, origin: { y: 0.8 }, colors: ['#00ffcc', '#7000ff'] });
-        
-        // 正解したのでキューから削除
-        missionQueue.shift(); 
-        
-        // プログレスバーの更新
-        const progressPercent = ((totalMissionQuestions - missionQueue.length) / totalMissionQuestions) * 100;
-        document.getElementById('main-progress').style.width = progressPercent + "%";
-        
-        state.coins += 20;
-        showToast("正解！", false);
-        updateHUD(); save();
-        setTimeout(nextQuestion, 600);
+    function success() {
+        confetti({ particleCount: 40, spread: 60, origin: { y: 0.8 }, colors: ['#00ffcc', '#7000ff'] });
+        state.progress += 25; // 4問正解でクリア
+        state.coins += (currentLevel * 10);
+        showToast("EXCELLENT!", false);
+        updateHUD();
+        setTimeout(nextQuestion, 800);
     }
 
-    function handleFailure(correct) {
-        showToast(`ミス！正解は: ${correct}`, true);
-        
+    function fail() {
+        state.hp--;
+        updateHUD();
         const card = document.getElementById('quiz-main-card');
-        card.classList.add('animate__animated', 'animate__shakeX');
+        card.classList.add('animate__animated', 'animate__headShake');
+        showToast(`MISS: 正解は "${activeTask.a}"`, true);
         
-        // 【重要】間違えた問題をキューの末尾に移動（後でもう一度解かせる）
-        let failedTask = missionQueue.shift();
-        missionQueue.push(failedTask);
-
         setTimeout(() => {
-            card.classList.remove('animate__animated', 'animate__shakeX');
-            document.getElementById('ans-input').value = "";
-            nextQuestion(); // 次の問題へ（間違えた問題は後で出てくる）
-        }, 1200);
+            card.classList.remove('animate__animated', 'animate__headShake');
+            if (state.hp <= 0) gameOver();
+            else nextQuestion(); // 失敗しても次の問題へ（本番試験風）
+        }, 1500);
     }
 
-    function giveUp() {
-        // ギブアップボタン：答えを表示し、問題を最後尾に回す
-        const correct = currentTask.word.toLowerCase();
-        handleFailure(correct);
+    // ==========================================
+    // 6. HARDWARE APIs (Speech & TTS)
+    // ==========================================
+    function replayAudio() {
+        const u = new SpeechSynthesisUtterance(currentAudioText);
+        u.lang = 'en-US';
+        u.rate = 0.85; // リスニング用に少しだけゆっくり
+        window.speechSynthesis.speak(u);
     }
 
-    // --- ユーティリティ ---
-    function showToast(m, isError) {
+    function startSpeechRecognition() {
+        const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!Speech) {
+            showToast("お使いのブラウザはマイク入力に未対応です", true);
+            success(); // 進行不能を防ぐためスキップ
+            return;
+        }
+        
+        const rec = new Speech();
+        rec.lang = 'en-US';
+        const micBtn = document.getElementById('mic-trigger');
+        
+        micBtn.classList.add('listening');
+        micBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 音声認識中...';
+        
+        rec.start();
+        
+        rec.onresult = (e) => {
+            micBtn.classList.remove('listening');
+            micBtn.innerHTML = '<i class="fas fa-microphone"></i> タップして発音';
+            const transcript = e.results[0][0].transcript.toLowerCase();
+            
+            // 判定: 要求されたキーワード（activeTask.a）が含まれていればOK
+            if (transcript.includes(activeTask.a.toLowerCase())) {
+                success();
+            } else {
+                fail();
+            }
+        };
+        
+        rec.onerror = () => {
+            micBtn.classList.remove('listening');
+            micBtn.innerHTML = '<i class="fas fa-microphone"></i> エラー発生。再試行';
+            showToast("音声を認識できませんでした", true);
+        };
+    }
+
+    // ==========================================
+    // 7. UTILITIES
+    // ==========================================
+    function showToast(msg, isErr) {
         const t = document.createElement('div');
         t.className = 'toast animate__animated animate__fadeInDown';
-        t.style.background = isError ? 'var(--accent)' : 'var(--primary)';
-        t.style.color = isError ? '#fff' : '#05070a';
-        t.innerText = m;
+        t.style.background = isErr ? 'rgba(255,0,119,0.9)' : 'rgba(0,255,204,0.9)';
+        t.style.color = isErr ? '#fff' : '#000';
+        t.innerText = msg;
         document.getElementById('toast-container').appendChild(t);
         setTimeout(() => {
             t.classList.replace('animate__fadeInDown', 'animate__fadeOutUp');
@@ -380,34 +418,44 @@
 
     function updateHUD() {
         document.getElementById('val-coins').innerText = state.coins;
+        document.getElementById('hp-container').innerHTML = "❤".repeat(Math.max(0, state.hp));
+        document.getElementById('main-progress').style.width = (state.progress || 0) + "%";
+        document.getElementById('val-rank').innerText = `SECTOR ${state.currentGrade}`;
+    }
+
+    function varColor(name) {
+        return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
     }
 
     function finishMission() {
-        showToast("ミッションコンプリート！", false);
-        if (state.unlocked < 10) state.unlocked++;
-        state.coins += 100; // クリアボーナス
+        showToast("MISSION CLEAR! セクター制圧", false);
+        
+        // 次のレベルを解放
+        const currentMax = state.unlockedLevels[state.currentGrade];
+        if (currentLevel === currentMax && currentMax < 10) {
+            state.unlockedLevels[state.currentGrade]++;
+        }
+        
         save();
         renderMap();
-        document.getElementById('main-progress').style.width = "0%";
-        setTimeout(() => nav('scr-map', document.querySelectorAll('.nav-btn')[2]), 1500);
+        setTimeout(() => nav('scr-map'), 1500);
+    }
+
+    function gameOver() {
+        showToast("SYSTEM FAILURE: ライフが尽きました", true);
+        setTimeout(() => nav('scr-map'), 2000);
     }
 
     function emergencyReset() {
-        if(confirm("全ての学習記録と進捗を初期化しますか？")) {
-            localStorage.removeItem('aetherQuest_v5');
+        if(confirm("全ての進行状況をリセットしますか？")) {
+            localStorage.removeItem('aether4Skills');
             location.reload();
         }
     }
 
-    function save() {
-        localStorage.setItem('aetherQuest_v5', JSON.stringify(state));
-    }
-
     window.onload = () => {
         updateHUD();
-        loadGradeData(state.grade);
-        // 初期画面はグレード選択
-        nav('scr-grade', document.querySelectorAll('.nav-btn')[0]);
+        // 初期状態は画面1を表示
     };
 </script>
 </body>
