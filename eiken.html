@@ -18,66 +18,71 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body, html { margin: 0; padding: 0; width: 100%; height: 100dvh; background: var(--bg-deep); color: var(--text-main); font-family: 'Noto Sans JP', sans-serif; overflow: hidden; display: flex; justify-content: center; }
         
-        .app-shell { width: 100%; max-width: 500px; height: 100%; background: radial-gradient(circle at top, #101520, #05070a); position: relative; display: flex; flex-direction: column; border-left: 1px solid var(--border-glass); border-right: 1px solid var(--border-glass); }
+        /* Expanded max-width for Tablets/Laptops */
+        .app-shell { width: 100%; max-width: 800px; height: 100%; background: radial-gradient(circle at top, #101520, #05070a); position: relative; display: flex; flex-direction: column; border-left: 1px solid var(--border-glass); border-right: 1px solid var(--border-glass); margin: 0 auto; box-shadow: 0 0 30px rgba(0,0,0,0.8); }
         
-        .nav-hud { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; background: rgba(0,0,0,0.8); z-index: 100; font-family: 'Orbitron'; }
-        .stat-badge { display: flex; align-items: center; gap: 6px; font-weight: bold; font-size: 0.85rem; }
+        .nav-hud { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: rgba(0,0,0,0.8); z-index: 100; font-family: 'Orbitron'; }
+        .stat-badge { display: flex; align-items: center; gap: 8px; font-weight: bold; font-size: 1rem; color: var(--gold); }
         
-        .global-progress { width: 100%; height: 3px; background: #111; }
+        .global-progress { width: 100%; height: 4px; background: #111; }
         .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--primary), var(--secondary)); transition: width 0.4s ease; box-shadow: 0 0 10px var(--primary); }
         
-        .screen { flex: 1; padding: 20px; display: none; flex-direction: column; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+        .screen { flex: 1; padding: 20px; display: none; flex-direction: column; overflow-y: auto; -webkit-overflow-scrolling: touch; align-items: center; }
         .screen.active { display: flex; animation: fadeIn 0.3s forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        .btn-core { background: var(--panel-glass); border: 1px solid var(--border-glass); color: white; padding: 15px; border-radius: 12px; cursor: pointer; text-align: center; margin-bottom: 8px; font-family: 'Orbitron', 'Noto Sans JP'; transition: 0.2s; }
-        .btn-core:active { transform: scale(0.98); background: rgba(255,255,255,0.1); }
+        .btn-core { background: var(--panel-glass); border: 1px solid var(--border-glass); color: white; padding: 15px; border-radius: 12px; cursor: pointer; text-align: center; margin-bottom: 8px; font-family: 'Orbitron', 'Noto Sans JP'; transition: 0.2s; width: 100%; }
+        .btn-core:hover { background: rgba(255,255,255,0.1); border-color: var(--primary); }
+        .btn-core:active { transform: scale(0.98); }
         
-        .grade-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        /* Grid layout adjusts based on screen size */
+        .grade-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; width: 100%; max-width: 600px; margin-top: 15px; }
         
-        .map-grid { display: flex; flex-direction: column; align-items: center; gap: 20px; padding-bottom: 40px; }
-        .skill-node { width: 60px; height: 60px; border-radius: 50%; background: var(--panel-glass); border: 2px solid var(--border-glass); display: flex; justify-content: center; align-items: center; font-family: 'Orbitron'; font-weight: bold; cursor: pointer; }
+        .map-grid { display: flex; flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 20px; padding-bottom: 40px; width: 100%; max-width: 600px; }
+        .skill-node { width: 70px; height: 70px; border-radius: 50%; background: var(--panel-glass); border: 2px solid var(--border-glass); display: flex; justify-content: center; align-items: center; font-family: 'Orbitron'; font-weight: bold; font-size: 1.2rem; cursor: pointer; transition: 0.3s; }
         .skill-node.unlocked { border-color: var(--primary); color: var(--primary); box-shadow: 0 0 15px rgba(0,255,204,0.2); }
-        .skill-node.locked { opacity: 0.5; cursor: not-allowed; }
+        .skill-node.unlocked:hover { transform: scale(1.1); box-shadow: 0 0 25px rgba(0,255,204,0.5); }
+        .skill-node.locked { opacity: 0.4; cursor: not-allowed; }
 
-        .quiz-card { background: var(--panel-glass); border: 1px solid var(--border-glass); border-radius: 20px; padding: 25px; text-align: center; backdrop-filter: blur(10px); }
-        .word-display { font-size: 1.2rem; font-weight: 900; margin: 15px 0; line-height: 1.5; color: #fff; }
-        .def-display { font-size: 0.9rem; color: #94a3b8; line-height: 1.6; margin-bottom: 20px; text-align: left; background: rgba(0,0,0,0.3); padding: 12px; border-radius: 10px; border-left: 3px solid var(--primary); }
+        .quiz-card { background: var(--panel-glass); border: 1px solid var(--border-glass); border-radius: 20px; padding: 30px; text-align: center; backdrop-filter: blur(10px); width: 100%; max-width: 600px; }
+        .word-display { font-size: 1.4rem; font-weight: 900; margin: 20px 0; line-height: 1.5; color: #fff; }
+        .def-display { font-size: 1rem; color: #94a3b8; line-height: 1.6; margin-bottom: 25px; text-align: left; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; border-left: 3px solid var(--primary); }
         
-        input[type="text"] { width: 100%; background: rgba(0,0,0,0.6); border: 2px solid var(--border-glass); border-radius: 12px; color: white; padding: 15px; font-size: 1rem; text-align: center; outline: none; transition: 0.3s; }
-        input[type="text"]:focus { border-color: var(--primary); box-shadow: 0 0 10px rgba(0,255,204,0.2); }
+        input[type="text"] { width: 100%; background: rgba(0,0,0,0.6); border: 2px solid var(--border-glass); border-radius: 12px; color: white; padding: 18px; font-size: 1.1rem; text-align: center; outline: none; transition: 0.3s; }
+        input[type="text"]:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(0,255,204,0.3); }
 
-        .bottom-nav { height: 75px; background: rgba(5,7,10,0.95); border-top: 1px solid var(--border-glass); display: flex; justify-content: space-around; align-items: center; }
-        .nav-btn { color: #475569; font-size: 1.1rem; cursor: pointer; text-align: center; flex: 1; transition: 0.3s; }
-        .nav-btn span { display: block; font-size: 0.6rem; margin-top: 4px; font-weight: bold; }
-        .nav-btn.active { color: var(--primary); text-shadow: 0 0 8px var(--primary); }
+        /* Flashcard Styles */
+        .fc-wrapper { perspective: 1000px; width: 100%; max-width: 500px; height: 300px; margin: 20px 0; }
+        .fc-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1); transform-style: preserve-3d; cursor: pointer; }
+        .fc-inner.is-flipped { transform: rotateY(180deg); }
+        .fc-front, .fc-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center; background: var(--panel-glass); border: 2px solid var(--border-glass); border-radius: 20px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .fc-front { color: #fff; font-size: 1.3rem; font-weight: bold; }
+        .fc-back { transform: rotateY(180deg); background: rgba(0, 255, 204, 0.05); border-color: var(--primary); color: var(--primary); font-size: 1.1rem; }
+        .fc-controls { display: flex; gap: 15px; width: 100%; max-width: 500px; }
+        
+        .bottom-nav { height: 80px; background: rgba(5,7,10,0.95); border-top: 1px solid var(--border-glass); display: flex; justify-content: space-around; align-items: center; padding-bottom: env(safe-area-inset-bottom); }
+        .nav-btn { color: #475569; font-size: 1.3rem; cursor: pointer; text-align: center; flex: 1; transition: 0.3s; padding: 10px; }
+        .nav-btn span { display: block; font-size: 0.7rem; margin-top: 6px; font-weight: bold; font-family: 'Orbitron', sans-serif; }
+        .nav-btn.active { color: var(--primary); text-shadow: 0 0 10px var(--primary); }
 
-        #loader { position: fixed; inset: 0; background: var(--bg-deep); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        #toast-container { position: fixed; top: 70px; width: 90%; max-width: 400px; z-index: 1000; pointer-events: none; left: 50%; transform: translateX(-50%); }
-        .toast { padding: 12px; border-radius: 12px; margin-bottom: 8px; text-align: center; font-weight: bold; font-size: 0.8rem; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        #toast-container { position: fixed; top: 80px; width: 90%; max-width: 400px; z-index: 1000; pointer-events: none; left: 50%; transform: translateX(-50%); }
+        .toast { padding: 15px; border-radius: 12px; margin-bottom: 10px; text-align: center; font-weight: bold; font-size: 0.9rem; box-shadow: 0 5px 20px rgba(0,0,0,0.6); }
     </style>
 </head>
 <body>
-
-<div id="loader">
-    <div class="animate__animated animate__pulse animate__infinite" style="color:var(--primary); font-size:2.5rem;"><i class="fas fa-satellite-dish"></i></div>
-    <p style="margin-top:15px; font-family: 'Orbitron'; font-size:0.7rem; letter-spacing: 2px;">SYNCING NEURAL LINK...</p>
-</div>
 
 <div id="toast-container"></div>
 
 <div class="app-shell">
     <div class="nav-hud">
-        <div class="hud-stats">
-            <div class="stat-badge"><i class="fas fa-gem"></i> <span id="val-coins">0</span></div>
-            <div class="stat-badge" id="hp-container"></div>
-        </div>
-        <div id="val-rank" style="font-size: 0.6rem; color: var(--primary); font-family: 'Orbitron';">CONNECTING...</div>
+        <div class="stat-badge"><i class="fas fa-coins"></i> <span id="val-coins">0</span></div>
+        <div id="val-rank" style="font-size: 0.7rem; color: var(--primary); font-family: 'Orbitron'; letter-spacing: 1px;">CONNECTING...</div>
     </div>
     <div class="global-progress"><div id="main-progress" class="progress-fill"></div></div>
 
     <div id="scr-grade" class="screen active">
-        <h2 style="text-align:center; font-family:'Orbitron'; font-size: 1.2rem; letter-spacing: 2px;">SECTOR SELECT</h2>
+        <h2 style="text-align:center; font-family:'Orbitron'; font-size: 1.5rem; letter-spacing: 2px;">SECTOR SELECT</h2>
+        <p style="color:#94a3b8; font-size:0.9rem; text-align:center; margin-bottom: 20px;">学習する級を選択してください</p>
         <div class="grade-grid">
             <div class="btn-core" onclick="setGrade('1')">1級</div>
             <div class="btn-core" onclick="setGrade('P1')">準1級</div>
@@ -87,27 +92,50 @@
             <div class="btn-core" onclick="setGrade('4')">4級</div>
             <div class="btn-core" onclick="setGrade('5')">5級</div>
         </div>
-        <button onclick="emergencyReset()" style="margin-top:auto; background:none; border:none; color:#444; font-size:0.6rem; padding:20px; cursor:pointer;">全データをリセット</button>
+        <button onclick="emergencyReset()" style="margin-top:40px; background:none; border:none; color:#444; font-size:0.8rem; padding:20px; cursor:pointer; text-decoration: underline;">全データをリセット</button>
     </div>
 
     <div id="scr-map" class="screen">
-        <h3 style="text-align:center; font-family:'Orbitron'; font-size: 0.9rem;" id="map-title">MISSION MAP</h3>
+        <h2 style="text-align:center; font-family:'Orbitron'; font-size: 1.5rem; margin-bottom: 30px;" id="map-title">MISSION MAP</h2>
         <div class="map-grid" id="map-container"></div>
+    </div>
+
+    <div id="scr-learn" class="screen">
+        <h2 style="text-align:center; font-family:'Orbitron'; font-size: 1.5rem;">STUDY MODULE</h2>
+        <p style="color:#94a3b8; font-size:0.9rem; margin-bottom: 10px;">タップしてカードを裏返します</p>
+        
+        <div class="fc-wrapper" onclick="flipCard()">
+            <div class="fc-inner" id="fc-inner">
+                <div class="fc-front" id="fc-front">...</div>
+                <div class="fc-back" id="fc-back">...</div>
+            </div>
+        </div>
+        
+        <div class="fc-controls">
+            <div class="btn-core" onclick="prevCard()"><i class="fas fa-arrow-left"></i> PREV</div>
+            <div class="btn-core" style="background: rgba(0, 255, 204, 0.1); border-color: var(--primary); color: var(--primary);" onclick="nextCard()">NEXT <i class="fas fa-arrow-right"></i></div>
+        </div>
+        <div id="fc-counter" style="margin-top: 15px; font-family: 'Orbitron'; color: #94a3b8;">0 / 0</div>
     </div>
 
     <div id="scr-quiz" class="screen">
         <div class="quiz-card" id="quiz-main-card">
-            <div id="bot-status" style="font-family:'Orbitron'; font-size:0.5rem; color:var(--primary); margin-bottom:10px;">[ ANALYZING ]</div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <div id="bot-status" style="font-family:'Orbitron'; font-size:0.7rem; color:var(--primary);">[ TESTING ]</div>
+                <div style="font-family:'Orbitron'; font-size:0.7rem; color:#94a3b8;" id="quiz-remaining">残り: 0問</div>
+            </div>
+            
             <div id="display-main" class="word-display">...</div>
             <div id="display-sub" class="def-display"></div>
             <input type="text" id="ans-input" placeholder="回答を英単語で入力..." autocomplete="off" autocapitalize="off" enterkeyhint="done">
         </div>
+        <button class="btn-core" style="max-width: 600px; margin-top: 20px; background: rgba(255,0,119,0.1); border-color: var(--accent); color: white;" onclick="giveUp()">わからない / 答えを見る</button>
     </div>
 
     <div class="bottom-nav">
-        <div class="nav-btn active" onclick="nav('scr-grade', this)"><i class="fas fa-th-large"></i><span>級選択</span></div>
-        <div class="nav-btn" onclick="nav('scr-map', this)"><i class="fas fa-map-marker-alt"></i><span>マップ</span></div>
-        <div class="nav-btn" onclick="showToast('PROFILE MODULE LOCKED', false)"><i class="fas fa-user-astronaut"></i><span>プロフ</span></div>
+        <div class="nav-btn active" onclick="nav('scr-grade', this)"><i class="fas fa-layer-group"></i><span>GRADE</span></div>
+        <div class="nav-btn" onclick="nav('scr-learn', this)"><i class="fas fa-clone"></i><span>STUDY</span></div>
+        <div class="nav-btn" onclick="nav('scr-map', this)"><i class="fas fa-map-marker-alt"></i><span>MISSIONS</span></div>
     </div>
 </div>
 
@@ -118,31 +146,30 @@
             vocab: [{w:"apple", d:"リンゴ"}, {w:"school", d:"学校"}, {w:"happy", d:"幸せな"}, {w:"friend", d:"友達"}],
             scenarios: [
                 {type:"CLOZE", text:"I go to ____ every morning.", q:"「学校」を英語で？", a:"school", hint:"sで始まる単語"},
-                {type:"READING", text:"I have a red apple. I like fruit very much.", q:"What do I have?", a:"apple", hint:"文中の「赤色のもの」です"}
+                {type:"READING", text:"I have a red apple. I like fruit very much.", q:"What do I have?", a:"apple", hint:"文中の「赤色のもの」"}
             ]
         },
         '4': {
             vocab: [{w:"useful", d:"役に立つ"}, {w:"between", d:"の間に"}, {w:"weather", d:"天気"}, {w:"library", d:"図書館"}],
             scenarios: [
                 {type:"CLOZE", text:"The ____ is sunny today.", q:"「天気」を英語で？", a:"weather", hint:"wから始まる単語"},
-                {type:"READING", text:"My father is a doctor. He works at a big hospital.", q:"Where does he work?", a:"hospital", hint:"働く場所の名前です"}
+                {type:"READING", text:"My father is a doctor. He works at a big hospital.", q:"Where does he work?", a:"hospital", hint:"働く場所の名前"}
             ]
         },
         '3': {
             vocab: [{w:"various", d:"様々な"}, {w:"believe", d:"信じる"}, {w:"experience", d:"経験"}, {w:"environment", d:"環境"}],
             scenarios: [
                 {type:"CLOZE", text:"I want to ____ a doctor in the future.", q:"「〜になる」という動詞は？", a:"become", hint:"bから始まります"},
-                {type:"READING", text:"Reading books is important for students to learn new things.", q:"What is important for students?", a:"reading", hint:"文頭の単語です"}
+                {type:"READING", text:"Reading books is important for students to learn new things.", q:"What is important for students?", a:"reading", hint:"文頭の単語"}
             ]
         },
         'P1': {
             vocab: [{w:"significant", d:"重要な"}, {w:"consequence", d:"結果"}, {w:"alternative", d:"代替の"}, {w:"negotiate", d:"交渉する"}],
             scenarios: [
                 {type:"CLOZE", text:"The project had a ____ impact on our success.", q:"「重大な」という意味の単語は？", a:"significant", hint:"sから始まる形容詞"},
-                {type:"READING", text:"Global warming requires international cooperation to solve.", q:"What kind of cooperation is needed?", a:"international", hint:"cooperationの前の単語です"}
+                {type:"READING", text:"Global warming requires international cooperation to solve.", q:"What kind of cooperation is needed?", a:"international", hint:"cooperationの前の単語"}
             ]
         },
-        // 未実装の級のためのフォールバック
         'default': {
             vocab: [{w:"mission", d:"任務"}, {w:"target", d:"標的"}, {w:"complete", d:"完了"}],
             scenarios: [{type:"CLOZE", text:"Mission ____.", q:"「完了」を英語で？", a:"complete", hint:"cから始まる"}]
@@ -150,11 +177,17 @@
     };
 
     // --- グローバル状態 ---
-    let state = JSON.parse(localStorage.getItem('aetherQuest_v4')) || { 
-        coins: 0, unlocked: 1, grade: '5', hp: 3, fails: {}, combo: 0, progress: 0 
+    let state = JSON.parse(localStorage.getItem('aetherQuest_v5')) || { 
+        coins: 0, unlocked: 1, grade: '5'
     };
+    
     let wordPool = [];
-    let currentTask = null;
+    let missionQueue = []; // 出題キュー
+    let totalMissionQuestions = 0;
+    
+    // Flashcard variables
+    let fcIndex = 0;
+    let isFlipped = false;
 
     // --- ナビゲーション ---
     function nav(id, el) {
@@ -162,26 +195,30 @@
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         if (el) el.classList.add('active');
+        
+        if(id === 'scr-learn') renderFlashcard();
     }
 
-    async function setGrade(g) {
+    function setGrade(g) {
         state.grade = g;
         save();
         loadGradeData(g);
-        nav('scr-map', document.querySelectorAll('.nav-btn')[1]);
+        showToast(`${g}級のデータをロードしました`, false);
+        nav('scr-learn', document.querySelectorAll('.nav-btn')[1]); // 級を選んだらまずSTUDYへ
     }
 
     function loadGradeData(g) {
-        document.getElementById('loader').style.display = 'flex';
         const content = GRADE_CONTENT[g] || GRADE_CONTENT['default'];
         wordPool = [];
         
         content.vocab.forEach(v => wordPool.push({word: v.w, def: v.d, type: "VOCAB"}));
         content.scenarios.forEach(s => wordPool.push({word: s.a, ...s}));
         
-        document.getElementById('map-title').innerText = `${g}級 MISSION SECTOR`;
+        document.getElementById('map-title').innerText = `SECTOR: ${g}級`;
+        document.getElementById('val-rank').innerText = `${g}級 解析中`;
+        
+        fcIndex = 0;
         renderMap();
-        setTimeout(() => document.getElementById('loader').style.display = 'none', 600);
     }
 
     function renderMap() {
@@ -191,24 +228,71 @@
             const node = document.createElement('div');
             const unlocked = i <= state.unlocked;
             node.className = `skill-node ${unlocked ? 'unlocked' : 'locked'}`;
-            node.innerHTML = unlocked ? i : '<i class="fas fa-lock" style="font-size:0.6rem"></i>';
+            node.innerHTML = unlocked ? i : '<i class="fas fa-lock" style="font-size:1rem"></i>';
             if (unlocked) node.onclick = () => startMission(i);
             container.appendChild(node);
         }
     }
 
-    // --- ゲームエンジン ---
+    // --- FLASHCARD ENGINE ---
+    function renderFlashcard() {
+        if (wordPool.length === 0) return;
+        const card = wordPool[fcIndex];
+        const front = document.getElementById('fc-front');
+        const back = document.getElementById('fc-back');
+        
+        isFlipped = false;
+        document.getElementById('fc-inner').classList.remove('is-flipped');
+        
+        if (card.type === "VOCAB") {
+            front.innerHTML = `<div style="font-size:0.8rem; color:var(--primary); margin-bottom:10px;">[ 単語 ]</div>${card.word}`;
+            back.innerHTML = `<strong>意味:</strong><br>${card.def}`;
+        } else {
+            const label = card.type === "READING" ? "読解" : "穴埋め";
+            front.innerHTML = `<div style="font-size:0.8rem; color:var(--primary); margin-bottom:10px;">[ ${label} ]</div><div style="font-size:0.9rem; line-height:1.4;">${card.text}<br><br><span style="color:var(--gold)">Q: ${card.q}</span></div>`;
+            back.innerHTML = `<strong>答え:</strong><br><span style="font-size:1.5rem; color:#fff;">${card.word}</span>`;
+        }
+        
+        document.getElementById('fc-counter').innerText = `${fcIndex + 1} / ${wordPool.length}`;
+    }
+
+    function flipCard() {
+        isFlipped = !isFlipped;
+        document.getElementById('fc-inner').classList.toggle('is-flipped', isFlipped);
+    }
+
+    function nextCard() {
+        fcIndex = (fcIndex + 1) % wordPool.length;
+        renderFlashcard();
+    }
+
+    function prevCard() {
+        fcIndex = (fcIndex - 1 + wordPool.length) % wordPool.length;
+        renderFlashcard();
+    }
+
+    // --- GAME ENGINE (No Repeats, No HP) ---
     function startMission(lv) {
-        state.hp = 3; state.progress = 0; state.combo = 0;
-        updateHUD(); nav('scr-quiz'); nextQuestion();
+        // 毎回ユニークな5問（プールが少ない場合は最大数）をシャッフルして抽出
+        let shuffled = [...wordPool].sort(() => 0.5 - Math.random());
+        missionQueue = shuffled.slice(0, 5); 
+        totalMissionQuestions = missionQueue.length;
+        
+        updateHUD(); 
+        
+        // Remove active class from nav buttons since Quiz is a sub-screen
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById('scr-quiz').classList.add('active');
+        
+        nextQuestion();
     }
 
     function nextQuestion() {
-        if (state.progress >= 100) return finishMission();
-        if (state.hp <= 0) return gameOver();
+        if (missionQueue.length === 0) return finishMission();
 
-        // 苦手な単語を少し出やすくする簡易ロジック
-        currentTask = wordPool[Math.floor(Math.random() * wordPool.length)];
+        currentTask = missionQueue[0]; // キューの先頭を見る
+        document.getElementById('quiz-remaining').innerText = `残り: ${missionQueue.length}問`;
 
         const main = document.getElementById('display-main');
         const sub = document.getElementById('display-sub');
@@ -217,11 +301,11 @@
         
         if (currentTask.type === "READING" || currentTask.type === "CLOZE") {
             const label = currentTask.type === "READING" ? "読解ミッション" : "穴埋めミッション";
-            main.innerHTML = `<span style="font-size:0.7rem; color:var(--primary); letter-spacing:2px;">[ ${label} ]</span><br>${currentTask.text}`;
-            sub.innerHTML = `問: ${currentTask.q}<br><small style="color:var(--gold)">ヒント: ${currentTask.hint}</small>`;
+            main.innerHTML = `<span style="font-size:0.8rem; color:var(--primary); letter-spacing:2px;">[ ${label} ]</span><br><div style="font-size:1.1rem;">${currentTask.text}</div>`;
+            sub.innerHTML = `問: ${currentTask.q}<br><small style="color:var(--gold); margin-top:5px; display:inline-block;">ヒント: ${currentTask.hint}</small>`;
         } else {
-            main.innerHTML = `<span style="font-size:0.7rem; color:var(--primary); letter-spacing:2px;">[ 単語スキャン ]</span><br>この意味の英単語は？`;
-            sub.innerText = currentTask.def;
+            main.innerHTML = `<span style="font-size:0.8rem; color:var(--primary); letter-spacing:2px;">[ 単語スキャン ]</span><br>この意味の英単語は？`;
+            sub.innerHTML = `<strong style="font-size:1.1rem; color:#fff;">${currentTask.def}</strong>`;
         }
         input.focus();
     }
@@ -242,28 +326,42 @@
     }
 
     function handleSuccess() {
-        confetti({ particleCount: 30, spread: 60, origin: { y: 0.8 }, colors: ['#00ffcc', '#7000ff'] });
-        state.combo++;
-        state.progress += 25;
-        state.coins += (10 + state.combo * 2);
-        showToast("正解！ニューラルリンク安定。", false);
+        confetti({ particleCount: 40, spread: 70, origin: { y: 0.8 }, colors: ['#00ffcc', '#7000ff'] });
+        
+        // 正解したのでキューから削除
+        missionQueue.shift(); 
+        
+        // プログレスバーの更新
+        const progressPercent = ((totalMissionQuestions - missionQueue.length) / totalMissionQuestions) * 100;
+        document.getElementById('main-progress').style.width = progressPercent + "%";
+        
+        state.coins += 20;
+        showToast("正解！", false);
         updateHUD(); save();
-        setTimeout(nextQuestion, 700);
+        setTimeout(nextQuestion, 600);
     }
 
     function handleFailure(correct) {
-        state.hp--;
-        state.combo = 0;
-        updateHUD();
-        showToast(`不正解：正解は ${correct}`, true);
+        showToast(`ミス！正解は: ${correct}`, true);
         
         const card = document.getElementById('quiz-main-card');
         card.classList.add('animate__animated', 'animate__shakeX');
+        
+        // 【重要】間違えた問題をキューの末尾に移動（後でもう一度解かせる）
+        let failedTask = missionQueue.shift();
+        missionQueue.push(failedTask);
+
         setTimeout(() => {
             card.classList.remove('animate__animated', 'animate__shakeX');
-            if (state.hp <= 0) gameOver();
-            else nextQuestion();
-        }, 800);
+            document.getElementById('ans-input').value = "";
+            nextQuestion(); // 次の問題へ（間違えた問題は後で出てくる）
+        }, 1200);
+    }
+
+    function giveUp() {
+        // ギブアップボタン：答えを表示し、問題を最後尾に回す
+        const correct = currentTask.word.toLowerCase();
+        handleFailure(correct);
     }
 
     // --- ユーティリティ ---
@@ -282,39 +380,34 @@
 
     function updateHUD() {
         document.getElementById('val-coins').innerText = state.coins;
-        document.getElementById('hp-container').innerHTML = "❤".repeat(Math.max(0, state.hp));
-        document.getElementById('main-progress').style.width = state.progress + "%";
-        document.getElementById('val-rank').innerText = `${state.grade}級領域を解析中`;
     }
 
     function finishMission() {
-        showToast("ミッションクリア！セクターを解放しました。", false);
+        showToast("ミッションコンプリート！", false);
         if (state.unlocked < 10) state.unlocked++;
-        state.coins += 50;
+        state.coins += 100; // クリアボーナス
         save();
         renderMap();
-        setTimeout(() => nav('scr-map'), 1200);
-    }
-
-    function gameOver() {
-        showToast("シールド大破。基地へ帰還します。", true);
-        setTimeout(() => nav('scr-map'), 1500);
+        document.getElementById('main-progress').style.width = "0%";
+        setTimeout(() => nav('scr-map', document.querySelectorAll('.nav-btn')[2]), 1500);
     }
 
     function emergencyReset() {
         if(confirm("全ての学習記録と進捗を初期化しますか？")) {
-            localStorage.removeItem('aetherQuest_v4');
+            localStorage.removeItem('aetherQuest_v5');
             location.reload();
         }
     }
 
     function save() {
-        localStorage.setItem('aetherQuest_v4', JSON.stringify(state));
+        localStorage.setItem('aetherQuest_v5', JSON.stringify(state));
     }
 
     window.onload = () => {
         updateHUD();
         loadGradeData(state.grade);
+        // 初期画面はグレード選択
+        nav('scr-grade', document.querySelectorAll('.nav-btn')[0]);
     };
 </script>
 </body>
