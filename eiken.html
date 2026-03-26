@@ -374,7 +374,7 @@
         rec.lang = 'en-US';
         document.getElementById('mic-trigger').onclick = () => {
             rec.start();
-            document.getElementById('mic-trigger').style.background = var(--gold);
+            document.getElementById('mic-trigger').style.background = "var(--gold)";
         };
         rec.onresult = (e) => {
             if (e.results[0][0].transcript.toLowerCase().includes(currentTask.word.toLowerCase())) handleSuccess();
