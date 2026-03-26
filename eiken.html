@@ -3,617 +3,432 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eiken Quest: Omniverse</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Noto+Sans+JP:wght@400;900&display=swap" rel="stylesheet">
+    <title>Eiken Quest: Aether - Ultimate Learning</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Noto+Sans+JP:wght@400;900&family=MuseoModerno:wght@300;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     
     <style>
         :root {
-            --primary: #00f2ff; /* ネオンブルー */
-            --accent: #7000ff; /* ネオンパープル */
-            --success: #10b981; /* 緑 */
-            --warning: #f59e0b; /* 黄色 */
-            --danger: #ef4444; /* 赤 */
-            --bg: #030712; /* ダークブルー背景 */
-            --panel: rgba(255,255,255,0.08); /* 半透明パネル */
-            --text-light: #e2e8f0;
-            --text-muted: #94a3b8;
+            --primary: #00ffcc; /* Aether Neon */
+            --secondary: #7000ff;
+            --accent: #ff0077;
+            --gold: #ffcc00;
+            --bg-deep: #05070a;
+            --panel-glass: rgba(255, 255, 255, 0.05);
+            --border-glass: rgba(255, 255, 255, 0.1);
+            --text-main: #e2e8f0;
         }
 
+        /* Base Setup */
+        * { box-sizing: border-box; outline: none; }
         body {
-            background-color: var(--bg);
-            color: var(--text-light);
+            background-color: var(--bg-deep);
+            color: var(--text-main);
             font-family: 'Noto Sans JP', sans-serif;
-            margin: 0;
-            overflow: hidden;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            perspective: 1000px; /* 3D回転用 */
+            margin: 0; overflow: hidden; height: 100vh;
+            display: flex; justify-content: center;
         }
 
-        /* 画面レイヤー管理 */
-        .screen {
-            position: absolute;
-            width: 420px;
-            min-height: 600px;
-            background: var(--panel);
-            backdrop-filter: blur(25px);
-            border-radius: 40px;
-            border: 1px solid rgba(255,255,255,0.1);
-            padding: 30px;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
-            transform: rotateY(90deg); /* 初期状態は非表示で回転 */
-            transition: transform 0.6s ease-in-out, opacity 0.6s ease-in-out;
-            opacity: 0;
-            z-index: 10; /* 最前面 */
-        }
-        .screen.active {
-            display: flex;
-            transform: rotateY(0deg); /* 表示時に回転 */
-            opacity: 1;
+        /* App Container */
+        .app-shell {
+            width: 100%; max-width: 480px; height: 100vh;
+            background: radial-gradient(circle at top, #101520, #05070a);
+            position: relative; border-left: 1px solid var(--border-glass);
+            border-right: 1px solid var(--border-glass);
+            display: flex; flex-direction: column;
         }
 
-        /* ボタン共通スタイル */
-        .btn-main, .btn-secondary {
-            border: none;
-            color: white;
-            padding: 12px 30px;
-            border-radius: 30px;
-            font-weight: bold;
-            cursor: pointer;
+        /* Top Navigation HUD */
+        .nav-hud {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px 20px; background: rgba(0,0,0,0.4);
+            border-bottom: 1px solid var(--border-glass); z-index: 100;
             font-family: 'Orbitron', sans-serif;
-            margin-top: 20px;
-            transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
         }
-        .btn-main {
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            box-shadow: 0 5px 20px rgba(0, 242, 255, 0.3);
-        }
-        .btn-main:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0, 242, 255, 0.5);
-        }
-        .btn-secondary {
-            background: rgba(255,255,255,0.15);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        }
-        .btn-secondary:hover {
-            transform: translateY(-2px);
-            background: rgba(255,255,255,0.25);
-            box-shadow: 0 7px 20px rgba(0,0,0,0.4);
-        }
+        .hud-stats { display: flex; gap: 15px; }
+        .stat-badge { display: flex; align-items: center; gap: 5px; font-weight: bold; }
+        .stat-badge i { color: var(--gold); }
 
-        /* アバター */
-        .avatar-option {
-            font-size: 3rem;
-            cursor: pointer;
-            transition: transform 0.3s ease, filter 0.3s ease;
-            filter: grayscale(1);
-            opacity: 0.7;
-        }
-        .avatar-option:hover, .avatar-selected {
-            filter: grayscale(0);
-            transform: scale(1.2);
-            opacity: 1;
-        }
-
-        /* ユーザーカード */
-        .user-card {
-            width: 100%;
-            background: rgba(255,255,255,0.05);
-            margin: 10px 0;
-            padding: 15px;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-            transition: 0.3s ease-out;
-            border: 1px solid transparent;
-            position: relative;
-        }
-        .user-card:hover {
-            background: var(--primary);
-            color: var(--bg);
-            border-color: var(--primary);
-            transform: translateX(10px);
-        }
-        .user-card:hover .user-info small { color: var(--bg); }
-
-        .user-avatar { font-size: 2.5rem; margin-right: 15px; }
-        .user-info { flex-grow: 1; }
-        .user-info strong { font-size: 1.2rem; }
-        .user-info small { color: var(--text-muted); transition: color 0.3s ease; }
-
-        /* 入力フィールド */
-        input, select {
-            background: rgba(0,0,0,0.3);
-            border: 2px solid rgba(255,255,255,0.1);
-            border-radius: 15px;
-            color: white;
-            padding: 12px;
-            width: 80%;
-            text-align: center;
-            font-size: 1.1rem;
-            outline: none;
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
-        }
-        input:focus, select:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 15px rgba(0, 242, 255, 0.4);
-        }
-
-        /* プログレスバー */
-        .progress-container {
-            width: 100%;
-            height: 8px;
-            background: #222;
-            border-radius: 4px;
-            margin: 15px 0;
-            overflow: hidden;
-            box-shadow: inset 0 0 5px rgba(0,0,0,0.3);
-        }
+        /* Progress Bar Area */
+        .global-progress { width: 100%; height: 5px; background: #111; position: relative; }
         .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--primary), var(--accent));
-            width: 0%;
-            transition: width 1s ease-in-out;
-            border-radius: 4px;
+            height: 100%; width: 0%; background: linear-gradient(90deg, var(--primary), var(--secondary));
+            box-shadow: 0 0 10px var(--primary); transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
         }
 
-        /* ゲーム画面固有 */
-        #game-screen .header-bar {
-            display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 20px;
+        /* Screen Management */
+        .screen {
+            position: absolute; inset: 0; top: 60px; /* HUDの下から */
+            padding: 20px; display: none; flex-direction: column; overflow-y: auto;
         }
-        #player-tag { font-weight: bold; font-size: 1.1rem; color: var(--primary); }
-        #rank-tag { font-family: 'Orbitron', sans-serif; font-size: 1.2rem; color: var(--text-light); }
-        #lv-display { font-family: 'Orbitron', sans-serif; font-size: 1.8rem; color: var(--primary); }
-        #jp-word {
-            font-size: 2.8rem; font-weight: 900; margin: 50px 0 30px; text-align: center;
-            text-shadow: 0 0 20px rgba(0,242,255,0.5);
-        }
-        #answer-input { margin-top: 30px; }
-        #combo-ui {
-            color: var(--warning); height: 30px; font-weight: bold; font-family: 'Orbitron';
-            font-size: 1.3rem; text-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
-            animation: pulse 1s infinite alternate; display: none;
-        }
-        @keyframes pulse { from { transform: scale(1); opacity: 0.8; } to { transform: scale(1.05); opacity: 1; } }
+        .screen.active { display: flex; }
 
-        /* タイマーバー */
-        #timer-container {
-            width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; margin-bottom: 20px; overflow: hidden;
+        /* Map & Skill Tree */
+        .map-grid { display: flex; flex-direction: column; align-items: center; gap: 40px; padding: 40px 0 150px; }
+        .skill-node {
+            width: 85px; height: 85px; border-radius: 50%; background: var(--panel-glass);
+            border: 3px solid var(--border-glass); display: flex; flex-direction: column;
+            justify-content: center; align-items: center; cursor: pointer;
+            transition: all 0.3s ease; position: relative;
         }
-        #timer-bar {
-            width: 100%; height: 100%; background: linear-gradient(90deg, var(--success), var(--warning)); transition: width 0.1s linear;
-        }
+        .skill-node.unlocked { border-color: var(--primary); box-shadow: 0 0 15px rgba(0, 255, 204, 0.3); }
+        .skill-node.current { transform: scale(1.15); border-color: var(--gold); box-shadow: 0 0 25px rgba(255, 204, 0, 0.5); }
+        .skill-node.locked { filter: grayscale(1); opacity: 0.5; cursor: not-allowed; }
+        .node-icon { font-size: 1.8rem; margin-bottom: 2px; }
+        .node-label { font-family: 'Orbitron'; font-size: 0.7rem; font-weight: bold; }
 
-        /* ヒント＆例文 */
-        #hint-area {
-            background: rgba(255,255,255,0.05); border-left: 3px solid var(--primary); padding: 10px 15px;
-            border-radius: 8px; font-size: 0.9rem; color: var(--text-light); margin-top: 20px;
-            text-align: left; display: none;
+        /* Quiz UI Elements */
+        .quiz-card {
+            background: var(--panel-glass); border: 1px solid var(--border-glass);
+            border-radius: 25px; padding: 25px; text-align: center; margin-top: 20px;
+            backdrop-filter: blur(10px);
         }
-        #hint-area strong { color: var(--primary); }
-        #hint-area .example-sentence { color: var(--text-muted); font-style: italic; margin-top: 5px; display: block;}
+        .q-type-label {
+            display: inline-block; padding: 4px 12px; border-radius: 10px;
+            font-size: 0.75rem; font-weight: bold; background: var(--secondary); margin-bottom: 15px;
+        }
+        .word-display { font-size: 2.2rem; font-weight: 900; margin: 20px 0; text-shadow: 0 0 15px rgba(255,255,255,0.2); }
+        .def-display { font-size: 1rem; color: #94a3b8; line-height: 1.6; margin-bottom: 30px; }
 
-        /* フッターボタン */
-        .game-footer {
-            margin-top: auto; width: 100%; display: flex; justify-content: space-between; align-items: center;
+        input[type="text"] {
+            width: 100%; background: rgba(0,0,0,0.5); border: 2px solid var(--border-glass);
+            border-radius: 15px; color: white; padding: 18px; font-size: 1.3rem;
+            text-align: center; transition: 0.3s;
         }
-        .footer-buttons button {
-            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
-            padding: 8px 15px; border-radius: 20px; color: var(--text-light); font-weight: bold;
-            cursor: pointer; transition: 0.2s ease;
-        }
-        .footer-buttons button:hover { background: rgba(255,255,255,0.25); }
+        input[type="text"]:focus { border-color: var(--primary); box-shadow: 0 0 20px rgba(0, 255, 204, 0.2); }
 
-        /* 統計モーダル */
-        #stats-modal {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg); border-radius: 40px; padding: 30px;
-            transform: rotateY(90deg); transition: transform 0.6s ease-in-out, opacity 0.6s ease-in-out;
-            opacity: 0; display: flex; flex-direction: column; z-index: 20;
+        /* Shop & Inventory */
+        .shop-list { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .item-card {
+            background: var(--panel-glass); border: 1px solid var(--border-glass);
+            border-radius: 20px; padding: 15px; text-align: center; transition: 0.3s;
         }
-        #stats-modal.active {
-            transform: rotateY(0deg); opacity: 1;
+        .item-card:hover { border-color: var(--primary); }
+        .item-price { color: var(--gold); font-weight: bold; font-family: 'Orbitron'; margin-top: 10px; }
+
+        /* Footer Menu */
+        .bottom-nav {
+            position: absolute; bottom: 0; width: 100%; height: 75px;
+            background: rgba(10, 15, 25, 0.9); border-top: 1px solid var(--border-glass);
+            display: flex; justify-content: space-around; align-items: center; z-index: 100;
         }
-        #stats-modal h2 { font-family: 'Orbitron'; color: var(--primary); text-align: center; margin-bottom: 20px;}
-        #stats-modal p { font-size: 1.1rem; margin-bottom: 8px;}
-        #weak-list div { background: rgba(255,255,255,0.05); padding: 8px; border-radius: 8px; margin-bottom: 5px; }
-        
-        .daily-box { background: rgba(16, 185, 129, 0.1); border: 1px solid var(--success); padding: 10px 15px; border-radius: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
-        .daily-text { font-size: 0.85rem; color: var(--success); font-weight: bold; }
-        
+        .nav-btn { color: #64748b; font-size: 1.4rem; cursor: pointer; transition: 0.3s; }
+        .nav-btn.active { color: var(--primary); }
+
+        /* Loading Overlay */
+        #loader {
+            position: fixed; inset: 0; background: var(--bg-deep); z-index: 9999;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+        }
+        .spinner {
+            width: 50px; height: 50px; border: 5px solid var(--panel-glass);
+            border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-<div id="login-screen" class="screen active">
-    <h1 style="font-family: 'Orbitron';">SELECT PILOT</h1>
-    <div id="user-list" style="width: 100%; max-height: 350px; overflow-y: auto;"></div>
-    <button class="btn-main" onclick="showScreen('create-screen')">+ NEW ACCOUNT</button>
+<div id="loader">
+    <div class="spinner"></div>
+    <p style="margin-top: 20px; font-family: 'Orbitron'; letter-spacing: 2px;">SYNCING AETHER DATA...</p>
 </div>
 
-<div id="create-screen" class="screen">
-    <h1 style="font-family: 'Orbitron';">CREATE DATA</h1>
-    <div style="display: flex; gap: 20px; margin-bottom: 20px;">
-        <span class="avatar-option" onclick="selectAvatar('🔥', this)">🔥</span>
-        <span class="avatar-option" onclick="selectAvatar('💎', this)">💎</span>
-        <span class="avatar-option" onclick="selectAvatar('⚡', this)">⚡</span>
-        <span class="avatar-option" onclick="selectAvatar('🌸', this)">🌸</span>
-        <span class="avatar-option" onclick="selectAvatar('🤖', this)">🤖</span>
+<div class="app-shell">
+    <div class="nav-hud">
+        <div class="hud-stats">
+            <div class="stat-badge"><i class="fas fa-gem"></i> <span id="val-coins">0</span></div>
+            <div class="stat-badge"><i class="fas fa-fire"></i> <span id="val-streak">0</span></div>
+        </div>
+        <div id="val-rank" style="font-size: 0.8rem; color: var(--primary);">EXPERT LV.1</div>
     </div>
-    <input type="text" id="new-username" placeholder="NAME (MAX 8)">
-    <h3 style="margin-top: 20px;">SELECT RANK</h3>
-    <select id="new-rank" style="width: 80%;">
-        <option value="5">5級 (Beginner)</option>
-        <option value="4">4級</option>
-        <option value="3">3級</option>
-        <option value="準2">準2級</option>
-        <option value="2">2級</option>
-        <option value="準1" selected>準1級 (Expert)</option>
-        <option value="1">1級 (Master)</option>
-    </select>
-    <button class="btn-main" onclick="createUser()">INITIALIZE DATA</button>
-</div>
+    <div class="global-progress"><div id="main-progress" class="progress-fill"></div></div>
 
-<div id="game-screen" class="screen">
-    <div id="timer-container"><div id="timer-bar"></div></div>
-    <div class="header-bar">
-        <span id="player-tag"></span>
-        <span id="rank-tag"></span>
-    </div>
-    <div class="progress-container"><div id="exp-bar" class="progress-fill"></div></div>
-    
-    <div class="daily-box">
-        <div class="daily-text">🎯 デイリーミッション：あと <span id="daily-left">0</span> 問正解</div>
-        <div id="daily-status">⏳</div>
+    <div id="scr-map" class="screen active">
+        <div class="map-grid" id="map-container"></div>
     </div>
 
-    <div style="margin-top: 30px; text-align: center; width: 100%;">
-        <div id="combo-ui"></div>
-        <div id="jp-word">READY?</div>
-        <input type="text" id="answer-input" placeholder="TYPE HERE..." autocomplete="off">
-        <div id="hint-area">
-            <strong>💡 ヒント:</strong> <span id="hint-text"></span>
-            <span class="example-sentence" id="ex-text"></span>
+    <div id="scr-quiz" class="screen">
+        <div class="quiz-card animate__animated animate__zoomIn">
+            <div id="quiz-type" class="q-type-label">READING</div>
+            <div id="timer-text" style="font-family: 'Orbitron'; font-size: 0.9rem; color: var(--accent);">15s</div>
+            <div id="display-main" class="word-display">TargetWord</div>
+            <div id="display-sub" class="def-display">Definition goes here...</div>
+            <input type="text" id="ans-input" placeholder="答えを入力...">
+            <button id="mic-trigger" class="skill-node" style="width: 100%; border-radius: 15px; height: 60px; margin-top: 15px; display: none; background: var(--accent);">
+                <i class="fas fa-microphone"></i>
+            </button>
         </div>
     </div>
 
-    <div class="game-footer">
-        <div class="footer-buttons">
-            <button onclick="logout()">LOGOUT</button>
-            <button onclick="toggleHint()">HINT</button>
-            <button onclick="speak()">🔊</button>
-            <button onclick="showStats()">📊 STATS</button>
-        </div>
-        <div id="lv-display">LV. 1</div>
+    <div id="scr-shop" class="screen">
+        <h2 style="font-family: 'Orbitron'; text-align: center;">AETHER SHOP</h2>
+        <div class="shop-list" id="shop-container">
+            </div>
     </div>
-</div>
 
-<div id="stats-modal" class="screen">
-    <h2>USER STATS</h2>
-    <p>🚀 RANK: <span id="stats-rank"></span></p>
-    <p>⭐ LEVEL: <span id="stats-lv"></span></p>
-    <p>✅ TOTAL CORRECT: <span id="stats-total-correct"></span></p>
-    <p>🔥 MAX COMBO: <span id="stats-max-combo"></span></p>
-    <p>🗓️ LOGIN STREAK: <span id="stats-streak"></span> 日</p>
-    <h3 style="margin-top: 20px; color: var(--warning);">🧠 WEAK WORDS (TOP 5)</h3>
-    <div id="weak-list" style="width: 100%; max-height: 150px; overflow-y: auto;"></div>
-    <button class="btn-secondary" onclick="closeStats()">閉じる</button>
+    <div class="bottom-nav">
+        <i class="fas fa-map-marked-alt nav-btn active" onclick="nav('scr-map', this)"></i>
+        <i class="fas fa-shopping-cart nav-btn" onclick="nav('scr-shop', this)"></i>
+        <i class="fas fa-user-circle nav-btn" onclick="nav('scr-profile', this)"></i>
+    </div>
 </div>
 
 <script>
-    // --- グローバル変数 ---
-    let users = JSON.parse(localStorage.getItem('eikenUniverseUsers') || "{}");
-    let currentUser = null;
-    let selectedAvatar = "🔥";
-    let currentWord = null;
-    let quizState = {
-        timeLeft: 100, // 100%
-        timerId: null
-    };
-
-    // --- 単語データベース (各級のデータはこのように拡張) ---
-    const wordDB = {
-        "5": [
-            {jp:"りんご", en:"apple", hint:"果物", ex:"I like red apples."},
-            {jp:"犬", en:"dog", hint:"ペット", ex:"My dog is cute."}
-        ],
-        "準1": [
-            {jp:"維持する", en:"maintain", hint:"main(手) + tain(保つ)", ex:"We must maintain peace."},
-            {jp:"獲得する", en:"acquire", hint:"ac(〜へ) + quire(求める)", ex:"She acquired new skills."},
-            {jp:"必然的な", en:"inevitable", hint:"in(否定) + evite(避ける) = 避けられない", ex:"Failure is an inevitable part of life."},
-            {jp:"洗練された", en:"sophisticated", hint:"高度で複雑な", ex:"The system is highly sophisticated."},
-            {jp:"妥協する", en:"compromise", hint:"com(共に) + promise(約束) = 歩み寄る", ex:"Both sides had to compromise."},
-            {jp:"を明らかにする", en:"reveal", hint:"re(再び) + veil(覆う) の逆", ex:"The study revealed the truth."},
-            {jp:"豊富な", en:"abundant", hint:"ab(離れて) + und(波打つ) = 溢れ出る", ex:"Japan has abundant rainfall."}
+    // --- 構成データ & 定数 ---
+    const CONFIG = {
+        baseWords: ["significant", "consequence", "alternative", "substantial", "prohibit", "adequate", "perspective", "vulnerable", "prevalent", "ambiguous", "incentive", "implement", "sustainable", "feasible", "precisely"],
+        modes: ["READING", "LISTENING", "SPEAKING", "WRITING"],
+        items: [
+            { id: 'fire', name: 'Fire Aura', price: 100, icon: '🔥' },
+            { id: 'ice', name: 'Ice Shield', price: 250, icon: '❄️' },
+            { id: 'bolt', name: 'Thunder Stick', price: 500, icon: '⚡' },
+            { id: 'crown', name: 'Master Crown', price: 1000, icon: '👑' }
         ]
     };
 
-    // --- 画面切り替え (アニメーション付き) ---
-    function showScreen(id) {
-        document.querySelectorAll('.screen').forEach(s => {
-            if (s.id === id) {
-                s.classList.remove('animate__animated', 'animate__fadeOut');
-                s.classList.add('active', 'animate__animated', 'animate__fadeIn');
-            } else {
-                s.classList.remove('active', 'animate__animated', 'animate__fadeIn');
-                s.classList.add('animate__animated', 'animate__fadeOut');
-            }
-        });
-        if (id === 'login-screen') renderUsers();
-    }
+    // --- ゲーム状態 (LocalStorage連携) ---
+    let state = JSON.parse(localStorage.getItem('eikenAetherSave')) || {
+        coins: 0, streak: 0, unlocked: 1, currentLv: 1, progress: 0,
+        inventory: [], lastLogin: ""
+    };
 
-    // --- ユーザーデータ管理 ---
-    function saveUsers() {
-        localStorage.setItem('eikenUniverseUsers', JSON.stringify(users));
-    }
+    let wordPool = [];
+    let currentTask = null;
+    let timerId = null;
 
-    function selectAvatar(icon, el) {
-        selectedAvatar = icon;
-        document.querySelectorAll('.avatar-option').forEach(opt => opt.classList.remove('avatar-selected'));
-        el.classList.add('avatar-selected');
-    }
-
-    function createUser() {
-        const name = document.getElementById('new-username').value.trim();
-        const rank = document.getElementById('new-rank').value;
-        if (!name || name.length > 8) {
-            alert("名前は8文字以内で入力してください！");
-            return;
-        }
-        if (users[name]) {
-            alert("この名前はすでに使われています！");
-            return;
+    // --- 初期化処理 ---
+    async function initAether() {
+        const loaderMsg = document.querySelector('#loader p');
+        
+        // 1. APIからデータをフェッチ
+        for (let word of CONFIG.baseWords) {
+            loaderMsg.innerText = `FETCHING: ${word}...`;
+            try {
+                const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
+                const data = await res.json();
+                if (data[0]) {
+                    wordPool.push({
+                        word: word,
+                        def: data[0].meanings[0].definitions[0].definition,
+                        audio: data[0].phonetics.find(p => p.audio)?.audio || ""
+                    });
+                }
+            } catch (e) { console.warn("API Fetch Error"); }
         }
 
-        users[name] = {
-            name, rank, avatar: selectedAvatar,
-            lv: 1, exp: 0, combo: 0, maxCombo: 0,
-            totalCorrect: 0,
-            loginStreak: 0, lastLoginDate: '', dailySolved: 0,
-            weakWords: {} // 間違えた単語とその回数
-        };
-        saveUsers();
-        alert(`アカウント「${name}」を作成しました！`);
-        showScreen('login-screen');
+        // 2. UI反映
+        updateHUD();
+        renderMap();
+        renderShop();
+        
+        // 3. ローダー解除
+        setTimeout(() => {
+            document.getElementById('loader').style.display = 'none';
+        }, 800);
     }
 
-    function renderUsers() {
-        const container = document.getElementById('user-list');
+    // --- 画面ナビゲーション ---
+    function nav(screenId, el) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(screenId).classList.add('active');
+        if (el) el.classList.add('active');
+    }
+
+    // --- マップ生成 ---
+    function renderMap() {
+        const container = document.getElementById('map-container');
         container.innerHTML = "";
-        if (Object.keys(users).length === 0) {
-            container.innerHTML = `<p style="text-align:center; color:var(--text-muted);">アカウントがありません。「NEW ACCOUNT」を作成してください。</p>`;
-            return;
+        for (let i = 1; i <= 20; i++) {
+            const node = document.createElement('div');
+            const isUnlocked = i <= state.unlocked;
+            const isCurrent = i === state.unlocked;
+            
+            node.className = `skill-node ${isUnlocked ? 'unlocked' : 'locked'} ${isCurrent ? 'current' : ''}`;
+            node.innerHTML = `
+                <div class="node-icon"><i class="fas ${isUnlocked ? 'fa-bolt' : 'fa-lock'}"></i></div>
+                <div class="node-label">LV.${i}</div>
+            `;
+            if (isUnlocked) node.onclick = () => startMission(i);
+            container.appendChild(node);
         }
-        Object.values(users).forEach(u => {
-            const div = document.createElement('div');
-            div.className = "user-card";
-            div.innerHTML = `<span class="user-avatar">${u.avatar}</span>
-                             <div class="user-info">
-                                 <strong>${u.name}</strong><br>
-                                 <small>${u.rank}級 / Lv.${u.lv}</small>
-                             </div>`;
-            div.onclick = () => login(u.name);
-            container.appendChild(div);
-        });
     }
 
-    function login(name) {
-        currentUser = users[name];
-        checkDailyLogin(); // ログイン時デイリーチェック
-        document.getElementById('player-tag').innerText = `${currentUser.avatar} ${currentUser.name}`;
-        document.getElementById('rank-tag').innerText = `${currentUser.rank}級`;
-        updateGameUI();
-        showScreen('game-screen');
+    // --- ミッション開始 ---
+    function startMission(lv) {
+        state.currentLv = lv;
+        state.progress = 0;
+        updateProgress();
+        nav('scr-quiz');
         nextQuestion();
-    }
-
-    function logout() {
-        currentUser = null;
-        showScreen('login-screen');
-    }
-
-    // --- デイリーミッションとログインストリーク ---
-    function checkDailyLogin() {
-        const today = new Date().toDateString();
-        if (currentUser.lastLoginDate !== today) {
-            // 前日ログインしていればストリーク継続、そうでなければリセット
-            const yesterday = new Date(Date.now() - 86400000).toDateString();
-            if (currentUser.lastLoginDate === yesterday) {
-                currentUser.loginStreak++;
-            } else {
-                currentUser.loginStreak = 1;
-            }
-            currentUser.lastLoginDate = today;
-            currentUser.dailySolved = 0; // デイリーミッション数をリセット
-            saveUsers();
-        }
     }
 
     // --- クイズロジック ---
     function nextQuestion() {
-        document.getElementById('hint-area').style.display = 'none';
-        const input = document.getElementById('answer-input');
-        input.value = "";
-        input.focus();
+        if (state.progress >= 100) return finishMission();
+        
+        clearInterval(timerId);
+        currentTask = wordPool[Math.floor(Math.random() * wordPool.length)];
+        const mode = CONFIG.modes[Math.floor(Math.random() * CONFIG.modes.length)];
+        
+        document.getElementById('quiz-type').innerText = mode;
+        document.getElementById('ans-input').value = "";
+        document.getElementById('ans-input').style.display = "block";
+        document.getElementById('mic-trigger').style.display = "none";
+        
+        const main = document.getElementById('display-main');
+        const sub = document.getElementById('display-sub');
 
-        const currentRankDB = wordDB[currentUser.rank] || wordDB["準1"];
-        
-        // 弱点単語の出題優先 (30%の確率)
-        const weakWordsArray = Object.entries(currentUser.weakWords)
-                                .filter(([, count]) => count > 0)
-                                .map(([word]) => word);
-        
-        if (weakWordsArray.length > 0 && Math.random() < 0.3) {
-            const weakWordEn = weakWordsArray[Math.floor(Math.random() * weakWordsArray.length)];
-            currentWord = currentRankDB.find(w => w.en === weakWordEn);
-            document.getElementById('jp-word').innerText = `【復習】${currentWord.jp}`;
-            document.getElementById('jp-word').style.color = 'var(--warning)';
-        } else {
-            currentWord = currentRankDB[Math.floor(Math.random() * currentRankDB.length)];
-            document.getElementById('jp-word').innerText = currentWord.jp;
-            document.getElementById('jp-word').style.color = 'var(--text-light)';
+        if (mode === "READING") {
+            main.innerText = "Translate Def";
+            sub.innerText = currentTask.def;
+        } else if (mode === "LISTENING") {
+            main.innerText = "👂 Listen...";
+            sub.innerText = "Type the word you hear";
+            playTTS(currentTask.word);
+        } else if (mode === "WRITING") {
+            const hint = currentTask.word.charAt(0) + "_".repeat(currentTask.word.length - 2) + currentTask.word.slice(-1);
+            main.innerText = hint;
+            sub.innerText = currentTask.def;
+        } else if (mode === "SPEAKING") {
+            main.innerText = currentTask.word;
+            sub.innerText = "Pronounce clearly";
+            document.getElementById('ans-input').style.display = "none";
+            document.getElementById('mic-trigger').style.display = "flex";
+            setupSpeech();
         }
 
-        document.getElementById('hint-text').innerText = currentWord.hint;
-        document.getElementById('ex-text').innerText = currentWord.ex;
-        startTimer(10); // 10秒タイマー
+        startTimer();
     }
 
-    function startTimer(seconds) {
-        clearInterval(quizState.timerId);
-        quizState.timeLeft = 100; // 100%
-        const totalSteps = seconds * 10; // 0.1秒ごとに更新するので
-        const stepAmount = 100 / totalSteps;
-
-        quizState.timerId = setInterval(() => {
-            quizState.timeLeft -= stepAmount;
-            document.getElementById('timer-bar').style.width = `${quizState.timeLeft}%`;
-            if (quizState.timeLeft <= 0) {
-                clearInterval(quizState.timerId);
-                handleIncorrect();
-                alert(`時間切れ！正解は "${currentWord.en}" でした。`);
+    function startTimer() {
+        let sec = 15;
+        document.getElementById('timer-text').innerText = sec + "s";
+        timerId = setInterval(() => {
+            sec--;
+            document.getElementById('timer-text').innerText = sec + "s";
+            if (sec <= 0) {
+                clearInterval(timerId);
+                alert("TIME OVER! Answer: " + currentTask.word);
                 nextQuestion();
             }
-        }, 100);
+        }, 1000);
     }
 
-    document.getElementById('answer-input').addEventListener('input', function() {
-        if (this.value.toLowerCase() === currentWord.en.toLowerCase()) {
-            handleCorrect();
-        }
-    });
-
-    function handleCorrect() {
-        clearInterval(quizState.timerId);
-        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: [var('--primary'), var('--accent')] });
-
-        currentUser.combo++;
-        if (currentUser.combo > currentUser.maxCombo) currentUser.maxCombo = currentUser.combo;
-        currentUser.totalCorrect++;
-        currentUser.dailySolved++;
-
-        let expGain = 10 + (currentUser.combo * 2); // コンボボーナス
-        currentUser.exp += expGain;
-        if (currentUser.exp >= 100) {
-            currentUser.lv++;
-            currentUser.exp = currentUser.exp % 100; // 経験値は余りを引き継ぐ
-            // レベルアップ演出
-            document.body.style.backgroundColor = var('--primary');
-            setTimeout(() => document.body.style.backgroundColor = var('--bg'), 100);
-            alert(`🎉 LEVEL UP! ${currentUser.name}はLv.${currentUser.lv}になった！`);
-        }
-
-        // 弱点単語から削除（正解した場合は得意とみなす）
-        if (currentUser.weakWords[currentWord.en]) {
-            currentUser.weakWords[currentWord.en] = Math.max(0, currentUser.weakWords[currentWord.en] - 1);
-        }
-
-        saveUsers();
-        updateGameUI();
-        displayCombo(expGain);
-        setTimeout(nextQuestion, 600);
-    }
-
-    function handleIncorrect() {
-        clearInterval(quizState.timerId);
-        currentUser.combo = 0;
-        
-        // 弱点単語に追加
-        currentUser.weakWords[currentWord.en] = (currentUser.weakWords[currentWord.en] || 0) + 1;
-
-        saveUsers();
-        updateGameUI();
-        document.getElementById('combo-ui').style.display = 'none'; // コンボ表示を非表示に
-    }
-
-    // --- UI更新 ---
-    function updateGameUI() {
-        document.getElementById('lv-display').innerText = `LV. ${currentUser.lv}`;
-        document.getElementById('exp-bar').style.width = `${currentUser.exp}%`;
-        
-        const dailyLeft = Math.max(0, 10 - currentUser.dailySolved); // デイリーミッションは10問
-        document.getElementById('daily-left').innerText = dailyLeft;
-        document.getElementById('daily-status').innerText = dailyLeft === 0 ? "✅ 達成！" : "⏳";
-    }
-
-    function displayCombo(expGain) {
-        const comboEl = document.getElementById('combo-ui');
-        comboEl.innerText = `${currentUser.combo} COMBO! (+${expGain} EXP)`;
-        comboEl.style.display = 'block';
-        if(currentUser.combo === 1) comboEl.style.display = 'none'; // 1コンボは表示しない
-        setTimeout(() => {
-            if (currentUser.combo <= 1) comboEl.style.display = 'none';
-        }, 1500);
-    }
-
-    // --- 補助機能 ---
-    function toggleHint() {
-        const hintBox = document.getElementById('hint-area');
-        hintBox.style.display = hintBox.style.display === 'block' ? 'none' : 'block';
-    }
-
-    function speak() {
-        if (!currentWord) return;
-        const uttr = new SpeechSynthesisUtterance(currentWord.en);
-        uttr.lang = 'en-US';
-        speechSynthesis.speak(uttr);
-        toggleHint(); // 音声再生と同時にヒント表示
-    }
-
-    function showStats() {
-        if (!currentUser) return;
-        document.getElementById('stats-rank').innerText = currentUser.rank;
-        document.getElementById('stats-lv').innerText = currentUser.lv;
-        document.getElementById('stats-total-correct').innerText = currentUser.totalCorrect;
-        document.getElementById('stats-max-combo').innerText = currentUser.maxCombo;
-        document.getElementById('stats-streak').innerText = currentUser.loginStreak;
-
-        const weakListEl = document.getElementById('weak-list');
-        weakListEl.innerHTML = "";
-        const sortedWeak = Object.entries(currentUser.weakWords)
-                                .sort((a, b) => b[1] - a[1]) // ミス回数で降順
-                                .slice(0, 5); // TOP5
-
-        if (sortedWeak.length === 0) {
-            weakListEl.innerHTML = "<p style='color:var(--text-muted); text-align:center;'>素晴らしい！苦手単語はありません。</p>";
-        } else {
-            sortedWeak.forEach(([word, count]) => {
-                const div = document.createElement('div');
-                div.innerText = `${word} (${count}回ミス)`;
-                weakListEl.appendChild(div);
-            });
-        }
-        document.getElementById('stats-modal').classList.add('active');
-    }
-
-    function closeStats() {
-        document.getElementById('stats-modal').classList.remove('active');
-    }
-
-    // CSS変数取得ヘルパー
-    function var(name) {
-        return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-    }
-
-    // 初期ロード
-    window.onload = () => {
-        if (Object.keys(users).length > 0) {
-            showScreen('login-screen');
-        } else {
-            showScreen('create-screen');
-            selectAvatar(selectedAvatar, document.querySelector('.avatar-option')); // 初期アバター選択
+    // --- 判定アルゴリズム ---
+    document.getElementById('ans-input').oninput = function() {
+        if (this.value.toLowerCase() === currentTask.word.toLowerCase()) {
+            handleSuccess();
         }
     };
 
+    function handleSuccess() {
+        clearInterval(timerId);
+        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+        
+        state.progress += 25;
+        state.coins += 20;
+        updateProgress();
+        updateHUD();
+        save();
+        
+        setTimeout(nextQuestion, 1000);
+    }
+
+    function finishMission() {
+        alert("MISSION CLEAR! 💎 +100");
+        state.coins += 100;
+        if (state.currentLv === state.unlocked) state.unlocked++;
+        state.streak++;
+        save();
+        renderMap();
+        nav('scr-map');
+    }
+
+    // --- 音声認識 & 合成 ---
+    function playTTS(text) {
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = 'en-US';
+        u.rate = 0.8;
+        speechSynthesis.speak(u);
+    }
+
+    function setupSpeech() {
+        const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!Speech) return;
+        const rec = new Speech();
+        rec.lang = 'en-US';
+        
+        document.getElementById('mic-trigger').onclick = () => {
+            rec.start();
+            document.getElementById('mic-trigger').style.background = "#ffcc00";
+        };
+        
+        rec.onresult = (e) => {
+            const result = e.results[0][0].transcript.toLowerCase();
+            document.getElementById('mic-trigger').style.background = "var(--accent)";
+            if (result.includes(currentTask.word.toLowerCase())) {
+                handleSuccess();
+            } else {
+                alert(`Heard: "${result}". Try again!`);
+            }
+        };
+    }
+
+    // --- ショップ機能 ---
+    function renderShop() {
+        const container = document.getElementById('shop-container');
+        container.innerHTML = "";
+        CONFIG.items.forEach(item => {
+            const isOwned = state.inventory.includes(item.id);
+            const card = document.createElement('div');
+            card.className = "item-card";
+            card.innerHTML = `
+                <div style="font-size: 2rem;">${item.icon}</div>
+                <div style="font-weight: bold; margin-top:5px;">${item.name}</div>
+                <div class="item-price">${isOwned ? 'OWNED' : item.price + ' 💎'}</div>
+                <button class="btn-main" style="width:100%; margin-top:10px; padding:5px; font-size:0.7rem;" 
+                    onclick="buyItem('${item.id}', ${item.price})" ${isOwned ? 'disabled' : ''}>
+                    ${isOwned ? 'EQUIPPED' : 'BUY'}
+                </button>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    function buyItem(id, price) {
+        if (state.coins >= price) {
+            state.coins -= price;
+            state.inventory.push(id);
+            save();
+            updateHUD();
+            renderShop();
+            alert("ITEM ACQUIRED!");
+        } else {
+            alert("NOT ENOUGH GEMS!");
+        }
+    }
+
+    // --- ユーティリティ ---
+    function updateHUD() {
+        document.getElementById('val-coins').innerText = state.coins;
+        document.getElementById('val-streak').innerText = state.streak;
+        document.getElementById('val-rank').innerText = `PILOT LV.${state.unlocked}`;
+    }
+
+    function updateProgress() {
+        document.getElementById('main-progress').style.width = state.progress + "%";
+    }
+
+    function save() {
+        localStorage.setItem('eikenAetherSave', JSON.stringify(state));
+    }
+
+    // エントリーポイント
+    window.onload = initAether;
 </script>
 </body>
 </html>
