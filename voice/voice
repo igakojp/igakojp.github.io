@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>オープンソース ボイスチャット (ブラウザ完結 高音質ノイキャン版)</title>
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #313338;
+            --panel-bg: #2b2d31;
+            --card-bg: #1e1f22;
+            --text-color: #f2f3f5;
+            --primary: #5865f2;
+            --success: #23a55a;
+            --danger: #f23f43;
+            --muted: #80848e;
+            --accent: #faa61a;
+        }
+
+        body {
+            font-family: 'gg sans', 'Noto Sans JP', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .my-id-box {
+            background-color: var(--card-bg);
+            padding: 10px 20px;
+            border-radius: 8px;
+            display: inline-block;
+            font-size: 1.2rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            color: #00a8fc;
+            margin-top: 5px;
+            user-select: all;
+        }
+
+        .connection-panel {
+            background-color: var(--panel-bg);
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            border-radius: 4px;
+            border: none;
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            font-size: 1rem;
+            text-transform: uppercase;
+        }
+
+        button {
+            padding: 10px 18px;
+            border-radius: 4px;
+            border: none;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        button:hover { opacity: 0.85; }
+
+        .btn-connect { background-color: var(--primary); }
+        .btn-accept { background-color: var(--success); }
+        .btn-decline { background-color: var(--danger); }
+        .btn-mute { background-color: var(--muted); }
+
+        #incoming-call-ui {
+            display: none;
+            background-color: var(--panel-bg);
+            border: 2px solid var(--primary);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .user-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            width: 100%;
+            max-width: 800px;
+            margin-bottom: 30px;
+        }
+
+        .user-card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            border: 3px solid transparent;
+            transition: border-color 0.15s ease;
+        }
+
+        .user-card.speaking {
+            border-color: var(--success) !important;
+            box-shadow: 0 0 12px rgba(35, 165, 90, 0.6);
+        }
+
+        .avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 10px;
+        }
+
+        .user-name {
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        .user-number {
+            font-size: 0.8rem;
+            color: var(--muted);
+            margin-top: 3px;
+        }
+
+        .controls-bar {
+            background-color: var(--panel-bg);
+            padding: 20px;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .control-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .status-badge {
+            background-color: var(--accent);
+            color: #000;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        /* ゲート感度調整用のスライダー */
+        .slider-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            width: 48%;
+        }
+        .slider-container-row {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h2>高音質ボイスチャンネル</h2>
+        <div>あなたの5文字ID:</div>
+        <div class="my-id-box" id="my-id">生成中...</div>
+    </div>
+
+    <div id="incoming-call-ui">
+        <p><strong id="caller-id"></strong> から通話の招待が届きました</p>
+        <button class="btn-accept" id="accept-btn">応答する</button>
+        <button class="btn-decline" id="decline-btn">拒否する</button>
+    </div>
+
+    <div class="connection-panel">
+        <input type="text" id="remote-id-input" placeholder="相手の5文字IDを入力" maxlength="5">
+        <button class="btn-connect" id="call-btn">通話開始</button>
+    </div>
+
+    <div class="user-grid" id="user-grid"></div>
+
+    <div class="controls-bar">
+        <div class="control-row">
+            <button class="btn-mute" id="mute-btn">マイク: ON</button>
+            <span class="status-badge">DSPプロセッサ稼働中</span>
+        </div>
+        
+        <div class="slider-container-row">
+            <div class="slider-group">
+                <label for="volume-slider">受信用音量</label>
+                <input type="range" id="volume-slider" min="0" max="1" step="0.05" value="1">
+            </div>
+            
+            <div class="slider-group">
+                <label for="gate-slider">環境音カット強さ (ゲート)</label>
+                <input type="range" id="gate-slider" min="0" max="50" step="1" value="15">
+            </div>
+        </div>
+    </div>
+
+    <audio id="remote-audio" autoplay></audio>
+
+<script>
+    // 5文字のランダムID
+    function generate5CharId() {
+        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+        let result = '';
+        for (let i = 0; i < 5; i++) {
+            result += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return result;
+    }
+
+    function getColorForIndex(index) {
+        const hue = (index * 137.5) % 360;
+        return `hsl(${hue}, 65%, 45%)`;
+    }
+
+    let peer;
+    let rawLocalStream;
+    let processedStream;
+    let audioContext;
+    let isMuted = false;
+    let userCount = 0;
+    
+    // ノイズゲートの閾値（スライダーで変更可能）
+    let gateThreshold = 15; 
+
+    const myId = generate5CharId();
+    document.getElementById('my-id').innerText = myId;
+    const remoteIdInput = document.getElementById('remote-id-input');
+    const callBtn = document.getElementById('call-btn');
+    const incomingCallUi = document.getElementById('incoming-call-ui');
+    const callerIdDisplay = document.getElementById('caller-id');
+    const acceptBtn = document.getElementById('accept-btn');
+    const declineBtn = document.getElementById('decline-btn');
+    const muteBtn = document.getElementById('mute-btn');
+    const volumeSlider = document.getElementById('volume-slider');
+    const gateSlider = document.getElementById('gate-slider');
+    const remoteAudio = document.getElementById('remote-audio');
+    const userGrid = document.getElementById('user-grid');
+
+    // ブラウザの変な処理を消し、純粋な音を取る
+    const audioConstraints = {
+        audio: {
+            echoCancellation: true,    // ハウリング防止だけオン
+            noiseSuppression: false,   // ブラウザのしょぼいノイキャンはオフ
+            autoGainControl: false,    // 勝手に音量が変わるのを防ぐ
+            sampleRate: 48000
+        },
+        video: false
+    };
+
+    navigator.mediaDevices.getUserMedia(audioConstraints)
+        .then(stream => {
+            rawLocalStream = stream;
+            setupDSPPipeline(stream); // 最強のオーディオ処理パイプラインを構築
+            addUserCard(myId, "あなた", true);
+            initPeer();
+        })
+        .catch(err => {
+            alert("マイクへのアクセスを許可してください: " + err.message);
+        });
+
+    // Web Audio API による最強の処理パイプライン (Digital Signal Processing)
+    function setupDSPPipeline(stream) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const source = audioContext.createMediaStreamSource(stream);
+
+        // 1. ノイズゲート用のアナライザーとゲイン（音量調整）ノード
+        const analyser = audioContext.createAnalyser();
+        analyser.fftSize = 512;
+        const gateGain = audioContext.createGain();
+
+        // 2. ハイパスフィルター: 80Hz以下の低音ノイズ（エアコン、PCファン）をカット
+        const highPass = audioContext.createBiquadFilter();
+        highPass.type = "highpass";
+        highPass.frequency.value = 80;
+
+        // 3. ローパスフィルター: 8000Hz以上の高音ノイズ（キーボードのカン高い音、サーという音）をカット
+        const lowPass = audioContext.createBiquadFilter();
+        lowPass.type = "lowpass";
+        lowPass.frequency.value = 8000;
+
+        // 4. コンプレッサー: 声の大きさを一定に保つ（叫んでも割れない、ボソボソ喋っても聞こえる）
+        const compressor = audioContext.createDynamicsCompressor();
+        compressor.threshold.value = -30;
+        compressor.knee.value = 30;
+        compressor.ratio.value = 12;
+        compressor.attack.value = 0.003;
+        compressor.release.value = 0.250;
+
+        // 出力先
+        const destination = audioContext.createMediaStreamDestination();
+
+        // パイプラインを接続: Source -> Analyser -> Gate -> HighPass -> LowPass -> Compressor -> 出力
+        source.connect(analyser);
+        source.connect(gateGain);
+        gateGain.connect(highPass);
+        highPass.connect(lowPass);
+        lowPass.connect(compressor);
+        compressor.connect(destination);
+
+        const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+        // ノイズゲートのロジックを常時実行
+        function processNoiseGate() {
+            analyser.getByteFrequencyData(dataArray);
+            let sum = 0;
+            for (let i = 0; i < dataArray.length; i++) {
+                sum += dataArray[i];
+            }
+            const average = sum / dataArray.length;
+
+            // スライダーで設定した閾値以下の音はミュート、それ以上なら通す
+            if (average > gateThreshold) {
+                // 声を開く（自然に聞こえるように少しフェードイン）
+                gateGain.gain.setTargetAtTime(1.0, audioContext.currentTime, 0.05); 
+            } else {
+                // 無音化（プツッと切れないように少しフェードアウト）
+                gateGain.gain.setTargetAtTime(0.0, audioContext.currentTime, 0.1); 
+            }
+
+            requestAnimationFrame(processNoiseGate);
+        }
+        processNoiseGate();
+
+        // 処理済みの超高音質ストリームを確保
+        processedStream = destination.stream;
+    }
+
+    // ゲート閾値スライダーのイベント
+    gateSlider.addEventListener('input', (e) => {
+        gateThreshold = parseInt(e.target.value, 10);
+    });
+
+    // PeerJSの初期化と通信
+    function initPeer() {
+        peer = new Peer(myId);
+
+        peer.on('call', call => {
+            incomingCallUi.style.display = 'block';
+            callerIdDisplay.innerText = call.peer;
+
+            acceptBtn.onclick = () => {
+                // 処理済みの音声を相手に送る
+                call.answer(processedStream);
+                setupRemoteCall(call);
+                incomingCallUi.style.display = 'none';
+            };
+
+            declineBtn.onclick = () => {
+                call.close();
+                incomingCallUi.style.display = 'none';
+            };
+        });
+    }
+
+    // 発信
+    callBtn.addEventListener('click', () => {
+        const remoteId = remoteIdInput.value.trim().toUpperCase();
+        if (remoteId.length !== 5) {
+            alert("5文字の相手IDを入力してください。");
+            return;
+        }
+        // 処理済みの音声を相手に送る
+        const call = peer.call(remoteId, processedStream);
+        setupRemoteCall(call);
+    });
+
+    // 受信処理
+    function setupRemoteCall(call) {
+        call.on('stream', remoteStream => {
+            remoteAudio.srcObject = remoteStream;
+            addUserCard(call.peer, `ユーザー (${call.peer})`, false);
+            listenForSpeaking(remoteStream, call.peer);
+        });
+
+        call.on('close', () => {
+            removeUserCard(call.peer);
+            alert("通話が終了しました。");
+        });
+    }
+
+    // UI関連（ユーザー追加）
+    function addUserCard(id, label, isSelf) {
+        if (document.getElementById(`card-${id}`)) return;
+        userCount++;
+        const cardColor = getColorForIndex(userCount);
+        const card = document.createElement('div');
+        card.className = 'user-card';
+        card.id = `card-${id}`;
+        card.innerHTML = `
+            <div class="avatar" style="background-color: ${cardColor};">#${userCount}</div>
+            <div class="user-name">${label}</div>
+            <div class="user-number">ID: ${id}</div>
+        `;
+        userGrid.appendChild(card);
+        if (isSelf) listenForSpeaking(rawLocalStream, id);
+    }
+
+    function removeUserCard(id) {
+        const card = document.getElementById(`card-${id}`);
+        if (card) card.remove();
+    }
+
+    // 話している時の緑枠の光
+    function listenForSpeaking(stream, userId) {
+        if (!audioContext) return;
+        const source = audioContext.createMediaStreamSource(stream);
+        const analyser = audioContext.createAnalyser();
+        analyser.fftSize = 512;
+        source.connect(analyser);
+        const dataArray = new Uint8Array(analyser.frequencyBinCount);
+        const card = document.getElementById(`card-${userId}`);
+
+        function checkVolume() {
+            analyser.getByteFrequencyData(dataArray);
+            let sum = 0;
+            for (let i = 0; i < dataArray.length; i++) { sum += dataArray[i]; }
+            const average = sum / dataArray.length;
+            
+            if (average > 15) { card?.classList.add('speaking'); } 
+            else { card?.classList.remove('speaking'); }
+            
+            requestAnimationFrame(checkVolume);
+        }
+        checkVolume();
+    }
+
+    // ミュートボタン
+    muteBtn.addEventListener('click', () => {
+        if (rawLocalStream) {
+            isMuted = !isMuted;
+            rawLocalStream.getAudioTracks()[0].enabled = !isMuted;
+            muteBtn.innerText = isMuted ? "マイク: OFF (ミュート中)" : "マイク: ON";
+            muteBtn.style.backgroundColor = isMuted ? "var(--danger)" : "var(--muted)";
+        }
+    });
+
+    // 全体音量スライダー
+    volumeSlider.addEventListener('input', (e) => {
+        remoteAudio.volume = e.target.value;
+    });
+</script>
+
+</body>
+</html>
