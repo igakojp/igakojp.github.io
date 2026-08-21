@@ -3,85 +3,251 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vortex Analytics Pro</title>
-    <!-- Link to the favicon -->
+    <title>Vortex Analytics</title>
     <link rel="icon" type="image/png" href="https://playvortex.io/favicon.ico">
-    <!-- Import Chart.js for the graphs -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        /* PLAIN & SIMPLE THEME (Rolimons / Dashboard Style) */
         :root {
-            --bg-color: #0b0f19;
-            --card-bg: rgba(30, 41, 59, 0.7);
-            --accent: #0ea5e9;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
+            --bg-color: #1a1a1b; /* Flat dark background */
+            --card-bg: #272729;  /* Slightly lighter for cards */
+            --border-color: #343536; /* Subtle borders */
+            --accent: #2563eb; /* Standard clean blue */
+            --accent-hover: #1d4ed8;
+            --text-main: #d7dadc;
+            --text-muted: #818384;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-color);
-            background-image: radial-gradient(circle at top right, #1e3a8a 0%, transparent 40%),
-                              radial-gradient(circle at bottom left, #082f49 0%, transparent 40%);
             color: var(--text-main);
             margin: 0;
-            padding: 40px 20px;
+            padding: 20px;
             min-height: 100vh;
         }
 
-        .container { max-width: 1200px; margin: auto; }
-        header { text-align: center; margin-bottom: 30px; }
-        h1 { font-size: 3rem; margin: 0; background: linear-gradient(to right, #38bdf8, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .subtitle { color: var(--text-muted); font-size: 1.1rem; margin-top: 10px; }
+        .container { 
+            max-width: 1200px; 
+            margin: auto; 
+        }
+
+        header { 
+            text-align: left; /* Shifted left for a standard dashboard feel */
+            margin-bottom: 25px; 
+            padding-bottom: 15px; 
+            border-bottom: 1px solid var(--border-color); 
+        }
+        
+        h1 { 
+            font-size: 2rem; 
+            margin: 0; 
+            color: #ffffff; 
+            font-weight: 600; 
+        }
+
+        .subtitle { 
+            color: var(--text-muted); 
+            font-size: 0.95rem; 
+            margin-top: 5px; 
+        }
 
         /* CONTROLS STYLING */
-        .controls { display: flex; gap: 15px; margin-bottom: 30px; justify-content: center; flex-wrap: wrap; }
+        .controls { 
+            display: flex; 
+            gap: 10px; 
+            margin-bottom: 20px; 
+            flex-wrap: wrap; 
+        }
         .controls input, .controls select { 
-            padding: 12px 15px; 
-            border-radius: 8px; 
-            border: 1px solid #334155; 
-            background: #1e293b; 
-            color: white; 
+            padding: 10px 12px; 
+            border-radius: 4px; 
+            border: 1px solid var(--border-color); 
+            background: var(--bg-color); 
+            color: var(--text-main); 
             outline: none;
-            font-size: 1rem;
+            font-size: 0.95rem;
             min-width: 220px;
         }
-        .controls input:focus, .controls select:focus { border-color: var(--accent); }
+        .controls input:focus, .controls select:focus { 
+            border-color: var(--accent); 
+        }
 
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; }
-        .card { background: var(--card-bg); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; overflow: hidden; cursor: pointer; transition: transform 0.3s ease, box-shadow 0.3s ease; }
-        .card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(14, 165, 233, 0.2); border-color: rgba(14, 165, 233, 0.4); }
-        .card-img-container { width: 100%; height: 160px; background: #111827; overflow: hidden; display: flex; align-items: center; justify-content: center; }
-        .card img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
-        .card:hover img { transform: scale(1.05); }
-        .card-content { padding: 20px; }
-        .card h3 { margin: 0 0 10px 0; font-size: 1.4rem; }
-        .player-badge { display: inline-block; background: rgba(14, 165, 233, 0.2); color: #38bdf8; padding: 5px 12px; border-radius: 20px; font-weight: bold; font-size: 0.9rem; }
+        /* GRID & CARDS */
+        .grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); 
+            gap: 15px; 
+        }
+        .card { 
+            background: var(--card-bg); 
+            border: 1px solid var(--border-color); 
+            border-radius: 6px; 
+            overflow: hidden; 
+            cursor: pointer; 
+        }
+        .card:hover { 
+            border-color: #565758; /* Simple border color change on hover, no animations */
+        }
+        .card-img-container { 
+            width: 100%; 
+            height: 140px; 
+            background: #111; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+        }
+        .card img { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+        }
+        .card-content { 
+            padding: 15px; 
+        }
+        .card h3 { 
+            margin: 0 0 10px 0; 
+            font-size: 1.1rem; 
+            color: #ffffff; 
+        }
+        .player-badge { 
+            display: inline-block; 
+            background: #1a1a1b; 
+            border: 1px solid var(--border-color); 
+            color: #ffffff; 
+            padding: 4px 8px; 
+            border-radius: 4px; 
+            font-weight: 600; 
+            font-size: 0.85rem; 
+        }
+        .player-badge span {
+            color: #22c55e; /* Simple green dot indicator */
+        }
 
         /* MODAL STYLES */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 1000; }
-        .modal-overlay.active { opacity: 1; pointer-events: auto; }
-        .modal-content { background: #0f172a; border: 1px solid #334155; border-radius: 20px; width: 95%; max-width: 800px; padding: 30px; transform: scale(0.9); opacity: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; max-height: 90vh; overflow-y: auto; }
-        .modal-overlay.active .modal-content { transform: scale(1); opacity: 1; }
-        .close-btn { position: absolute; top: 20px; right: 20px; background: transparent; border: none; color: #ef4444; font-size: 1.5rem; cursor: pointer; }
+        .modal-overlay { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(0, 0, 0, 0.7); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            opacity: 0; 
+            pointer-events: none; 
+            z-index: 1000; 
+        }
+        .modal-overlay.active { 
+            opacity: 1; 
+            pointer-events: auto; 
+        }
+        .modal-content { 
+            background: var(--card-bg); 
+            border: 1px solid var(--border-color); 
+            border-radius: 6px; 
+            width: 95%; 
+            max-width: 700px; 
+            padding: 25px; 
+            position: relative; 
+            max-height: 90vh; 
+            overflow-y: auto; 
+        }
+        .close-btn { 
+            position: absolute; 
+            top: 15px; 
+            right: 15px; 
+            background: transparent; 
+            border: none; 
+            color: var(--text-muted); 
+            font-size: 1.5rem; 
+            cursor: pointer; 
+        }
+        .close-btn:hover { color: #ffffff; }
         
-        .modal-header-flex { display: flex; gap: 20px; align-items: center; margin-bottom: 20px; }
-        .modal-img-container { width: 120px; height: 120px; border-radius: 12px; background: #111827; overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-        .modal-img { width: 100%; height: 100%; object-fit: cover; }
+        .modal-header-flex { 
+            display: flex; 
+            gap: 20px; 
+            align-items: center; 
+            margin-bottom: 20px; 
+        }
+        .modal-img-container { 
+            width: 120px; 
+            height: 120px; 
+            border-radius: 6px; 
+            background: #111; 
+            overflow: hidden; 
+            flex-shrink: 0; 
+            border: 1px solid var(--border-color);
+        }
+        .modal-img { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+        }
+        .stat-text {
+            color: var(--text-muted);
+            margin-bottom: 5px;
+            font-size: 0.95rem;
+        }
+        .stat-text strong {
+            color: #ffffff;
+        }
         
-        .chart-container { background: #1e293b; padding: 15px; border-radius: 12px; margin-top: 20px; border: 1px solid #334155; }
-        .chart-filters { display: flex; gap: 10px; margin-bottom: 10px; justify-content: center; }
-        .chart-filters button { background: #334155; color: white; border: none; padding: 5px 15px; border-radius: 5px; cursor: pointer; transition: 0.2s; }
-        .chart-filters button.active { background: var(--accent); }
-        .chart-filters button:hover { background: #475569; }
+        .chart-container { 
+            background: var(--bg-color); 
+            padding: 15px; 
+            border-radius: 6px; 
+            margin-top: 20px; 
+            border: 1px solid var(--border-color); 
+        }
+        .chart-filters { 
+            display: flex; 
+            gap: 5px; 
+            margin-bottom: 15px; 
+        }
+        .chart-filters button { 
+            background: var(--card-bg); 
+            color: var(--text-main); 
+            border: 1px solid var(--border-color); 
+            padding: 6px 12px; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-size: 0.85rem; 
+        }
+        .chart-filters button.active { 
+            background: var(--accent); 
+            color: white; 
+            border-color: var(--accent); 
+        }
+        .chart-filters button:hover:not(.active) { 
+            background: #343536; 
+        }
         
-        .play-btn { display: block; width: 100%; text-align: center; background: var(--accent); color: white; text-decoration: none; padding: 12px; border-radius: 10px; margin-top: 25px; font-weight: bold; }
+        .play-btn { 
+            display: block; 
+            width: 100%; 
+            text-align: center; 
+            background: var(--accent); 
+            color: white; 
+            text-decoration: none; 
+            padding: 10px; 
+            border-radius: 4px; 
+            margin-top: 20px; 
+            font-weight: 600; 
+            box-sizing: border-box;
+        }
+        .play-btn:hover { 
+            background: var(--accent-hover); 
+        }
     </style>
 </head>
 <body>
 
     <div class="container">
         <header>
-            <h1>Vortex Analytics Pro</h1>
+            <h1>Vortex Analytics</h1>
             <div class="subtitle">Live game metrics dashboard</div>
         </header>
 
@@ -108,10 +274,10 @@
                     <img id="modalImg" class="modal-img" src="" alt="Game" onload="this.style.display='block'" onerror="handleImageError(this)">
                 </div>
                 <div>
-                    <h2 id="modalTitle" style="margin: 0 0 10px 0;">Game Title</h2>
-                    <div style="color: var(--text-muted);">Live Players: <strong id="modalLive" style="color: var(--accent);">0</strong></div>
-                    <div style="color: var(--text-muted);">All-Time Peak: <strong id="modalPeak" style="color: var(--accent);">0</strong></div>
-                    <div style="color: var(--text-muted);">Total Visits: <strong id="modalVisits" style="color: var(--accent);">0</strong></div>
+                    <h2 id="modalTitle" style="margin: 0 0 10px 0; color: #ffffff;">Game Title</h2>
+                    <div class="stat-text">Live Players: <strong id="modalLive">0</strong></div>
+                    <div class="stat-text">All-Time Peak: <strong id="modalPeak">0</strong></div>
+                    <div class="stat-text">Total Visits: <strong id="modalVisits">0</strong></div>
                 </div>
             </div>
             
@@ -166,11 +332,9 @@
                 globalGameData = fallbackData;
             }
 
-            // Render the games list once loaded
             renderGames();
         }
 
-        // Dedicated rendering function handling Search and Sort logic
         function renderGames() {
             const grid = document.getElementById('game-grid');
             grid.innerHTML = "";
@@ -178,32 +342,28 @@
             const searchQuery = document.getElementById('searchInput').value.toLowerCase();
             const sortBy = document.getElementById('sortSelect').value;
 
-            // Convert object entries to an array so we can filter and sort easily
             let gamesArray = Object.entries(globalGameData).map(([gameName, info]) => {
                 const currentPlayers = info.history && info.history.length > 0 ? info.history[info.history.length - 1].active_players : 0;
                 return { gameName, info, currentPlayers };
             });
 
-            // 1. Filter by search input
             if (searchQuery) {
                 gamesArray = gamesArray.filter(item => item.gameName.toLowerCase().includes(searchQuery));
             }
 
-            // 2. Sort array based on dropdown choice
             gamesArray.sort((a, b) => {
                 if (sortBy === 'players_desc') {
-                    return b.currentPlayers - a.currentPlayers; // Most famous/active first
+                    return b.currentPlayers - a.currentPlayers; 
                 } else if (sortBy === 'visits_desc') {
-                    return (b.info.total_visits || 0) - (a.info.total_visits || 0); // Total visits high to low
+                    return (b.info.total_visits || 0) - (a.info.total_visits || 0); 
                 } else if (sortBy === 'name_asc') {
-                    return a.gameName.localeCompare(b.gameName); // Alphabetical A-Z
+                    return a.gameName.localeCompare(b.gameName); 
                 }
                 return 0;
             });
 
-            // 3. Build and append cards
             for (const { gameName, info, currentPlayers } of gamesArray) {
-                let thumb = info.thumbnail || 'https://via.placeholder.com/200x160/111827/94a3b8?text=No+Image';
+                let thumb = info.thumbnail || 'https://via.placeholder.com/200x140/111/818384?text=No+Image';
 
                 if (thumb.includes('/api/games/') && thumb.includes('/thumbnail')) {
                     const match = thumb.match(/\/api\/games\/(\d+)\/thumbnail(.*)/);
@@ -224,7 +384,7 @@
                     </div>
                     <div class="card-content">
                         <h3>${gameName}</h3>
-                        <div class="player-badge">● ${currentPlayers} Online</div>
+                        <div class="player-badge"><span>●</span> ${currentPlayers} Online</div>
                     </div>
                 `;
                 grid.appendChild(card);
@@ -276,6 +436,7 @@
             const ctx = document.getElementById('playerChart').getContext('2d');
             if (currentChart) currentChart.destroy();
 
+            // Updated Chart.js settings for a flatter look
             currentChart = new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -283,11 +444,11 @@
                     datasets: [{
                         label: 'Active Players',
                         data: dataPoints.length ? dataPoints : [0],
-                        borderColor: '#0ea5e9',
-                        backgroundColor: 'rgba(14, 165, 233, 0.1)',
+                        borderColor: '#2563eb', /* Flat blue */
+                        backgroundColor: 'rgba(37, 99, 235, 0.05)', /* Barely visible background */
                         borderWidth: 2,
                         fill: true,
-                        pointRadius: 3,
+                        pointRadius: 2, /* Smaller points */
                         spanGaps: true
                     }]
                 },
@@ -295,8 +456,15 @@
                     responsive: true,
                     interaction: { mode: 'index', intersect: false },
                     scales: {
-                        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#94a3b8' } },
-                        x: { grid: { display: false }, ticks: { color: '#94a3b8', maxTicksLimit: 10 } }
+                        y: { 
+                            beginAtZero: true, 
+                            grid: { color: '#343536' }, /* Simple grid lines */
+                            ticks: { color: '#818384' } 
+                        },
+                        x: { 
+                            grid: { display: false }, 
+                            ticks: { color: '#818384', maxTicksLimit: 10 } 
+                        }
                     },
                     plugins: { legend: { display: false } }
                 }
