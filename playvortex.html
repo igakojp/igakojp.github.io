@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vortex Analytics Pro</title>
+    <!-- Import Chart.js for the graphs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --accent: #0ea5e9;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(circle at top right, #1e3a8a 0%, transparent 40%),
+                              radial-gradient(circle at bottom left, #082f49 0%, transparent 40%);
+            color: var(--text-main);
+            margin: 0;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .container { max-width: 1200px; margin: auto; }
+        header { text-align: center; margin-bottom: 30px; }
+        h1 { font-size: 3rem; margin: 0; background: linear-gradient(to right, #38bdf8, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .subtitle { color: var(--text-muted); font-size: 1.1rem; margin-top: 10px; }
+
+        .controls { display: flex; gap: 15px; margin-bottom: 30px; justify-content: center; flex-wrap: wrap; }
+        .controls input, .controls select { 
+            padding: 12px 15px; 
+            border-radius: 8px; 
+            border: 1px solid #334155; 
+            background: #1e293b; 
+            color: white; 
+            outline: none;
+            font-size: 1rem;
+            min-width: 200px;
+        }
+        .controls input:focus, .controls select:focus { border-color: var(--accent); }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; }
+        .card { background: var(--card-bg); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; overflow: hidden; cursor: pointer; transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(14, 165, 233, 0.2); border-color: rgba(14, 165, 233, 0.4); }
+        .card-img-container { width: 100%; height: 160px; background: #111827; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        .card img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
+        .card:hover img { transform: scale(1.05); }
+        .card-content { padding: 20px; }
+        .card h3 { margin: 0 0 10px 0; font-size: 1.4rem; }
+        .player-badge { display: inline-block; background: rgba(14, 165, 233, 0.2); color: #38bdf8; padding: 5px 12px; border-radius: 20px; font-weight: bold; font-size: 0.9rem; }
+
+        /* API Failed Message Style */
+        .api-failed { grid-column: 1 / -1; text-align: center; color: #ef4444; font-size: 1.5rem; padding: 50px; background: rgba(239, 68, 68, 0.1); border-radius: 12px; border: 1px solid rgba(239, 68, 68, 0.3); }
+
+        /* MODAL STYLES */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 1000; }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .modal-content { background: #0f172a; border: 1px solid #334155; border-radius: 20px; width: 95%; max-width: 800px; padding: 30px; transform: scale(0.9); opacity: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; max-height: 90vh; overflow-y: auto; }
+        .modal-overlay.active .modal-content { transform: scale(1); opacity: 1; }
+        .close-btn { position: absolute; top: 20px; right: 20px; background: transparent; border: none; color: #ef4444; font-size: 1.5rem; cursor: pointer; }
+        
+        .modal-header-flex { display: flex; gap: 20px; align-items: center; margin-bottom: 20px; }
+        .modal-img-container { width: 120px; height: 120px; border-radius: 12px; background: #111827; overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .modal-img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .chart-container { background: #1e293b; padding: 15px; border-radius: 12px; margin-top: 20px; border: 1px solid #334155; }
+        .chart-filters { display: flex; gap: 10px; margin-bottom: 10px; justify-content: center; }
+        .chart-filters button { background: #334155; color: white; border: none; padding: 5px 15px; border-radius: 5px; cursor: pointer; transition: 0.2s; }
+        .chart-filters button.active { background: var(--accent); }
+        .chart-filters button:hover { background: #475569; }
+        
+        .play-btn { display: block; width: 100%; text-align: center; background: var(--accent); color: white; text-decoration: none; padding: 12px; border-radius: 10px; margin-top: 25px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Vortex Analytics Pro</h1>
+            <div class="subtitle">Live game metrics dashboard</div>
+        </header>
+
+        <div class="controls">
+            <input type="text" id="searchInput" placeholder="Search games by name..." oninput="renderGames()">
+            <select id="sortSelect" onchange="renderGames()">
+                <option value="players_desc">Live Players: High to Low</option>
+                <option value="visits_desc">Total Visits: High to Low</option>
+                <option value="name_asc">Name: A to Z</option>
+            </select>
+        </div>
+
+        <div class="grid" id="game-grid"></div>
+    </div>
+
+    <!-- MODAL POPUP -->
+    <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+        <div class="modal-content" id="modalContent" onclick="event.stopPropagation()">
+            <button class="close-btn" onclick="closeModal(event)">&times;</button>
+            
+            <div class="modal-header-flex">
+                <div class="modal-img-container">
+                    <img id="modalImg" class="modal-img" src="" alt="Game" onload="this.style.display='block'" onerror="handleImageError(this)">
+                </div>
+                <div>
+                    <h2 id="modalTitle" style="margin: 0 0 10px 0;">Game Title</h2>
+                    <div style="color: var(--text-muted);">Live Players: <strong id="modalLive" style="color: var(--accent);">0</strong></div>
+                    <div style="color: var(--text-muted);">All-Time Peak: <strong id="modalPeak" style="color: var(--accent);">0</strong></div>
+                    <div style="color: var(--text-muted);">Total Visits: <strong id="modalVisits" style="color: var(--accent);">0</strong></div>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <div class="chart-filters">
+                    <button onclick="updateChart('day')" id="btn-day" class="active">Daily</button>
+                    <button onclick="updateChart('week')" id="btn-week">Weekly</button>
+                    <button onclick="updateChart('month')" id="btn-month">Monthly</button>
+                    <button onclick="updateChart('year')" id="btn-year">Yearly</button>
+                </div>
+                <canvas id="playerChart" height="100"></canvas>
+            </div>
+            
+            <a id="modalLink" href="#" target="_blank" class="play-btn">View on Vortex</a>
+        </div>
+    </div>
+
+    <script>
+        let globalGameData = {};
+        let currentChart = null;
+        let activeGameHistory = [];
+
+        const GITHUB_JSON_URL = 'https://raw.githubusercontent.com/igakojp/Vortex/main/game_data.json';
+        const LIVE_API_URL = 'https://playvortex.io/api/games';
+
+        function handleImageError(img) {
+            console.warn("Failed to load image resource:", img.src);
+            img.style.display = 'none';
+        }
+
+        async function loadGameData() {
+            try {
+                // 1. Fetch the history data for the charts
+                const response = await fetch(GITHUB_JSON_URL);
+                if (!response.ok) throw new Error("History API Failed");
+                globalGameData = await response.json();
+
+                // 2. Fetch the live thumbnail versions directly from Vortex API
+                try {
+                    const liveResponse = await fetch(LIVE_API_URL);
+                    if (liveResponse.ok) {
+                        const liveData = await liveResponse.json();
+                        
+                        // Handle the data whether the API returns an array directly or an object containing an array
+                        const gamesList = Array.isArray(liveData) ? liveData : (liveData.games || liveData.data || []);
+                        
+                        // Inject the live thumbnail_version and id into our global data
+                        gamesList.forEach(liveGame => {
+                            if (liveGame.name && globalGameData[liveGame.name]) {
+                                globalGameData[liveGame.name].id = liveGame.id || globalGameData[liveGame.name].id;
+                                globalGameData[liveGame.name].thumbnail_version = liveGame.thumbnail_version;
+                            }
+                        });
+                    }
+                } catch (liveError) {
+                    console.warn("Could not fetch live thumbnails, using cached JSON versions.");
+                }
+
+                // Render once all data is compiled
+                renderGames();
+
+            } catch (error) {
+                console.error("Critical Fetch Error:", error);
+                
+                // FALLBACK: Display "API failed" if the main data cannot load
+                const grid = document.getElementById('game-grid');
+                grid.innerHTML = '<div class="api-failed">API failed</div>';
+            }
+        }
+
+        function renderGames() {
+            const grid = document.getElementById('game-grid');
+            grid.innerHTML = "";
+            
+            const searchQuery = document.getElementById('searchInput').value.toLowerCase();
+            const sortBy = document.getElementById('sortSelect').value;
+
+            let gamesArray = Object.entries(globalGameData).map(([name, info]) => {
+                const currentPlayers = info.history && info.history.length > 0 ? info.history[info.history.length - 1].active_players : 0;
+                return { name, info, currentPlayers };
+            });
+
+            if (searchQuery) {
+                gamesArray = gamesArray.filter(g => g.name.toLowerCase().includes(searchQuery));
+            }
+
+            gamesArray.sort((a, b) => {
+                if (sortBy === 'players_desc') return b.currentPlayers - a.currentPlayers;
+                if (sortBy === 'visits_desc') return (b.info.total_visits || 0) - (a.info.total_visits || 0);
+                if (sortBy === 'name_asc') return a.name.localeCompare(b.name);
+                return 0;
+            });
+
+            for (const { name, info, currentPlayers } of gamesArray) {
+                
+                let thumb = "";
+                if (info.id && info.thumbnail_version) {
+                    thumb = `https://playvortex.io/assets/thumbnails/${info.id}.png?v=${info.thumbnail_version}`;
+                } else if (info.thumbnail) {
+                    thumb = info.thumbnail; 
+                }
+
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.onclick = () => openModal(name, info, currentPlayers, thumb);
+                
+                card.innerHTML = `
+                    <div class="card-img-container">
+                        <img src="${thumb}" alt="${name}" onload="this.style.display='block'" onerror="handleImageError(this)">
+                    </div>
+                    <div class="card-content">
+                        <h3>${name}</h3>
+                        <div class="player-badge">● ${currentPlayers} Online</div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            }
+        }
+
+        function openModal(gameName, info, currentPlayers, thumb) {
+            document.getElementById('modalTitle').innerText = gameName;
+            
+            const modalImg = document.getElementById('modalImg');
+            modalImg.src = thumb || ''; 
+            modalImg.style.display = 'block'; 
+            
+            document.getElementById('modalLive').innerText = currentPlayers;
+            document.getElementById('modalPeak').innerText = info.all_time_peak || 0;
+            document.getElementById('modalVisits').innerText = (info.total_visits || 0).toLocaleString();
+            document.getElementById('modalLink').href = info.url || '#';
+            
+            activeGameHistory = info.history || [];
+            updateChart('day');
+            
+            document.getElementById('modalOverlay').classList.add('active');
+        }
+
+        function closeModal(event) {
+            document.getElementById('modalOverlay').classList.remove('active');
+            
+            if (currentChart) {
+                currentChart.destroy();
+                currentChart = null; 
+            }
+        }
+
+        function updateChart(timeframe) {
+            document.querySelectorAll('.chart-filters button').forEach(b => b.classList.remove('active'));
+            document.getElementById(`btn-${timeframe}`).classList.add('active');
+
+            const now = new Date();
+            let cutoffTime = new Date();
+            
+            if (timeframe === 'day') cutoffTime.setDate(now.getDate() - 1);
+            if (timeframe === 'week') cutoffTime.setDate(now.getDate() - 7);
+            if (timeframe === 'month') cutoffTime.setMonth(now.getMonth() - 1);
+            if (timeframe === 'year') cutoffTime.setFullYear(now.getFullYear() - 1);
+
+            const filteredData = activeGameHistory.filter(entry => {
+                const cleanTime = entry.time.replace(/-/g, '/');
+                return new Date(cleanTime) >= cutoffTime;
+            });
+            
+            const labels = filteredData.map(entry => {
+                const d = new Date(entry.time.replace(/-/g, '/'));
+                return timeframe === 'day' ? d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : d.toLocaleDateString();
+            });
+            const dataPoints = filteredData.map(entry => entry.active_players);
+
+            const ctx = document.getElementById('playerChart').getContext('2d');
+            if (currentChart) currentChart.destroy();
+
+            currentChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels.length ? labels : ['No Data'],
+                    datasets: [{
+                        label: 'Active Players',
+                        data: dataPoints.length ? dataPoints : [0],
+                        borderColor: '#0ea5e9',
+                        backgroundColor: 'rgba(14, 165, 233, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        pointRadius: 3,
+                        spanGaps: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    interaction: { mode: 'index', intersect: false },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#94a3b8' } },
+                        x: { grid: { display: false }, ticks: { color: '#94a3b8', maxTicksLimit: 10 } }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        // Initialize fetching on load
+        loadGameData();
+        // Refresh data every 60 seconds
+        setInterval(loadGameData, 60000);
+    </script>
+</body>
+</html>
