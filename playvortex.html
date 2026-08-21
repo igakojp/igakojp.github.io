@@ -7,15 +7,16 @@
     <link rel="icon" type="image/png" href="https://playvortex.io/favicon.ico">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* PLAIN & SIMPLE THEME (Rolimons / Dashboard Style) */
         :root {
-            --bg-color: #1a1a1b; /* Flat dark background */
-            --card-bg: #272729;  /* Slightly lighter for cards */
-            --border-color: #343536; /* Subtle borders */
-            --accent: #2563eb; /* Standard clean blue */
+            --bg-color: #1a1a1b;
+            --card-bg: #272729;
+            --border-color: #343536;
+            --accent: #2563eb;
             --accent-hover: #1d4ed8;
             --text-main: #d7dadc;
             --text-muted: #818384;
+            --green: #22c55e;
+            --yellow: #eab308;
         }
 
         body {
@@ -27,30 +28,33 @@
             min-height: 100vh;
         }
 
-        .container { 
-            max-width: 1200px; 
-            margin: auto; 
-        }
+        .container { max-width: 1200px; margin: auto; }
 
         header { 
-            text-align: left; /* Shifted left for a standard dashboard feel */
-            margin-bottom: 25px; 
+            text-align: left; 
+            margin-bottom: 20px; 
             padding-bottom: 15px; 
             border-bottom: 1px solid var(--border-color); 
         }
         
-        h1 { 
-            font-size: 2rem; 
-            margin: 0; 
-            color: #ffffff; 
-            font-weight: 600; 
-        }
+        h1 { font-size: 2rem; margin: 0; color: #ffffff; font-weight: 600; }
+        .subtitle { color: var(--text-muted); font-size: 0.95rem; margin-top: 5px; }
 
-        .subtitle { 
-            color: var(--text-muted); 
-            font-size: 0.95rem; 
-            margin-top: 5px; 
+        /* GLOBAL STATS BAR */
+        .global-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
         }
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 15px;
+        }
+        .stat-card-title { color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; font-weight: 600; }
+        .stat-card-value { color: #ffffff; font-size: 1.5rem; font-weight: bold; margin-top: 5px; }
 
         /* CONTROLS STYLING */
         .controls { 
@@ -58,7 +62,10 @@
             gap: 10px; 
             margin-bottom: 20px; 
             flex-wrap: wrap; 
+            justify-content: space-between;
+            align-items: center;
         }
+        .controls-left { display: flex; gap: 10px; flex-wrap: wrap; flex-grow: 1; }
         .controls input, .controls select { 
             padding: 10px 12px; 
             border-radius: 4px; 
@@ -67,180 +74,89 @@
             color: var(--text-main); 
             outline: none;
             font-size: 0.95rem;
-            min-width: 220px;
+            min-width: 200px;
         }
-        .controls input:focus, .controls select:focus { 
-            border-color: var(--accent); 
-        }
+        .controls input:focus, .controls select:focus { border-color: var(--accent); }
 
-        /* GRID & CARDS */
-        .grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); 
-            gap: 15px; 
+        .view-toggle-btn {
+            background: var(--card-bg);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
         }
+        .view-toggle-btn:hover { background: #343536; }
+
+        /* GRID VIEW */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 15px; }
         .card { 
             background: var(--card-bg); 
             border: 1px solid var(--border-color); 
             border-radius: 6px; 
             overflow: hidden; 
             cursor: pointer; 
+            position: relative;
         }
-        .card:hover { 
-            border-color: #565758; /* Simple border color change on hover, no animations */
+        .card:hover { border-color: #565758; }
+        .card-img-container { width: 100%; height: 140px; background: #111; display: flex; align-items: center; justify-content: center; position: relative; }
+        .card img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .favorite-star {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            border-radius: 4px;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: 0.2s;
         }
-        .card-img-container { 
-            width: 100%; 
-            height: 140px; 
-            background: #111; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-        }
-        .card img { 
-            width: 100%; 
-            height: 100%; 
-            object-fit: cover; 
-        }
-        .card-content { 
-            padding: 15px; 
-        }
-        .card h3 { 
-            margin: 0 0 10px 0; 
-            font-size: 1.1rem; 
-            color: #ffffff; 
-        }
-        .player-badge { 
-            display: inline-block; 
-            background: #1a1a1b; 
-            border: 1px solid var(--border-color); 
-            color: #ffffff; 
-            padding: 4px 8px; 
-            border-radius: 4px; 
-            font-weight: 600; 
-            font-size: 0.85rem; 
-        }
-        .player-badge span {
-            color: #22c55e; /* Simple green dot indicator */
-        }
+        .favorite-star:hover { transform: scale(1.1); }
+        .favorite-star.favorited { color: var(--yellow); border-color: var(--yellow); }
+
+        .card-content { padding: 15px; }
+        .card h3 { margin: 0 0 10px 0; font-size: 1.1rem; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .player-badge { display: inline-block; background: var(--bg-color); border: 1px solid var(--border-color); color: #ffffff; padding: 4px 8px; border-radius: 4px; font-weight: 600; font-size: 0.85rem; }
+        .player-badge span { color: var(--green); }
+
+        /* TABLE VIEW (Rolimons Style) */
+        .table-container { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.95rem; }
+        th, td { padding: 12px 15px; border-bottom: 1px solid var(--border-color); }
+        th { background: #202022; color: var(--text-muted); font-weight: 600; text-transform: uppercase; font-size: 0.8rem; }
+        tr:hover td { background: rgba(255, 255, 255, 0.02); }
+        tr { cursor: pointer; }
+        .table-thumb { width: 40px; height: 40px; border-radius: 4px; object-fit: cover; vertical-align: middle; margin-right: 10px; }
 
         /* MODAL STYLES */
-        .modal-overlay { 
-            position: fixed; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%; 
-            background: rgba(0, 0, 0, 0.7); 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            opacity: 0; 
-            pointer-events: none; 
-            z-index: 1000; 
-        }
-        .modal-overlay.active { 
-            opacity: 1; 
-            pointer-events: auto; 
-        }
-        .modal-content { 
-            background: var(--card-bg); 
-            border: 1px solid var(--border-color); 
-            border-radius: 6px; 
-            width: 95%; 
-            max-width: 700px; 
-            padding: 25px; 
-            position: relative; 
-            max-height: 90vh; 
-            overflow-y: auto; 
-        }
-        .close-btn { 
-            position: absolute; 
-            top: 15px; 
-            right: 15px; 
-            background: transparent; 
-            border: none; 
-            color: var(--text-muted); 
-            font-size: 1.5rem; 
-            cursor: pointer; 
-        }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; z-index: 1000; }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .modal-content { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; width: 95%; max-width: 700px; padding: 25px; position: relative; max-height: 90vh; overflow-y: auto; }
+        .close-btn { position: absolute; top: 15px; right: 15px; background: transparent; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; }
         .close-btn:hover { color: #ffffff; }
         
-        .modal-header-flex { 
-            display: flex; 
-            gap: 20px; 
-            align-items: center; 
-            margin-bottom: 20px; 
-        }
-        .modal-img-container { 
-            width: 120px; 
-            height: 120px; 
-            border-radius: 6px; 
-            background: #111; 
-            overflow: hidden; 
-            flex-shrink: 0; 
-            border: 1px solid var(--border-color);
-        }
-        .modal-img { 
-            width: 100%; 
-            height: 100%; 
-            object-fit: cover; 
-        }
-        .stat-text {
-            color: var(--text-muted);
-            margin-bottom: 5px;
-            font-size: 0.95rem;
-        }
-        .stat-text strong {
-            color: #ffffff;
-        }
+        .modal-header-flex { display: flex; gap: 20px; align-items: center; margin-bottom: 20px; }
+        .modal-img-container { width: 120px; height: 120px; border-radius: 6px; background: #111; overflow: hidden; flex-shrink: 0; border: 1px solid var(--border-color); }
+        .modal-img { width: 100%; height: 100%; object-fit: cover; }
+        .stat-text { color: var(--text-muted); margin-bottom: 5px; font-size: 0.95rem; }
+        .stat-text strong { color: #ffffff; }
         
-        .chart-container { 
-            background: var(--bg-color); 
-            padding: 15px; 
-            border-radius: 6px; 
-            margin-top: 20px; 
-            border: 1px solid var(--border-color); 
-        }
-        .chart-filters { 
-            display: flex; 
-            gap: 5px; 
-            margin-bottom: 15px; 
-        }
-        .chart-filters button { 
-            background: var(--card-bg); 
-            color: var(--text-main); 
-            border: 1px solid var(--border-color); 
-            padding: 6px 12px; 
-            border-radius: 4px; 
-            cursor: pointer; 
-            font-size: 0.85rem; 
-        }
-        .chart-filters button.active { 
-            background: var(--accent); 
-            color: white; 
-            border-color: var(--accent); 
-        }
-        .chart-filters button:hover:not(.active) { 
-            background: #343536; 
-        }
+        .chart-container { background: var(--bg-color); padding: 15px; border-radius: 6px; margin-top: 20px; border: 1px solid var(--border-color); }
+        .chart-filters { display: flex; gap: 5px; margin-bottom: 15px; }
+        .chart-filters button { background: var(--card-bg); color: var(--text-main); border: 1px solid var(--border-color); padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; }
+        .chart-filters button.active { background: var(--accent); color: white; border-color: var(--accent); }
         
-        .play-btn { 
-            display: block; 
-            width: 100%; 
-            text-align: center; 
-            background: var(--accent); 
-            color: white; 
-            text-decoration: none; 
-            padding: 10px; 
-            border-radius: 4px; 
-            margin-top: 20px; 
-            font-weight: 600; 
-            box-sizing: border-box;
-        }
-        .play-btn:hover { 
-            background: var(--accent-hover); 
-        }
+        .play-btn { display: block; width: 100%; text-align: center; background: var(--accent); color: white; text-decoration: none; padding: 10px; border-radius: 4px; margin-top: 20px; font-weight: 600; box-sizing: border-box; }
+        .play-btn:hover { background: var(--accent-hover); }
     </style>
 </head>
 <body>
@@ -251,17 +167,38 @@
             <div class="subtitle">Live game metrics dashboard</div>
         </header>
 
-        <!-- Search and Sort Controls -->
-        <div class="controls">
-            <input type="text" id="searchInput" placeholder="Search games by name..." oninput="renderGames()">
-            <select id="sortSelect" onchange="renderGames()">
-                <option value="players_desc">Live Players: Most to Least</option>
-                <option value="visits_desc">Total Visits: High to Low</option>
-                <option value="name_asc">Name: A to Z</option>
-            </select>
+        <!-- GLOBAL STATS SUMMARY -->
+        <div class="global-stats">
+            <div class="stat-card">
+                <div class="stat-card-title">Total Active Online</div>
+                <div class="stat-card-value" id="global-active">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-title">Total Studio Visits</div>
+                <div class="stat-card-value" id="global-visits">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-title">Tracked Games</div>
+                <div class="stat-card-value" id="global-count">0</div>
+            </div>
         </div>
 
-        <div class="grid" id="game-grid"></div>
+        <!-- Controls & View Toggle -->
+        <div class="controls">
+            <div class="controls-left">
+                <input type="text" id="searchInput" placeholder="Search games by name..." oninput="renderGames()">
+                <select id="sortSelect" onchange="renderGames()">
+                    <option value="favorites">Favorites First</option>
+                    <option value="players_desc">Live Players: Most to Least</option>
+                    <option value="visits_desc">Total Visits: High to Low</option>
+                    <option value="name_asc">Name: A to Z</option>
+                </select>
+            </div>
+            <button class="view-toggle-btn" onclick="toggleView()" id="viewToggleBtn">Switch to Table View</button>
+        </div>
+
+        <!-- Content Container (Grid or Table will render here) -->
+        <div id="content-container"></div>
     </div>
 
     <!-- MODAL POPUP -->
@@ -299,6 +236,8 @@
         let globalGameData = {};
         let currentChart = null;
         let activeGameHistory = [];
+        let isTableView = false;
+        let favorites = JSON.parse(localStorage.getItem('vortex_favorites')) || [];
 
         const GITHUB_JSON_URL = 'https://raw.githubusercontent.com/igakojp/Vortex/main/game_data.json';
 
@@ -318,7 +257,6 @@
         };
 
         function handleImageError(img) {
-            console.warn("Failed to load image resource:", img.src);
             img.style.display = 'none';
         }
 
@@ -328,23 +266,58 @@
                 if (!response.ok) throw new Error("File not found on GitHub");
                 globalGameData = await response.json();
             } catch (error) {
-                console.warn("GitHub fetch failed. Loading fallback data.");
                 globalGameData = fallbackData;
             }
 
+            calculateGlobalStats();
+            renderGames();
+        }
+
+        function calculateGlobalStats() {
+            let totalActive = 0;
+            let totalVisits = 0;
+            let count = Object.keys(globalGameData).length;
+
+            for (const info of Object.values(globalGameData)) {
+                if (info.history && info.history.length > 0) {
+                    totalActive += info.history[info.history.length - 1].active_players;
+                }
+                totalVisits += info.total_visits || 0;
+            }
+
+            document.getElementById('global-active').innerText = totalActive.toLocaleString();
+            document.getElementById('global-visits').innerText = totalVisits.toLocaleString();
+            document.getElementById('global-count').innerText = count;
+        }
+
+        function toggleView() {
+            isTableView = !isTableView;
+            document.getElementById('viewToggleBtn').innerText = isTableView ? "Switch to Grid View" : "Switch to Table View";
+            renderGames();
+        }
+
+        function toggleFavorite(gameName, event) {
+            event.stopPropagation();
+            if (favorites.includes(gameName)) {
+                favorites = favorites.filter(fav => fav !== gameName);
+            } else {
+                favorites.push(gameName);
+            }
+            localStorage.setItem('vortex_favorites', JSON.stringify(favorites));
             renderGames();
         }
 
         function renderGames() {
-            const grid = document.getElementById('game-grid');
-            grid.innerHTML = "";
+            const container = document.getElementById('content-container');
+            container.innerHTML = "";
 
             const searchQuery = document.getElementById('searchInput').value.toLowerCase();
             const sortBy = document.getElementById('sortSelect').value;
 
             let gamesArray = Object.entries(globalGameData).map(([gameName, info]) => {
                 const currentPlayers = info.history && info.history.length > 0 ? info.history[info.history.length - 1].active_players : 0;
-                return { gameName, info, currentPlayers };
+                const isFav = favorites.includes(gameName);
+                return { gameName, info, currentPlayers, isFav };
             });
 
             if (searchQuery) {
@@ -352,7 +325,11 @@
             }
 
             gamesArray.sort((a, b) => {
-                if (sortBy === 'players_desc') {
+                if (sortBy === 'favorites') {
+                    if (a.isFav && !b.isFav) return -1;
+                    if (!a.isFav && b.isFav) return 1;
+                    return b.currentPlayers - a.currentPlayers;
+                } else if (sortBy === 'players_desc') {
                     return b.currentPlayers - a.currentPlayers; 
                 } else if (sortBy === 'visits_desc') {
                     return (b.info.total_visits || 0) - (a.info.total_visits || 0); 
@@ -362,41 +339,86 @@
                 return 0;
             });
 
-            for (const { gameName, info, currentPlayers } of gamesArray) {
-                let thumb = info.thumbnail || 'https://via.placeholder.com/200x140/111/818384?text=No+Image';
-
-                if (thumb.includes('/api/games/') && thumb.includes('/thumbnail')) {
-                    const match = thumb.match(/\/api\/games\/(\d+)\/thumbnail(.*)/);
-                    if (match) {
-                        const gameId = match[1];
-                        const queryParams = match[2] || '';
-                        thumb = `https://playvortex.io/assets/thumbnails/${gameId}.png${queryParams}`;
-                    }
-                }
-
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.onclick = () => openModal(gameName, info, currentPlayers, thumb);
+            if (isTableView) {
+                // RENDER TABLE VIEW
+                const wrapper = document.createElement('div');
+                wrapper.className = 'table-container';
                 
-                card.innerHTML = `
-                    <div class="card-img-container">
-                        <img src="${thumb}" alt="${gameName}" onload="this.style.display='block'" onerror="handleImageError(this)">
-                    </div>
-                    <div class="card-content">
-                        <h3>${gameName}</h3>
-                        <div class="player-badge"><span>●</span> ${currentPlayers} Online</div>
-                    </div>
+                let tableHtml = `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Game Name</th>
+                                <th>Live Players</th>
+                                <th>All-Time Peak</th>
+                                <th>Total Visits</th>
+                            </tr>
+                        </thead>
+                        <tbody>
                 `;
-                grid.appendChild(card);
+
+                for (const { gameName, info, currentPlayers, isFav } of gamesArray) {
+                    let thumb = formatThumbnailUrl(info.thumbnail);
+                    tableHtml += `
+                        <tr onclick='openModal(${JSON.stringify(gameName)}, ${JSON.stringify(info)}, ${currentPlayers}, ${JSON.stringify(thumb)})'>
+                            <td>
+                                <img src="${thumb}" class="table-thumb" onerror="this.style.display='none'">
+                                ${isFav ? '★ ' : ''}<strong>${gameName}</strong>
+                            </td>
+                            <td><span style="color:var(--green)">●</span> ${currentPlayers}</td>
+                            <td>${info.all_time_peak || 0}</td>
+                            <td>${(info.total_visits || 0).toLocaleString()}</td>
+                        </tr>
+                    `;
+                }
+                tableHtml += `</tbody></table>`;
+                wrapper.innerHTML = tableHtml;
+                container.appendChild(wrapper);
+
+            } else {
+                // RENDER GRID VIEW
+                const grid = document.createElement('div');
+                grid.className = 'grid';
+
+                for (const { gameName, info, currentPlayers, isFav } of gamesArray) {
+                    let thumb = formatThumbnailUrl(info.thumbnail);
+
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.onclick = () => openModal(gameName, info, currentPlayers, thumb);
+                    
+                    card.innerHTML = `
+                        <div class="card-img-container">
+                            <img src="${thumb}" alt="${gameName}" onload="this.style.display='block'" onerror="handleImageError(this)">
+                            <div class="favorite-star ${isFav ? 'favorited' : ''}" onclick="toggleFavorite('${gameName}', event)">★</div>
+                        </div>
+                        <div class="card-content">
+                            <h3>${gameName}</h3>
+                            <div class="player-badge"><span>●</span> ${currentPlayers} Online</div>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                }
+                container.appendChild(grid);
             }
+        }
+
+        function formatThumbnailUrl(thumbUrl) {
+            let thumb = thumbUrl || 'https://via.placeholder.com/200x140/111/818384?text=No+Image';
+            if (thumb.includes('/api/games/') && thumb.includes('/thumbnail')) {
+                const match = thumb.match(/\/api\/games\/(\d+)\/thumbnail(.*)/);
+                if (match) {
+                    const gameId = match[1];
+                    const queryParams = match[2] || '';
+                    thumb = `https://playvortex.io/assets/thumbnails/${gameId}.png${queryParams}`;
+                }
+            }
+            return thumb;
         }
 
         function openModal(gameName, info, currentPlayers, thumb) {
             document.getElementById('modalTitle').innerText = gameName;
-            
-            const modalImg = document.getElementById('modalImg');
-            modalImg.src = thumb || ''; 
-            
+            document.getElementById('modalImg').src = thumb || ''; 
             document.getElementById('modalLive').innerText = currentPlayers;
             document.getElementById('modalPeak').innerText = info.all_time_peak || 0;
             document.getElementById('modalVisits').innerText = (info.total_visits || 0).toLocaleString();
@@ -436,7 +458,6 @@
             const ctx = document.getElementById('playerChart').getContext('2d');
             if (currentChart) currentChart.destroy();
 
-            // Updated Chart.js settings for a flatter look
             currentChart = new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -444,11 +465,11 @@
                     datasets: [{
                         label: 'Active Players',
                         data: dataPoints.length ? dataPoints : [0],
-                        borderColor: '#2563eb', /* Flat blue */
-                        backgroundColor: 'rgba(37, 99, 235, 0.05)', /* Barely visible background */
+                        borderColor: '#2563eb',
+                        backgroundColor: 'rgba(37, 99, 235, 0.05)',
                         borderWidth: 2,
                         fill: true,
-                        pointRadius: 2, /* Smaller points */
+                        pointRadius: 2,
                         spanGaps: true
                     }]
                 },
@@ -456,15 +477,8 @@
                     responsive: true,
                     interaction: { mode: 'index', intersect: false },
                     scales: {
-                        y: { 
-                            beginAtZero: true, 
-                            grid: { color: '#343536' }, /* Simple grid lines */
-                            ticks: { color: '#818384' } 
-                        },
-                        x: { 
-                            grid: { display: false }, 
-                            ticks: { color: '#818384', maxTicksLimit: 10 } 
-                        }
+                        y: { beginAtZero: true, grid: { color: '#343536' }, ticks: { color: '#818384' } },
+                        x: { grid: { display: false }, ticks: { color: '#818384', maxTicksLimit: 10 } }
                     },
                     plugins: { legend: { display: false } }
                 }
