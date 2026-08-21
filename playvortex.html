@@ -31,6 +31,7 @@
         h1 { font-size: 3rem; margin: 0; background: linear-gradient(to right, #38bdf8, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .subtitle { color: var(--text-muted); font-size: 1.1rem; margin-top: 10px; }
 
+        /* CONTROLS STYLING */
         .controls { display: flex; gap: 15px; margin-bottom: 30px; justify-content: center; flex-wrap: wrap; }
         .controls input, .controls select { 
             padding: 12px 15px; 
@@ -40,7 +41,7 @@
             color: white; 
             outline: none;
             font-size: 1rem;
-            min-width: 200px;
+            min-width: 220px;
         }
         .controls input:focus, .controls select:focus { border-color: var(--accent); }
 
@@ -53,9 +54,6 @@
         .card-content { padding: 20px; }
         .card h3 { margin: 0 0 10px 0; font-size: 1.4rem; }
         .player-badge { display: inline-block; background: rgba(14, 165, 233, 0.2); color: #38bdf8; padding: 5px 12px; border-radius: 20px; font-weight: bold; font-size: 0.9rem; }
-
-        /* API Failed Message Style */
-        .api-failed { grid-column: 1 / -1; text-align: center; color: #ef4444; font-size: 1.5rem; padding: 50px; background: rgba(239, 68, 68, 0.1); border-radius: 12px; border: 1px solid rgba(239, 68, 68, 0.3); }
 
         /* MODAL STYLES */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 1000; }
@@ -85,10 +83,11 @@
             <div class="subtitle">Live game metrics dashboard</div>
         </header>
 
+        <!-- Search and Sort Controls -->
         <div class="controls">
             <input type="text" id="searchInput" placeholder="Search games by name..." oninput="renderGames()">
             <select id="sortSelect" onchange="renderGames()">
-                <option value="players_desc">Live Players: High to Low</option>
+                <option value="players_desc">Live Players: Most to Least</option>
                 <option value="visits_desc">Total Visits: High to Low</option>
                 <option value="name_asc">Name: A to Z</option>
             </select>
@@ -134,7 +133,21 @@
         let activeGameHistory = [];
 
         const GITHUB_JSON_URL = 'https://raw.githubusercontent.com/igakojp/Vortex/main/game_data.json';
-        const LIVE_API_URL = 'https://playvortex.io/api/games';
+
+        const fallbackData = {
+            "Vortexia": {
+                "all_time_peak": 128,
+                "total_visits": 140124,
+                "history": [
+                    { "time": "2026-08-21 16:37", "active_players": 7 },
+                    { "time": "2026-08-21 17:34", "active_players": 88 },
+                    { "time": "2026-08-21 17:44", "active_players": 128 },
+                    { "time": "2026-08-21 18:09", "active_players": 68 }
+                ],
+                "url": "https://playvortex.io/games/8",
+                "thumbnail": "https://playvortex.io/api/games/8/thumbnail?v=c4933044"
+            }
+        };
 
         function handleImageError(img) {
             console.warn("Failed to load image resource:", img.src);
@@ -143,86 +156,72 @@
 
         async function loadGameData() {
             try {
-                // 1. Fetch the history data for the charts
                 const response = await fetch(GITHUB_JSON_URL);
-                if (!response.ok) throw new Error("History API Failed");
+                if (!response.ok) throw new Error("File not found on GitHub");
                 globalGameData = await response.json();
-
-                // 2. Fetch the live thumbnail versions directly from Vortex API
-                try {
-                    const liveResponse = await fetch(LIVE_API_URL);
-                    if (liveResponse.ok) {
-                        const liveData = await liveResponse.json();
-                        
-                        // Handle the data whether the API returns an array directly or an object containing an array
-                        const gamesList = Array.isArray(liveData) ? liveData : (liveData.games || liveData.data || []);
-                        
-                        // Inject the live thumbnail_version and id into our global data
-                        gamesList.forEach(liveGame => {
-                            if (liveGame.name && globalGameData[liveGame.name]) {
-                                globalGameData[liveGame.name].id = liveGame.id || globalGameData[liveGame.name].id;
-                                globalGameData[liveGame.name].thumbnail_version = liveGame.thumbnail_version;
-                            }
-                        });
-                    }
-                } catch (liveError) {
-                    console.warn("Could not fetch live thumbnails, using cached JSON versions.");
-                }
-
-                // Render once all data is compiled
-                renderGames();
-
             } catch (error) {
-                console.error("Critical Fetch Error:", error);
-                
-                // FALLBACK: Display "API failed" if the main data cannot load
-                const grid = document.getElementById('game-grid');
-                grid.innerHTML = '<div class="api-failed">API failed</div>';
+                console.warn("GitHub fetch failed. Loading fallback data.");
+                globalGameData = fallbackData;
             }
+
+            // Render the games list once loaded
+            renderGames();
         }
 
+        // Dedicated rendering function handling Search and Sort logic
         function renderGames() {
             const grid = document.getElementById('game-grid');
             grid.innerHTML = "";
-            
+
             const searchQuery = document.getElementById('searchInput').value.toLowerCase();
             const sortBy = document.getElementById('sortSelect').value;
 
-            let gamesArray = Object.entries(globalGameData).map(([name, info]) => {
+            // Convert object entries to an array so we can filter and sort easily
+            let gamesArray = Object.entries(globalGameData).map(([gameName, info]) => {
                 const currentPlayers = info.history && info.history.length > 0 ? info.history[info.history.length - 1].active_players : 0;
-                return { name, info, currentPlayers };
+                return { gameName, info, currentPlayers };
             });
 
+            // 1. Filter by search input
             if (searchQuery) {
-                gamesArray = gamesArray.filter(g => g.name.toLowerCase().includes(searchQuery));
+                gamesArray = gamesArray.filter(item => item.gameName.toLowerCase().includes(searchQuery));
             }
 
+            // 2. Sort array based on dropdown choice
             gamesArray.sort((a, b) => {
-                if (sortBy === 'players_desc') return b.currentPlayers - a.currentPlayers;
-                if (sortBy === 'visits_desc') return (b.info.total_visits || 0) - (a.info.total_visits || 0);
-                if (sortBy === 'name_asc') return a.name.localeCompare(b.name);
+                if (sortBy === 'players_desc') {
+                    return b.currentPlayers - a.currentPlayers; // Most famous/active first
+                } else if (sortBy === 'visits_desc') {
+                    return (b.info.total_visits || 0) - (a.info.total_visits || 0); // Total visits high to low
+                } else if (sortBy === 'name_asc') {
+                    return a.gameName.localeCompare(b.gameName); // Alphabetical A-Z
+                }
                 return 0;
             });
 
-            for (const { name, info, currentPlayers } of gamesArray) {
-                
-                let thumb = "";
-                if (info.id && info.thumbnail_version) {
-                    thumb = `https://playvortex.io/assets/thumbnails/${info.id}.png?v=${info.thumbnail_version}`;
-                } else if (info.thumbnail) {
-                    thumb = info.thumbnail; 
+            // 3. Build and append cards
+            for (const { gameName, info, currentPlayers } of gamesArray) {
+                let thumb = info.thumbnail || 'https://via.placeholder.com/200x160/111827/94a3b8?text=No+Image';
+
+                if (thumb.includes('/api/games/') && thumb.includes('/thumbnail')) {
+                    const match = thumb.match(/\/api\/games\/(\d+)\/thumbnail(.*)/);
+                    if (match) {
+                        const gameId = match[1];
+                        const queryParams = match[2] || '';
+                        thumb = `https://playvortex.io/assets/thumbnails/${gameId}.png${queryParams}`;
+                    }
                 }
 
                 const card = document.createElement('div');
                 card.className = 'card';
-                card.onclick = () => openModal(name, info, currentPlayers, thumb);
+                card.onclick = () => openModal(gameName, info, currentPlayers, thumb);
                 
                 card.innerHTML = `
                     <div class="card-img-container">
-                        <img src="${thumb}" alt="${name}" onload="this.style.display='block'" onerror="handleImageError(this)">
+                        <img src="${thumb}" alt="${gameName}" onload="this.style.display='block'" onerror="handleImageError(this)">
                     </div>
                     <div class="card-content">
-                        <h3>${name}</h3>
+                        <h3>${gameName}</h3>
                         <div class="player-badge">● ${currentPlayers} Online</div>
                     </div>
                 `;
@@ -235,7 +234,6 @@
             
             const modalImg = document.getElementById('modalImg');
             modalImg.src = thumb || ''; 
-            modalImg.style.display = 'block'; 
             
             document.getElementById('modalLive').innerText = currentPlayers;
             document.getElementById('modalPeak').innerText = info.all_time_peak || 0;
@@ -250,11 +248,7 @@
 
         function closeModal(event) {
             document.getElementById('modalOverlay').classList.remove('active');
-            
-            if (currentChart) {
-                currentChart.destroy();
-                currentChart = null; 
-            }
+            if (currentChart) currentChart.destroy();
         }
 
         function updateChart(timeframe) {
@@ -269,13 +263,10 @@
             if (timeframe === 'month') cutoffTime.setMonth(now.getMonth() - 1);
             if (timeframe === 'year') cutoffTime.setFullYear(now.getFullYear() - 1);
 
-            const filteredData = activeGameHistory.filter(entry => {
-                const cleanTime = entry.time.replace(/-/g, '/');
-                return new Date(cleanTime) >= cutoffTime;
-            });
+            const filteredData = activeGameHistory.filter(entry => new Date(entry.time) >= cutoffTime);
             
             const labels = filteredData.map(entry => {
-                const d = new Date(entry.time.replace(/-/g, '/'));
+                const d = new Date(entry.time);
                 return timeframe === 'day' ? d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : d.toLocaleDateString();
             });
             const dataPoints = filteredData.map(entry => entry.active_players);
@@ -310,9 +301,7 @@
             });
         }
 
-        // Initialize fetching on load
         loadGameData();
-        // Refresh data every 60 seconds
         setInterval(loadGameData, 60000);
     </script>
 </body>
