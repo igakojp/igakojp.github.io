@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Identity Ring FX — Showcase</title>
+<style>
+  :root {
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 40px 24px 80px;
+    background: radial-gradient(circle at 50% 0%, #14141c 0%, #0a0a10 60%, #060608 100%);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: #f2f2f5;
+  }
+  header {
+    text-align: center;
+    max-width: 640px;
+    margin: 0 auto 48px;
+  }
+  header h1 {
+    font-size: 28px;
+    font-weight: 650;
+    letter-spacing: -0.01em;
+    margin: 0 0 8px;
+  }
+  header p {
+    color: #9a9aa8;
+    font-size: 15px;
+    line-height: 1.5;
+    margin: 0;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .card {
+    background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.015));
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    padding: 20px 16px 18px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+  .stage {
+    position: relative;
+    width: 180px;
+    height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .avatar {
+    width: 62px;
+    height: 62px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3a3a46, #202028);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-weight: 600;
+    color: #cfcfe0;
+    position: relative;
+    z-index: 3;
+    box-shadow: 0 0 0 2px rgba(255,255,255,0.06);
+  }
+  .fx-svg {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 180px;
+    height: 180px;
+    transform: translate(-50%, -50%);
+    overflow: visible;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .label {
+    text-align: center;
+  }
+  .label .rank {
+    font-size: 14px;
+    font-weight: 600;
+    display: block;
+  }
+  .label .theme {
+    font-size: 11px;
+    color: #7d7d8c;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Identity Ring FX — Showcase</h1>
+  <p>All twelve animated ring styles, rendered side by side so you can compare their look and motion at a glance.</p>
+</header>
+
+<div class="grid" id="grid"></div>
+
+<script>
+(() => {
+  "use strict";
+
+  // ---------- svg helpers ----------
+  function svg(name, attrs = {}) {
+    const el = document.createElementNS("http://www.w3.org/2000/svg", name);
+    for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+    return el;
+  }
+  function group() { return svg("g"); }
+  function circle(parent, cx, cy, r, attrs = {}) {
+    const el = svg("circle", { cx, cy, r, ...attrs }); parent.appendChild(el); return el;
+  }
+  function line(parent, x1, y1, x2, y2, attrs = {}) {
+    const el = svg("line", { x1, y1, x2, y2, ...attrs }); parent.appendChild(el); return el;
+  }
+  function path(parent, d, attrs = {}) {
+    const el = svg("path", { d, ...attrs }); parent.appendChild(el); return el;
+  }
+  function polygon(parent, points, attrs = {}) {
+    const el = svg("polygon", { points, ...attrs }); parent.appendChild(el); return el;
+  }
+  function ellipse(parent, cx, cy, rx, ry, attrs = {}) {
+    const el = svg("ellipse", { cx, cy, rx, ry, ...attrs }); parent.appendChild(el); return el;
+  }
+  function polar(radius, angle) {
+    return { x: Math.cos(angle) * radius, y: Math.sin(angle) * radius };
+  }
+  function polygonPoints(sides, radius, rotation = -Math.PI / 2) {
+    const pts = [];
+    for (let i = 0; i < sides; i++) {
+      const angle = rotation + (Math.PI * 2 * i) / sides;
+      const p = polar(radius, angle);
+      pts.push(`${p.x},${p.y}`);
+    }
+    return pts.join(" ");
+  }
+  function addRing(parent, radius, color, width = 2, dash = null, opacity = 0.9) {
+    const attrs = { fill: "none", stroke: color, "stroke-width": width, opacity };
+    if (dash) attrs["stroke-dasharray"] = dash;
+    return circle(parent, 0, 0, radius, attrs);
+  }
+  function createParticles(parent, radius, color, count, seed = 0) {
+    const particles = [];
+    for (let i = 0; i < count; i++) {
+      const angle = (i / count) * Math.PI * 2 + seed * 0.47;
+      const distance = radius + 4 + ((i * 19) % 38);
+      const p = polar(distance, angle);
+      const particle = circle(parent, p.x, p.y, 1 + (i % 3) * 0.45, { fill: color, opacity: 0.6 });
+      particles.push({ element: particle, angle, distance, phase: i * 0.71, speed: 0.16 + (i % 7) * 0.025 });
+    }
+    return particles;
+  }
+  function updateParticles(particles, time, direction = 1, wobble = 4) {
+    const t = time * 0.001;
+    for (const particle of particles) {
+      const angle = particle.angle + t * particle.speed * direction;
+      const distance = particle.distance + Math.sin(t * 2.1 + particle.phase) * wobble;
+      const p = polar(distance, angle);
+      particle.element.setAttribute("cx", p.x);
+      particle.element.setAttribute("cy", p.y);
+      particle.element.setAttribute("opacity", 0.2 + (Math.sin(t * 3.5 + particle.phase) + 1) * 0.32);
+    }
+  }
+
+  // ---------- ring builders (one per theme) ----------
+  function buildOrigin(root, scale) {
+    const back = group(), orbit = group(), command = group(), beam = group(), emblem = group(), particlesLayer = group();
+    root.append(back, orbit, command, beam, emblem, particlesLayer);
+    const r = 46 * scale;
+    const outer = addRing(back, r + 26, "#ffffff", 1.4, "2 8", 0.9);
+    addRing(back, r + 21, "#ffd86a", 1.2, "17 5 3 5", 0.9);
+    addRing(orbit, r + 13, "#ffffff", 2, "32 7", 0.95);
+    addRing(orbit, r + 17, "#d9bd6b", 1, "3 12", 0.8);
+    const octagon = polygon(command, polygonPoints(8, r + 32), { fill: "none", stroke: "#ffffff", "stroke-width": 1.3, opacity: 0.72 });
+    for (let i = 0; i < 8; i++) {
+      const angle = (i / 8) * Math.PI * 2;
+      const p1 = polar(r + 33, angle), p2 = polar(r + 40, angle);
+      line(command, p1.x, p1.y, p2.x, p2.y, { stroke: "#ffffff", "stroke-width": 2, opacity: 0.75 });
+    }
+    const crown = path(emblem, `M -16 -5 L -9 7 L 0 0 L 9 7 L 16 -5 L 11 11 L -11 11 Z`, { fill: "none", stroke: "#ffffff", "stroke-width": 2, opacity: 0.8 });
+    const crownRing = addRing(emblem, 18, "#ffd86a", 1.2, "3 6", 0.75);
+    line(beam, -(r + 48), 0, r + 48, 0, { stroke: "#ffffff", "stroke-width": 1.5, opacity: 0.35 });
+    const particles = createParticles(particlesLayer, r + 23, "#ffffff", 30, 1);
+    return { update(time) {
+      const t = time * 0.001;
+      orbit.setAttribute("transform", `rotate(${t * 18})`);
+      command.setAttribute("transform", `rotate(${-t * 7})`);
+      emblem.setAttribute("transform", `scale(${1 + Math.sin(t * 2.5) * 0.045})`);
+      beam.setAttribute("transform", `rotate(${Math.sin(t * 0.85) * 32})`);
+      crown.setAttribute("opacity", 0.5 + (Math.sin(t * 3) + 1) * 0.2);
+      crownRing.setAttribute("opacity", 0.4 + (Math.sin(t * 4) + 1) * 0.25);
+      outer.setAttribute("opacity", 0.55 + (Math.sin(t * 1.5) + 1) * 0.2);
+      octagon.setAttribute("opacity", 0.45 + (Math.sin(t * 2.1) + 1) * 0.18);
+      updateParticles(particles, time, 1, 5);
+    }};
+  }
+
+  function buildPerson(root, scale) {
+    const halo = group(), petals = group(), orbit = group(), heart = group(), waves = group(), particlesLayer = group();
+    root.append(halo, petals, orbit, heart, waves, particlesLayer);
+    const r = 45 * scale;
+    addRing(halo, r + 25, "#ff66c8", 1.5, "2 8", 0.85);
+    addRing(halo, r + 19, "#ffd1ee", 1, "14 5", 0.8);
+    const orbitRing = ellipse(orbit, 0, 0, r + 30, r + 16, { fill: "none", stroke: "#ff66c8", "stroke-width": 1.6, "stroke-dasharray": "5 10", opacity: 0.8 });
+    const orbitRing2 = ellipse(orbit, 0, 0, r + 22, r + 32, { fill: "none", stroke: "#ffc0e6", "stroke-width": 1, "stroke-dasharray": "2 13", opacity: 0.65 });
+    const petalElements = [];
+    for (let i = 0; i < 12; i++) {
+      const angle = (i / 12) * Math.PI * 2;
+      const p = polar(r + 22, angle);
+      petalElements.push(path(petals, `M ${p.x} ${p.y} C ${p.x - 4} ${p.y - 8} ${p.x + 4} ${p.y - 8} ${p.x} ${p.y}`, { fill: "none", stroke: "#ff83d2", "stroke-width": 1.2, opacity: 0.65 }));
+    }
+    const heartShape = path(heart, `M 0 14 C -24 -2 -16 -18 0 -8 C 16 -18 24 -2 0 14`, { fill: "none", stroke: "#ff66c8", "stroke-width": 2, opacity: 0.8 });
+    const pulseA = addRing(waves, r + 5, "#ff66c8", 1.8, null, 0.6);
+    const pulseB = addRing(waves, r + 5, "#ffd1ee", 1, null, 0.4);
+    const particles = createParticles(particlesLayer, r + 22, "#ff8bd5", 30, 2);
+    return { update(time) {
+      const t = time * 0.001;
+      orbit.setAttribute("transform", `rotate(${-t * 14})`);
+      petals.setAttribute("transform", `rotate(${t * 5})`);
+      heart.setAttribute("transform", `scale(${1 + Math.sin(t * 2.8) * 0.07})`);
+      const waveProgress = (t * 0.55) % 1;
+      waves.setAttribute("transform", `scale(${1 + waveProgress * 0.6})`);
+      pulseA.setAttribute("opacity", 0.65 - waveProgress * 0.65);
+      pulseB.setAttribute("opacity", 0.45 - waveProgress * 0.45);
+      orbitRing.setAttribute("opacity", 0.55 + (Math.sin(t * 2) + 1) * 0.18);
+      orbitRing2.setAttribute("opacity", 0.35 + (Math.sin(t * 1.4) + 1) * 0.2);
+      for (let i = 0; i < petalElements.length; i++) {
+        petalElements[i].setAttribute("opacity", 0.3 + (Math.sin(t * 2 + i * 0.45) + 1) * 0.25);
+      }
+      updateParticles(particles, time, 1, 5);
+    }};
+  }
+
+  function buildInner(root, scale) {
+    const hex = group(), data = group(), rings = group(), nodes = group(), scan = group(), particlesLayer = group();
+    root.append(hex, data, rings, nodes, scan, particlesLayer);
+    const r = 46 * scale, cyan = "#55eaff";
+    polygon(hex, polygonPoints(6, r + 8), { fill: "none", stroke: cyan, "stroke-width": 2, opacity: 0.8 });
+    polygon(hex, polygonPoints(6, r + 17), { fill: "none", stroke: "#b9f8ff", "stroke-width": 1, opacity: 0.55 });
+    addRing(rings, r + 23, cyan, 1.3, "2 12", 0.8);
+    addRing(rings, r + 29, cyan, 1, "15 5", 0.7);
+    const nodeElements = [];
+    for (let i = 0; i < 6; i++) {
+      const angle = (i / 6) * Math.PI * 2;
+      const p = polar(r + 31, angle);
+      nodeElements.push(circle(nodes, p.x, p.y, 3, { fill: cyan, opacity: 0.8 }));
+    }
+    for (let i = 0; i < 6; i++) {
+      const angle = (i / 6) * Math.PI * 2;
+      const p1 = polar(r + 8, angle), p2 = polar(r + 30, angle);
+      line(data, p1.x, p1.y, p2.x, p2.y, { stroke: cyan, "stroke-width": 1, opacity: 0.35 });
+    }
+    const scanRing = addRing(scan, r + 19, cyan, 2, "1 18", 0.65);
+    const particles = createParticles(particlesLayer, r + 22, cyan, 26, 3);
+    return { update(time) {
+      const t = time * 0.001;
+      hex.setAttribute("transform", `rotate(${t * 8})`);
+      rings.setAttribute("transform", `rotate(${-t * 13})`);
+      scan.setAttribute("transform", `rotate(${t * 75})`);
+      for (let i = 0; i < nodeElements.length; i++) {
+        nodeElements[i].setAttribute("r", 2 + (Math.sin(t * 4 + i) + 1) * 1.2);
+      }
+      scanRing.setAttribute("opacity", 0.35 + (Math.sin(t * 5) + 1) * 0.2);
+      updateParticles(particles, time, -1, 3);
+    }};
+  }
+
+  function buildClosest(root, scale) {
+    const orbitA = group(), orbitB = group(), orbitC = group(), nodes = group(), pulse = group(), particlesLayer = group();
+    root.append(orbitA, orbitB, orbitC, nodes, pulse, particlesLayer);
+    const r = 45 * scale;
+    ellipse(orbitA, 0, 0, r + 14, r + 30, { fill: "none", stroke: "#a66cff", "stroke-width": 2, "stroke-dasharray": "25 6", opacity: 0.85 });
+    ellipse(orbitB, 0, 0, r + 30, r + 13, { fill: "none", stroke: "#63d2ff", "stroke-width": 1.5, "stroke-dasharray": "4 12", opacity: 0.8 });
+    addRing(orbitC, r + 32, "#b98cff", 1, "2 9 2 20", 0.7);
+    const nodeElements = [];
+    for (let i = 0; i < 8; i++) {
+      const angle = (i / 8) * Math.PI * 2;
+      const p = polar(r + 30, angle);
+      nodeElements.push(circle(nodes, p.x, p.y, 2.5, { fill: "#70d9ff", opacity: 0.8 }));
+    }
+    const pulseRing = addRing(pulse, r + 10, "#a66cff", 2, null, 0.6);
+    const particles = createParticles(particlesLayer, r + 25, "#9d72ff", 28, 4);
+    return { update(time) {
+      const t = time * 0.001;
+      orbitA.setAttribute("transform", `rotate(${t * 25})`);
+      orbitB.setAttribute("transform", `rotate(${-t * 18})`);
+      orbitC.setAttribute("transform", `rotate(${t * 10})`);
+      const progress = (t * 0.75) % 1;
+      pulse.setAttribute("transform", `scale(${1 + progress * 0.65})`);
+      pulseRing.setAttribute("opacity", 0.65 - progress * 0.65);
+      for (let i = 0; i < nodeElements.length; i++) {
+        nodeElements[i].setAttribute("opacity", 0.25 + (Math.sin(t * 4 + i) + 1) * 0.3);
+      }
+      updateParticles(particles, time, 1, 4);
+    }};
+  }
+
+  function buildCherished(root, scale) {
+    const flower = group(), ring = group(), sparkles = group(), pulse = group(), particlesLayer = group();
+    root.append(flower, ring, sparkles, pulse, particlesLayer);
+    const r = 45 * scale, pink = "#ff9eae", pale = "#ffd4da";
+    addRing(ring, r + 25, pink, 1.8, "5 9", 0.85);
+    addRing(ring, r + 17, pale, 1, "1 12", 0.7);
+    for (let i = 0; i < 10; i++) {
+      const angle = (i / 10) * Math.PI * 2;
+      const outer = polar(r + 23, angle), left = polar(r + 11, angle - 0.16), right = polar(r + 11, angle + 0.16);
+      path(flower, `M ${left.x} ${left.y} Q ${outer.x} ${outer.y} ${right.x} ${right.y} Q 0 0 ${left.x} ${left.y}`, { fill: "none", stroke: pink, "stroke-width": 1.2, opacity: 0.7 });
+    }
+    const sparkleElements = [];
+    for (let i = 0; i < 8; i++) {
+      const angle = (i / 8) * Math.PI * 2;
+      const p = polar(r + 34, angle);
+      const size = i % 2 === 0 ? 3 : 2;
+      sparkleElements.push(path(sparkles, `M ${p.x - size} ${p.y} L ${p.x + size} ${p.y} M ${p.x} ${p.y - size} L ${p.x} ${p.y + size}`, { stroke: pale, "stroke-width": 1.5, opacity: 0.7 }));
+    }
+    const pulseRing = addRing(pulse, r + 8, pink, 1.8, null, 0.6);
+    const particles = createParticles(particlesLayer, r + 23, pink, 24, 5);
+    return { update(time) {
+      const t = time * 0.001;
+      flower.setAttribute("transform", `rotate(${t * 4})`);
+      ring.setAttribute("transform", `rotate(${-t * 10})`);
+      const heartbeat = 1 + Math.max(0, Math.sin(t * 3)) * 0.08;
+      pulse.setAttribute("transform", `scale(${heartbeat})`);
+      for (let i = 0; i < sparkleElements.length; i++) {
+        sparkleElements[i].setAttribute("opacity", 0.2 + (Math.sin(t * 3 + i) + 1) * 0.32);
+      }
+      updateParticles(particles, time, -1, 5);
+    }};
+  }
+
+  function buildTreasured(root, scale) {
+    const diamond = group(), jewel = group(), ring = group(), shards = group(), particlesLayer = group();
+    root.append(diamond, jewel, ring, shards, particlesLayer);
+    const r = 46 * scale;
+    addRing(ring, r + 26, "#ffd86a", 1.6, "12 6", 0.9);
+    addRing(ring, r + 18, "#fff0ad", 1, "3 15", 0.75);
+    polygon(diamond, polygonPoints(4, r + 20), { fill: "none", stroke: "#ffd86a", "stroke-width": 2, opacity: 0.85 });
+    polygon(jewel, polygonPoints(4, r + 27), { fill: "none", stroke: "#fff0ad", "stroke-width": 1, opacity: 0.7 });
+    for (let i = 0; i < 8; i++) {
+      const angle = (i / 8) * Math.PI * 2;
+      const p1 = polar(r + 30, angle), p2 = polar(r + 36, angle);
+      line(shards, p1.x, p1.y, p2.x, p2.y, { stroke: "#ffd86a", "stroke-width": 2, opacity: 0.75 });
+    }
+    const particles = createParticles(particlesLayer, r + 26, "#ffd86a", 25, 6);
+    return { update(time) {
+      const t = time * 0.001;
+      diamond.setAttribute("transform", `rotate(${t * 14})`);
+      jewel.setAttribute("transform", `rotate(${-t * 20})`);
+      ring.setAttribute("transform", `rotate(${t * 7})`);
+      updateParticles(particles, time, 1, 4);
+    }};
+  }
+
+  function buildTrusted(root, scale) {
+    const shield = group(), lock = group(), ring = group(), signals = group(), particlesLayer = group();
+    root.append(shield, lock, ring, signals, particlesLayer);
+    const r = 45 * scale, green = "#62ffad";
+    addRing(ring, r + 26, green, 1.5, "4 8", 0.85);
+    addRing(ring, r + 17, "#bffff0", 1, "2 14", 0.7);
+    path(shield, `M 0 ${-r - 5} L ${r * 0.62} ${-r * 0.37} L ${r * 0.48} ${r * 0.48} L 0 ${r * 0.76} L ${-r * 0.48} ${r * 0.48} L ${-r * 0.62} ${-r * 0.37} Z`, { fill: "none", stroke: green, "stroke-width": 2, opacity: 0.8 });
+    path(lock, `M -8 -1 H 8 V 12 H -8 Z M -5 -1 V -7 C -5 -15 5 -15 5 -7 V -1`, { fill: "none", stroke: "#c7ffe3", "stroke-width": 1.6, opacity: 0.75 });
+    for (let i = 0; i < 6; i++) {
+      const y = -13 + i * 5;
+      line(signals, r + 11, y, r + 29, y, { stroke: green, "stroke-width": 1.5, opacity: 0.55 });
+    }
+    const particles = createParticles(particlesLayer, r + 25, green, 24, 7);
+    return { update(time) {
+      const t = time * 0.001;
+      shield.setAttribute("transform", `scale(${1 + Math.sin(t * 2) * 0.025})`);
+      ring.setAttribute("transform", `rotate(${t * 10})`);
+      signals.setAttribute("transform", `translate(${Math.sin(t * 2) * 3} 0)`);
+      updateParticles(particles, time, -1, 3);
+    }};
+  }
+
+  function buildVeryImportant(root, scale) {
+    const star = group(), orbit = group(), marks = group(), sparks = group(), particlesLayer = group();
+    root.append(star, orbit, marks, sparks, particlesLayer);
+    const r = 46 * scale;
+    addRing(orbit, r + 25, "#ffcf4a", 1.6, "18 5", 0.9);
+    addRing(orbit, r + 17, "#fff1ae", 1, "2 12", 0.7);
+    const points = [];
+    for (let i = 0; i < 10; i++) {
+      const angle = -Math.PI / 2 + (i / 10) * Math.PI * 2;
+      const radius = i % 2 === 0 ? r + 21 : r + 10;
+      const p = polar(radius, angle);
+      points.push(`${p.x},${p.y}`);
+    }
+    polygon(star, points.join(" "), { fill: "none", stroke: "#ffcf4a", "stroke-width": 2, opacity: 0.85 });
+    for (let i = 0; i < 4; i++) {
+      const angle = (i / 4) * Math.PI * 2;
+      const p = polar(r + 32, angle);
+      line(marks, p.x * 0.7, p.y * 0.7, p.x, p.y, { stroke: "#fff1ae", "stroke-width": 2, opacity: 0.7 });
+    }
+    const sparkElements = [];
+    for (let i = 0; i < 12; i++) {
+      const angle = (i / 12) * Math.PI * 2;
+      const p = polar(r + 35, angle);
+      sparkElements.push(circle(sparks, p.x, p.y, 2, { fill: "#ffcf4a", opacity: 0.7 }));
+    }
+    const particles = createParticles(particlesLayer, r + 26, "#ffcf4a", 26, 8);
+    return { update(time) {
+      const t = time * 0.001;
+      star.setAttribute("transform", `rotate(${t * 16})`);
+      orbit.setAttribute("transform", `rotate(${-t * 23})`);
+      for (let i = 0; i < sparkElements.length; i++) {
+        sparkElements[i].setAttribute("opacity", 0.2 + (Math.sin(t * 5 + i) + 1) * 0.3);
+      }
+      updateParticles(particles, time, 1, 4);
+    }};
+  }
+
+  function buildImportant(root, scale) {
+    const crosshair = group(), circuits = group(), ring = group(), beam = group(), particlesLayer = group();
+    root.append(crosshair, circuits, ring, beam, particlesLayer);
+    const r = 45 * scale;
+    addRing(ring, r + 24, "#ff914d", 1.5, "8 6", 0.9);
+    addRing(ring, r + 16, "#ff4f5f", 1, "2 16", 0.7);
+    const crossSize = r + 30;
+    line(crosshair, -crossSize, 0, crossSize, 0, { stroke: "#ff914d", "stroke-width": 1, opacity: 0.65 });
+    line(crosshair, 0, -crossSize, 0, crossSize, { stroke: "#ff914d", "stroke-width": 1, opacity: 0.65 });
+    for (let i = 0; i < 8; i++) {
+      const angle = (i / 8) * Math.PI * 2;
+      const p = polar(r + 22, angle);
+      path(circuits, `M ${p.x * 0.5} ${p.y * 0.5} L ${p.x * 0.78} ${p.y * 0.78} L ${p.x} ${p.y}`, { fill: "none", stroke: "#ff4f5f", "stroke-width": 1.4, opacity: 0.6 });
+    }
+    const beamLine = line(beam, -(r + 42), 0, r + 42, 0, { stroke: "#ff4f5f", "stroke-width": 2, opacity: 0.35 });
+    const particles = createParticles(particlesLayer, r + 24, "#ff914d", 24, 9);
+    return { update(time) {
+      const t = time * 0.001;
+      crosshair.setAttribute("transform", `rotate(${t * 27})`);
+      circuits.setAttribute("transform", `rotate(${-t * 15})`);
+      ring.setAttribute("transform", `rotate(${t * 8})`);
+      beam.setAttribute("transform", `rotate(${Math.sin(t * 1.4) * 65})`);
+      beamLine.setAttribute("opacity", 0.12 + (Math.sin(t * 5) + 1) * 0.15);
+      updateParticles(particles, time, 1, 4);
+    }};
+  }
+
+  function buildCloseFriend(root, scale) {
+    const infinity = group(), ring = group(), nodes = group(), particlesLayer = group();
+    root.append(infinity, ring, nodes, particlesLayer);
+    const r = 45 * scale;
+    addRing(ring, r + 24, "#66b7ff", 1.5, "4 10", 0.9);
+    addRing(ring, r + 17, "#b9e0ff", 1, "18 5", 0.7);
+    path(infinity, `M ${-r - 15} 0 C ${-r - 4} -19 ${-r + 7} -19 0 0 C ${r - 7} 19 ${r + 4} 19 ${r + 15} 0 C ${r + 4} -19 ${r - 7} -19 0 0 C ${-r + 7} 19 ${-r - 4} 19 ${-r - 15} 0`, { fill: "none", stroke: "#66b7ff", "stroke-width": 2, opacity: 0.8 });
+    for (let i = 0; i < 8; i++) {
+      const angle = (i / 8) * Math.PI * 2;
+      const p = polar(r + 27, angle);
+      circle(nodes, p.x, p.y, 2.5, { fill: "#b9e0ff", opacity: 0.75 });
+    }
+    const particles = createParticles(particlesLayer, r + 25, "#66b7ff", 25, 10);
+    return { update(time) {
+      const t = time * 0.001;
+      infinity.setAttribute("transform", `scale(${1 + Math.sin(t * 2) * 0.06})`);
+      ring.setAttribute("transform", `rotate(${t * 11})`);
+      nodes.setAttribute("transform", `rotate(${-t * 17})`);
+      updateParticles(particles, time, -1, 4);
+    }};
+  }
+
+  function buildFriend(root, scale) {
+    const dots = group(), smile = group(), ring = group(), particlesLayer = group();
+    root.append(dots, smile, ring, particlesLayer);
+    const r = 44 * scale;
+    addRing(ring, r + 24, "#70e89b", 1.5, "1 9", 0.85);
+    addRing(ring, r + 16, "#baffd3", 1, "2 14", 0.7);
+    path(smile, `M -16 5 Q 0 18 16 5`, { fill: "none", stroke: "#70e89b", "stroke-width": 2, opacity: 0.7 });
+    for (let i = 0; i < 16; i++) {
+      const angle = (i / 16) * Math.PI * 2;
+      const p = polar(r + 19, angle);
+      circle(dots, p.x, p.y, 2, { fill: "#70e89b", opacity: 0.7 });
+    }
+    const particles = createParticles(particlesLayer, r + 22, "#70e89b", 20, 11);
+    return { update(time) {
+      const t = time * 0.001;
+      dots.setAttribute("transform", `rotate(${t * 9})`);
+      ring.setAttribute("transform", `rotate(${-t * 5})`);
+      smile.setAttribute("transform", `scale(${1 + Math.sin(t * 2) * 0.08})`);
+      updateParticles(particles, time, 1, 4);
+    }};
+  }
+
+  function buildAcquaintance(root, scale) {
+    const satellite = group(), ring = group(), signals = group(), particlesLayer = group();
+    root.append(satellite, ring, signals, particlesLayer);
+    const r = 43 * scale;
+    addRing(ring, r + 24, "#aeb7c5", 1, "3 12", 0.75);
+    addRing(ring, r + 16, "#e2e7ee", 0.8, "1 16", 0.55);
+    line(satellite, 0, -(r + 18), r + 23, -(r + 33), { stroke: "#aeb7c5", "stroke-width": 1.2, opacity: 0.65 });
+    path(satellite, `M ${r + 14} ${-(r + 25)} Q ${r + 28} ${-(r + 17)} ${r + 33} ${-(r + 6)}`, { fill: "none", stroke: "#e2e7ee", "stroke-width": 1, opacity: 0.6 });
+    for (let i = 0; i < 3; i++) {
+      addRing(signals, r + 22 + i * 5, "#aeb7c5", 0.7, "1 10", 0.5);
+    }
+    const particles = createParticles(particlesLayer, r + 24, "#aeb7c5", 16, 12);
+    return { update(time) {
+      const t = time * 0.001;
+      satellite.setAttribute("transform", `rotate(${Math.sin(t * 0.7) * 7})`);
+      ring.setAttribute("transform", `rotate(${t * 4})`);
+      signals.setAttribute("transform", `scale(${1 + (Math.sin(t * 1.4) + 1) * 0.15})`);
+      updateParticles(particles, time, 1, 3);
+    }};
+  }
+
+  // ---------- registry ----------
+  const THEMES = [
+    { rank: "Origin",         theme: "origin",        build: buildOrigin,        initial: "O" },
+    { rank: "My Person",      theme: "person",        build: buildPerson,        initial: "P" },
+    { rank: "Inner Circle",   theme: "inner",         build: buildInner,         initial: "I" },
+    { rank: "Closest",        theme: "closest",       build: buildClosest,       initial: "C" },
+    { rank: "Cherished",      theme: "cherished",     build: buildCherished,     initial: "C" },
+    { rank: "Treasured",      theme: "treasured",     build: buildTreasured,     initial: "T" },
+    { rank: "Trusted",        theme: "trusted",       build: buildTrusted,       initial: "T" },
+    { rank: "Very Important", theme: "veryImportant", build: buildVeryImportant, initial: "V" },
+    { rank: "Important",      theme: "important",     build: buildImportant,     initial: "I" },
+    { rank: "Close Friend",   theme: "closeFriend",   build: buildCloseFriend,   initial: "C" },
+    { rank: "Friend",         theme: "friend",        build: buildFriend,        initial: "F" },
+    { rank: "Acquaintance",   theme: "acquaintance",  build: buildAcquaintance,  initial: "A" }
+  ];
+
+  const grid = document.getElementById("grid");
+  const effects = [];
+
+  for (const def of THEMES) {
+    const card = document.createElement("div");
+    card.className = "card";
+
+    const stage = document.createElement("div");
+    stage.className = "stage";
+
+    const avatar = document.createElement("div");
+    avatar.className = "avatar";
+    avatar.textContent = def.initial;
+
+    const svgRoot = svg("svg", { class: "fx-svg", viewBox: "0 0 180 180" });
+    const root = group();
+    root.setAttribute("transform", "translate(90 90)");
+    svgRoot.appendChild(root);
+
+    const built = def.build(root, 1);
+
+    stage.appendChild(svgRoot);
+    stage.appendChild(avatar);
+
+    const label = document.createElement("div");
+    label.className = "label";
+    label.innerHTML = `<span class="rank">${def.rank}</span><span class="theme">${def.theme}</span>`;
+
+    card.appendChild(stage);
+    card.appendChild(label);
+    grid.appendChild(card);
+
+    effects.push(built);
+  }
+
+  function loop(time) {
+    for (const fx of effects) fx.update(time);
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
