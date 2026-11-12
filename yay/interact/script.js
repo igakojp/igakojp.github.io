@@ -38,7 +38,7 @@
     // A post URL is resolved through /posts/{post_id}; its author's ID
     // is taken from the returned post.user.id.
     const postMatch=s.match(/(?:^|\/)conversation\/(\d+)(?:[/?#]|$)/i);
-    if(postMatch) return {type:"post",id:postMatch[1]};
+    if(postMatch) return {type:"conversation",id:postMatch[1]};
 
     // Keep support for entering a user ID or profile URL directly.
     if(/^\d+$/.test(s)) return {type:"user",id:s};
