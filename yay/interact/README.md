@@ -10,11 +10,11 @@ Yay! の公開プロフィールと公開タイムラインを読み取り、投
 
 ## 取得する情報
 
-- `GET https://api.yay.space/v2/users/fresh/{user_id}`
-- `GET https://api.yay.space/v2/posts/user_timeline?number=50&user_id={user_id}`
+- `GET https://proxy.cors.dev/https://api.yay.space/v2/users/fresh/{user_id}`
+- `GET https://proxy.cors.dev/https://api.yay.space/v2/posts/user_timeline?number=50&user_id={user_id}`
 - 続きのページは `from_post_id` を指定して取得します。
 
-ブラウザーからまず Yay! API (`https://api.yay.space/v2`) へ直接アクセスし、ブラウザーのCORS制限などで接続できない場合は `https://proxy.cors.dev/` を経由して再試行します。ログイン、Cookie、認証情報は送信しません。CORS リレーは第三者サービスであり、停止・制限・仕様変更の可能性があります。
+ブラウザーからまず Yay! API (`https://proxy.cors.dev/https://api.yay.space/v2`) へ直接アクセスし、ブラウザーのCORS制限などで接続できない場合は `https://proxy.cors.dev/` を経由して再試行します。ログイン、Cookie、認証情報は送信しません。CORS リレーは第三者サービスであり、停止・制限・仕様変更の可能性があります。
 
 API応答はJSONとして解析する前にHTTPステータスとContent-Typeを確認します。HTMLページが返った場合（例：`<!DOCTYPE html>`）はJSON解析エラーでクラッシュせず、HTTPステータスと原因の候補を画面に表示します。
 
@@ -84,7 +84,7 @@ The analyzer accepts `/user/{user_id}` profile URLs, `/post/{post_id}` post URLs
 入力欄には投稿URL（例：`https://yay.space/post/614516067`）も指定できます。
 
 1. 投稿IDをURLから抽出します。
-2. `GET https://api.yay.space/v2/posts/{post_id}` を呼び出します。
+2. `GET https://proxy.cors.dev/https://api.yay.space/v2/posts/{post_id}` を呼び出します。
 3. 応答の `post.user.id` から投稿者のユーザーIDを取得します。
 4. そのIDで既存の `GET /users/fresh/{user_id}` と公開タイムライン分析を開始します。
 
@@ -99,6 +99,6 @@ map layout and positioning remain consistent while the downloaded file is smalle
 
 
 ## API connection fallback update
-- Requests now try `https://api.yay.space/v2` directly first.
+- Requests now try `https://proxy.cors.dev/https://api.yay.space/v2` directly first.
 - If the browser rejects the direct request with a network/CORS `TypeError`, the same GET is retried through `https://proxy.cors.dev/`.
 - This avoids making the proxy the only route, but it cannot bypass Yay! API outages, upstream access restrictions, or proxy outages.

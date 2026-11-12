@@ -1,9 +1,8 @@
 (() => {
   "use strict";
-  // Try Yay!'s public API directly first. If the browser blocks the response
-  // (for example because of CORS), retry through the public CORS relay.
-  const API = "https://api.yay.space/v2";
-  const CORS_PROXY = "https://proxy.cors.dev/";
+  // Use the exact CORS proxy API endpoint supplied by the user.
+  // All API requests are sent through this relay; no direct Yay! API calls.
+  const API = "https://proxy.cors.dev/https://api.yay.space/v2";
   const $ = id => document.getElementById(id);
   const state = {
     profile:null, userId:null, posts:[], scores:new Map(), feed:[], pages:0,
@@ -49,41 +48,12 @@
 
     return null;
   }
-  async function fetchApi(url, options){
-    // Try both routes. Direct API access can fail because of CORS, network
-    // restrictions, or an HTTP error; none of those should prevent trying
-    // the relay as a fallback.
-    const candidates = [
-      { label: "Yay! API", url },
-      { label: "CORS relay", url: `${CORS_PROXY}${url}` }
-    ];
-    let lastError = null;
-    let lastResponse = null;
-
-    for(const candidate of candidates){
-      try{
-        const response = await fetch(candidate.url, options);
-        lastResponse = response;
-        if(response.ok || response.status === 429 || response.status >= 500){
-          return response;
-        }
-        lastError = new Error(`${candidate.label}: HTTP ${response.status}`);
-      }catch(error){
-        if(error?.name === "AbortError") throw error;
-        lastError = error;
-      }
-    }
-
-    // Preserve an HTTP response so apiGet can report its status and body.
-    if(lastResponse) return lastResponse;
-    throw lastError || new Error("Yay! APIに接続できませんでした。");
-  }
   async function apiGet(url, signal){
     let lastError;
     for(let attempt=0;attempt<3;attempt++){
       try{
         await waitForApiWindow(signal);
-        const res=await fetchApi(url,{method:"GET",mode:"cors",credentials:"omit",cache:"default",headers:{"Accept":"application/json"},signal});
+        const res=await fetch(url,{method:"GET",mode:"cors",credentials:"omit",cache:"default",headers:{"Accept":"application/json"},signal});
         if(res.status===429){
           const delay=retryDelay(res,attempt);
           apiCooldownUntil=Math.max(apiCooldownUntil,Date.now()+delay);
