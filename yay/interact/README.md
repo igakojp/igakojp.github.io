@@ -14,7 +14,7 @@ Yay! の公開プロフィールと公開タイムラインを読み取り、投
 - `GET https://api.yay.space/v2/posts/user_timeline?number=50&user_id={user_id}`
 - 続きのページは `from_post_id` を指定して取得します。
 
-ブラウザーから `https://proxy.cors.dev/` を経由して公開 GET API を呼び出します。ログイン、Cookie、認証情報は送信しません。CORS リレーは第三者サービスであり、停止・制限・仕様変更の可能性があります。
+ブラウザーからまず Yay! API (`https://api.yay.space/v2`) へ直接アクセスし、ブラウザーのCORS制限などで接続できない場合は `https://proxy.cors.dev/` を経由して再試行します。ログイン、Cookie、認証情報は送信しません。CORS リレーは第三者サービスであり、停止・制限・仕様変更の可能性があります。
 
 API応答はJSONとして解析する前にHTTPステータスとContent-Typeを確認します。HTMLページが返った場合（例：`<!DOCTYPE html>`）はJSON解析エラーでクラッシュせず、HTTPステータスと原因の候補を画面に表示します。
 
@@ -47,8 +47,9 @@ API応答はJSONとして解析する前にHTTPステータスとContent-Typeを
 
 - Profile pages: `https://yay.space/user/{user_id}`
 - Conversation pages: `https://yay.space/conversation/{conversation_id}`
+- Post pages: `https://yay.space/post/{post_id}`
 
-The analyzer accepts the `/user/{user_id}` profile URL as input. Evidence links open the matching `/conversation/{conversation_id}` page, and each discovered user detail includes a link to their `/user/{user_id}` profile.
+The analyzer accepts `/user/{user_id}` profile URLs, `/post/{post_id}` post URLs, and `/conversation/{conversation_id}` conversation URLs as input. Evidence links open the matching `/conversation/{conversation_id}` page, and each discovered user detail includes a link to their `/user/{user_id}` profile.
 
 
 ## v5 changes
@@ -95,3 +96,9 @@ The analyzer accepts the `/user/{user_id}` profile URL as input. Evidence links 
 The interaction-map PNG export is rendered at **1000 × 1000 pixels**.
 The existing 3000 × 3000 drawing layout is scaled down during export, so the
 map layout and positioning remain consistent while the downloaded file is smaller.
+
+
+## API connection fallback update
+- Requests now try `https://api.yay.space/v2` directly first.
+- If the browser rejects the direct request with a network/CORS `TypeError`, the same GET is retried through `https://proxy.cors.dev/`.
+- This avoids making the proxy the only route, but it cannot bypass Yay! API outages, upstream access restrictions, or proxy outages.
