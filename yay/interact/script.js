@@ -339,7 +339,7 @@
     clearError();
     const input=parseInput($("userInput").value);
     if(!input){
-      showError("Yay! の投稿URL（https://yay.space/post/投稿ID）、プロフィールURL、またはユーザーIDを入力してください。");
+      showError("Yay! の投稿URL（https://yay.space/conversation/投稿ID）、プロフィールURL、またはユーザーIDを入力してください。");
       return;
     }
     $("analyzeBtn").disabled=true;
