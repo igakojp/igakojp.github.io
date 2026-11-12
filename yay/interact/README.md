@@ -102,3 +102,10 @@ map layout and positioning remain consistent while the downloaded file is smalle
 - Requests now try `https://proxy.cors.dev/https://api.yay.space/v2` directly first.
 - If the browser rejects the direct request with a network/CORS `TypeError`, the same GET is retried through `https://proxy.cors.dev/`.
 - This avoids making the proxy the only route, but it cannot bypass Yay! API outages, upstream access restrictions, or proxy outages.
+
+
+## CORS proxy
+
+All public Yay! API GET requests are sent through `https://cors.tools/proxy?url=` with the complete Yay! API URL percent-encoded as the `url` query parameter. The browser does not request `api.yay.space` directly.
+
+Privacy note: cors.tools states that it records proxied request/response data and request metadata. This analyzer only requests public Yay! profile, post, and timeline data; do not use this proxy for private tokens, passwords, cookies, or other sensitive data.

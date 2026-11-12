@@ -1,8 +1,9 @@
 (() => {
   "use strict";
-  // Use the exact CORS proxy API endpoint supplied by the user.
-  // All API requests are sent through this relay; no direct Yay! API calls.
-  const API = "https://proxy.cors.dev/https://api.yay.space/v2";
+  // Public Yay! API and a separate CORS proxy transport.
+  // Every request is routed through cors.tools; the browser never calls Yay! directly.
+  const API = "https://api.yay.space/v2";
+  const CORS_PROXY = "https://cors.tools/proxy?url=";
   const $ = id => document.getElementById(id);
   const state = {
     profile:null, userId:null, posts:[], scores:new Map(), feed:[], pages:0,
@@ -53,7 +54,8 @@
     for(let attempt=0;attempt<3;attempt++){
       try{
         await waitForApiWindow(signal);
-        const res=await fetch(url,{method:"GET",mode:"cors",credentials:"omit",cache:"default",headers:{"Accept":"application/json"},signal});
+        const proxiedUrl = `${CORS_PROXY}${encodeURIComponent(url)}`;
+        const res=await fetch(proxiedUrl,{method:"GET",mode:"cors",credentials:"omit",cache:"no-store",headers:{"Accept":"application/json"},signal});
         if(res.status===429){
           const delay=retryDelay(res,attempt);
           apiCooldownUntil=Math.max(apiCooldownUntil,Date.now()+delay);
