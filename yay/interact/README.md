@@ -88,3 +88,10 @@ The analyzer accepts the `/user/{user_id}` profile URL as input. Evidence links 
 4. そのIDで既存の `GET /users/fresh/{user_id}` と公開タイムライン分析を開始します。
 
 従来どおり、ユーザーIDやプロフィールURLを直接入力する方法も利用できます。
+
+
+## PNG export size
+
+The interaction-map PNG export is rendered at **1000 × 1000 pixels**.
+The existing 3000 × 3000 drawing layout is scaled down during export, so the
+map layout and positioning remain consistent while the downloaded file is smaller.

@@ -393,10 +393,15 @@
     try{
       const users=sortedScores().slice(0,Number($("topLimit").value||50));
       if(!users.length) throw new Error("画像に表示するユーザーがまだいません。");
+      // Draw using the existing 3000x3000 layout coordinates, but export
+      // at 1000x1000 pixels to keep the PNG compact.
       const W=3000,H=3000,cx=1500,cy=1400;
+      const EXPORT_SCALE=1/3;
       const showNames=$("showUsernames")?.checked!==false;
-      const canvas=document.createElement("canvas");canvas.width=W;canvas.height=H;
+      const canvas=document.createElement("canvas");
+      canvas.width=1000;canvas.height=1000;
       const ctx=canvas.getContext("2d");
+      ctx.scale(EXPORT_SCALE,EXPORT_SCALE);
       const bg=ctx.createLinearGradient(0,0,W,H);bg.addColorStop(0,"#4d91cf");bg.addColorStop(.42,"#1b548e");bg.addColorStop(1,"#071a42");ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
       const glow=ctx.createRadialGradient(cx,cy,80,cx,cy,1150);glow.addColorStop(0,"rgba(82,190,255,.25)");glow.addColorStop(1,"rgba(5,16,44,0)");ctx.fillStyle=glow;ctx.fillRect(0,0,W,H);
       let seed=93073;const rand=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;};
