@@ -35,14 +35,14 @@
   function parseInput(value){
     const s=String(value||"").trim();
 
-    // A post URL is resolved through /posts/{post_id}; its author's ID
-    // is taken from the returned post.user.id.
-    const postMatch=s.match(/(?:^|\/)conversation\/(\d+)(?:[/?#]|$)/i);
-    if(postMatch) return {type:"conversation",id:postMatch[1]};
+    // Yay! post/conversation URLs are resolved through /posts/{post_id}.
+    // The author's ID is taken from the returned post.user.id.
+    const postMatch=s.match(/(?:https?:\\/\\/)?(?:www\\.)?yay\\.space\\/(?:conversation|post)\\/(\\d+)(?:[/?#]|$)/i);
+    if(postMatch) return {type:"post",id:postMatch[1]};
 
     // Keep support for entering a user ID or profile URL directly.
-    if(/^\d+$/.test(s)) return {type:"user",id:s};
-    const userMatch=s.match(/(?:users?|profile|u)\/(\d+)(?:[/?#]|$)/i);
+    if(/^\\d+$/.test(s)) return {type:"user",id:s};
+    const userMatch=s.match(/(?:https?:\\/\\/)?(?:www\\.)?yay\\.space\\/(?:users?|profile|u)\\/(\\d+)(?:[/?#]|$)/i);
     if(userMatch) return {type:"user",id:userMatch[1]};
 
     return null;
