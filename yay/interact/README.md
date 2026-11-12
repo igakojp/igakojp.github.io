@@ -76,3 +76,15 @@ The analyzer accepts the `/user/{user_id}` profile URL as input. Evidence links 
 - Honors `Retry-After`, applies exponential backoff with jitter after transient failures, and shares a cooldown after HTTP 429 responses.
 - Detects HTML/non-JSON responses before parsing and reports a readable diagnostic instead of `Unexpected token '<'`.
 - Does not bypass server-side rate limits. If Yay! or the CORS relay throttles or blocks requests, scanning waits and reports the limitation.
+
+
+## 投稿URLから分析を開始する機能
+
+入力欄には投稿URL（例：`https://yay.space/post/614516067`）も指定できます。
+
+1. 投稿IDをURLから抽出します。
+2. `GET https://api.yay.space/v2/posts/{post_id}` を呼び出します。
+3. 応答の `post.user.id` から投稿者のユーザーIDを取得します。
+4. そのIDで既存の `GET /users/fresh/{user_id}` と公開タイムライン分析を開始します。
+
+従来どおり、ユーザーIDやプロフィールURLを直接入力する方法も利用できます。

@@ -32,11 +32,20 @@
   const setHidden = (id, yes) => $(id).classList.toggle("hidden", yes);
   function showError(message){ $("errorBox").textContent=message; setHidden("errorBox",false); }
   function clearError(){ $("errorBox").textContent=""; setHidden("errorBox",true); }
-  function extractId(value){
+  function parseInput(value){
     const s=String(value||"").trim();
-    if (/^\d+$/.test(s)) return s;
-    const match=s.match(/(?:users?|profile|u)\/(\d+)(?:[/?#]|$)/i) || s.match(/(\d+)(?:\/)?(?:[?#].*)?$/);
-    return match ? match[1] : null;
+
+    // A post URL is resolved through /posts/{post_id}; its author's ID
+    // is taken from the returned post.user.id.
+    const postMatch=s.match(/(?:^|\/)post\/(\d+)(?:[/?#]|$)/i);
+    if(postMatch) return {type:"post",id:postMatch[1]};
+
+    // Keep support for entering a user ID or profile URL directly.
+    if(/^\d+$/.test(s)) return {type:"user",id:s};
+    const userMatch=s.match(/(?:users?|profile|u)\/(\d+)(?:[/?#]|$)/i);
+    if(userMatch) return {type:"user",id:userMatch[1]};
+
+    return null;
   }
   async function apiGet(url, signal){
     let lastError;
@@ -328,11 +337,30 @@
   }
   async function startAnalysis(){
     clearError();
-    const id=extractId($("userInput").value);
-    if(!id){showError("Yay! のユーザーID、またはIDを含むプロフィールURLを入力してください。");return;}
+    const input=parseInput($("userInput").value);
+    if(!input){
+      showError("Yay! の投稿URL（https://yay.space/post/投稿ID）、プロフィールURL、またはユーザーIDを入力してください。");
+      return;
+    }
     $("analyzeBtn").disabled=true;
     try{
-      const data=await apiGet(`${API}/users/fresh/${id}`);
+      let userId=input.id;
+
+      if(input.type==="post"){
+        $("analyzeBtn").querySelector("span").textContent="投稿を確認中…";
+        const postData=await apiGet(`${API}/posts/${encodeURIComponent(input.id)}`);
+        const post=postData.post || postData.data?.post || postData;
+        if(postData.result && postData.result!=="success"){
+          throw new Error(postData.message || "投稿情報を取得できませんでした。");
+        }
+        if(!post?.user?.id){
+          throw new Error("投稿は取得できましたが、投稿者のユーザーID (post.user.id) が応答にありませんでした。");
+        }
+        userId=String(post.user.id);
+      }
+
+      $("analyzeBtn").querySelector("span").textContent="プロフィールを取得中…";
+      const data=await apiGet(`${API}/users/fresh/${encodeURIComponent(userId)}`);
       const p=data.user || data.profile || data;
       if(!p?.id)throw new Error("プロフィール情報を取得できませんでした。");
       state.userId=Number(p.id);updateProfile(p);resetScan();
@@ -341,7 +369,10 @@
       $("coverageNote").textContent="公開タイムラインに接続中…";
       await runScan();
     }catch(e){showError(e.message);}
-    finally{$("analyzeBtn").disabled=false;}
+    finally{
+      $("analyzeBtn").disabled=false;
+      $("analyzeBtn").querySelector("span").textContent="分析を開始";
+    }
   }
   function download(name,content,type){
     const blob=new Blob([content],{type}),url=URL.createObjectURL(blob),a=document.createElement("a");
