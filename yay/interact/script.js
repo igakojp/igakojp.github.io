@@ -50,15 +50,33 @@
     return null;
   }
   async function fetchApi(url, options){
-    try{
-      // Direct access is faster and avoids relying on a third-party relay
-      // when Yay!'s API permits browser access.
-      return await fetch(url, options);
-    }catch(error){
-      // A browser CORS/network TypeError can be retried through the relay.
-      if(!(error instanceof TypeError)) throw error;
-      return await fetch(`${CORS_PROXY}${url}`, options);
+    // Try both routes. Direct API access can fail because of CORS, network
+    // restrictions, or an HTTP error; none of those should prevent trying
+    // the relay as a fallback.
+    const candidates = [
+      { label: "Yay! API", url },
+      { label: "CORS relay", url: `${CORS_PROXY}${url}` }
+    ];
+    let lastError = null;
+    let lastResponse = null;
+
+    for(const candidate of candidates){
+      try{
+        const response = await fetch(candidate.url, options);
+        lastResponse = response;
+        if(response.ok || response.status === 429 || response.status >= 500){
+          return response;
+        }
+        lastError = new Error(`${candidate.label}: HTTP ${response.status}`);
+      }catch(error){
+        if(error?.name === "AbortError") throw error;
+        lastError = error;
+      }
     }
+
+    // Preserve an HTTP response so apiGet can report its status and body.
+    if(lastResponse) return lastResponse;
+    throw lastError || new Error("Yay! APIに接続できませんでした。");
   }
   async function apiGet(url, signal){
     let lastError;
@@ -356,6 +374,7 @@
       return;
     }
     $("analyzeBtn").disabled=true;
+    $("analyzeBtn").querySelector("span").textContent="接続中…";
     try{
       let userId=input.id;
 
