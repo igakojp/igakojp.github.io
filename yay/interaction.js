@@ -217,7 +217,7 @@
     const eventKey=`${post.id}:${reason}`;
     if(!entry.evidence.some(x=>x.eventKey===eventKey)) {
       entry.points++;
-      entry.evidence.push({eventKey,postId:post.id,text:post.text||"",createdAt:post.created_at||0,reason,url:`https://yay.space/psot/${post.id}`});
+      entry.evidence.push({eventKey,postId:post.id,text:post.text||"",createdAt:post.created_at||0,reason,url:`https://yay.space/post/${post.id}`});
     }
     renderRanking();
   }
