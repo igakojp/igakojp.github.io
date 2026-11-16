@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#10111a">
+  <title>Yay! リーダーボード</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="ambient ambient-a"></div><div class="ambient ambient-b"></div>
+  <header class="topbar">
+    <a class="brand" href="https://yay.space/" target="_blank" rel="noopener"><img class="brand-logo" src="https://yay.space/images/logotype.svg" alt="Yay!"><span><b>リーダーボード</b></span></a>
+    <nav class="section-nav" aria-label="マップ切り替え">
+      <a class="section-link" href="interaction.html">交流マップ</a>
+      <a class="section-link" href="review.html">レターマップ</a>
+      <a class="section-link active" href="leaderboard.html" aria-current="page">リーダーボード</a>
+      <a class="section-link" href="profile-card.html">自己紹介カード</a>
+    </nav>
+    <div class="top-actions"><span class="privacy-pill"><i></i> 公開データのみ</span></div>
+  </header>
+
+  <main class="shell lb-shell">
+    <section class="intro">
+      <div class="eyebrow">YAY! LEADERBOARD</div>
+      <h1>いいねするだけで、<br><span>みんなの順位に参加。</span></h1>
+      <p>対象の投稿に「いいね」するだけで参加できます。返信やメンションは不要です。フォロワー数・投稿数などで順位が決まり、好きなユーザーから下に10人分を画像にして保存できます。</p>
+    </section>
+
+    <section class="panel lb-join">
+      <div>
+        <b>参加のしくみ</b>
+        <p>下の投稿に「いいね」すると参加者として表示され、いいねを外すと一覧からも外れます。鍵アカウントなど情報を取得できないユーザーは、一番下に「特定できないユーザー」として表示されます。データはこのページを開いている間だけメモリ上に保持され、保存されません。</p>
+      </div>
+      <a class="secondary-btn lb-link" href="https://yay.space/post/615227650" target="_blank" rel="noopener">いいねする投稿を開く</a>
+    </section>
+
+    <section class="panel lb-status" aria-live="polite">
+      <div class="lb-stat"><b id="statCount">—</b><span>参加者</span></div>
+      <div class="lb-stat"><b id="statDetail">—</b><span>詳細データの読み込み</span></div>
+      <div class="lb-stat"><b id="statUpdated">—</b><span>最終更新</span></div>
+      <div class="lb-status-actions">
+        <label class="username-toggle"><input id="autoRefresh" type="checkbox" checked><span>60秒ごとに自動更新</span></label>
+        <button id="refreshBtn" class="secondary-btn" type="button">今すぐ更新</button>
+      </div>
+      <div id="errorBox" class="error-box hidden" role="alert"></div>
+    </section>
+
+    <section class="panel lb-tools">
+      <div class="lb-tools-row">
+        <label class="top-limit">並び替え
+          <select id="sortKey"></select>
+        </label>
+        <button id="sortDir" class="secondary-btn" type="button" aria-label="昇順・降順を切り替え">降順 ↓</button>
+        <input id="userFilter" class="lb-filter" type="search" placeholder="名前・IDで絞り込み" aria-label="ユーザー検索" autocomplete="off">
+      </div>
+      <div class="lb-export">
+        <div class="section-head"><div><div class="eyebrow">画像で保存</div><h3>ユーザーを選んで、そこから下の10人をダウンロード</h3></div></div>
+        <div class="lb-export-row">
+          <label class="lb-field lb-me">開始ユーザー（このユーザーから下に10人）<select id="startUser"></select></label>
+          <button id="imageBtn" class="primary-btn" type="button"><span>画像をダウンロード</span></button>
+        </div>
+        <p id="rangeHint" class="subtle lb-hint">選んだユーザーから順位が下に向かって10人分（残りが10人未満ならその人数）を、上が高く下が低い順で画像にします。</p>
+      </div>
+    </section>
+
+    <section class="panel lb-board">
+      <div class="lb-scroll">
+        <table class="lb-table">
+          <thead id="lbHead"></thead>
+          <tbody id="lbBody"><tr><td colspan="11" class="empty-state">読み込み中…</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+    <p id="starNote" class="map-disclaimer hidden">＊ 一部の項目（ログイン連続日数・フォロー数・登録日）を取得できなかったアカウントは、その項目を0として計算しています。</p>
+    <section id="unknownPanel" class="panel lb-unknown hidden">
+      <div class="section-head"><div><div class="eyebrow">UNIDENTIFIABLE</div><h3>特定できないユーザー <span id="unknownCount"></span></h3></div></div>
+      <p class="subtle">鍵アカウントなどでタイムラインを見られないため、順位には含めていません。</p>
+      <ul id="unknownList" class="lb-unknown-list"></ul>
+    </section>
+
+    <details class="panel lb-formula">
+      <summary>ミックスレベルの計算方法</summary>
+      <div class="lb-formula-body">
+        <p>0以上で上限のないスコアです。活動量を対数でならして加点し、フォローしすぎている場合だけ減点します（フォロバ目的の相互フォロー対策）。</p>
+        <pre>平均投稿数（補正）   = 総投稿数 ÷ max(アカウント年齢日数, 14)
+フォロワー点         = log(1 + フォロワー数)       × 0.30
+投稿点               = log(1 + 補正した平均投稿数)  × 0.30
+連続ログイン点       = log(1 + ログイン連続日数)    × 0.20
+年齢点               = log(1 + min(年齢日数, 3650)) × 0.10
+加点                 = 100 × (4つの合計)
+減点                 = 100 × log(1 + max(0, フォロー数 − 100)) × 0.12
+ミックスレベル       = max(0, 加点 − 減点)　（小数第1位まで表示）</pre>
+        <p>表の「1日平均投稿」は 総投稿数 ÷ アカウント年齢日数 の実測値です。補正値はレベルの計算にだけ使います。</p>
+      </div>
+    </details>
+
+    <footer><span>Yay! リーダーボード</span><span>公開情報のみ · ログイン不要 · データは保存されません</span><div id="creatorCredit" class="creator-credit" aria-live="polite">制作者情報を読み込み中…</div></footer>
+  </main>
+  <script src="site.js"></script>
+  <script src="leaderboard.js"></script>
+</body>
+</html>
