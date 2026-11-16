@@ -254,3 +254,14 @@ body.pc-modal-open{overflow:hidden}
 .pc-tagrow2 .secondary-btn{min-height:40px;padding:0 10px;white-space:nowrap;flex:none}
 button.pc-tagthumb{padding:0;cursor:pointer;font:inherit;color:var(--muted)}
 .pc-field .pc-warn{display:block}
+.pc-pick-item[hidden]{display:none}
+.pc-pick-item[hidden]{display:none}
+.pc-modal.lk{z-index:70}
+.lk-link{font-size:13px;color:#46caff}
+.likers-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin-top:12px}
+.likers-row .secondary-btn{min-height:40px}
+#pkLikers{text-align:left;line-height:1.5}
+
+/* Like-based user picker on the initial profile-card account screen */
+.pc-likers-entry{flex:0 0 auto;min-height:40px;white-space:nowrap}
+@media(max-width:640px){.pc-likers-entry{width:100%}}
