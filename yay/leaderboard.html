@@ -15,6 +15,7 @@
       <a class="section-link" href="interaction.html">交流マップ</a>
       <a class="section-link" href="review.html">レターマップ</a>
       <a class="section-link active" href="leaderboard.html" aria-current="page">リーダーボード</a>
+      <a class="section-link" href="profile-card.html">自己紹介カード</a>
     </nav>
     <div class="top-actions"><span class="privacy-pill"><i></i> 公開データのみ</span></div>
   </header>
@@ -77,6 +78,22 @@
       <p class="subtle">鍵アカウントなどでタイムラインを見られないため、順位には含めていません。</p>
       <ul id="unknownList" class="lb-unknown-list"></ul>
     </section>
+
+    <details class="panel lb-formula">
+      <summary>ミックスレベルの計算方法</summary>
+      <div class="lb-formula-body">
+        <p>0以上で上限のないスコアです。活動量を対数でならして加点し、フォローしすぎている場合だけ減点します（フォロバ目的の相互フォロー対策）。</p>
+        <pre>平均投稿数（補正）   = 総投稿数 ÷ max(アカウント年齢日数, 14)
+フォロワー点         = log(1 + フォロワー数)       × 0.30
+投稿点               = log(1 + 補正した平均投稿数)  × 0.30
+連続ログイン点       = log(1 + ログイン連続日数)    × 0.20
+年齢点               = log(1 + min(年齢日数, 3650)) × 0.10
+加点                 = 100 × (4つの合計)
+減点                 = 100 × log(1 + max(0, フォロー数 − 100)) × 0.12
+ミックスレベル       = max(0, 加点 − 減点)　（小数第1位まで表示）</pre>
+        <p>表の「1日平均投稿」は 総投稿数 ÷ アカウント年齢日数 の実測値です。補正値はレベルの計算にだけ使います。</p>
+      </div>
+    </details>
 
     <footer><span>Yay! リーダーボード</span><span>公開情報のみ · ログイン不要 · データは保存されません</span><div id="creatorCredit" class="creator-credit" aria-live="polite">制作者情報を読み込み中…</div></footer>
   </main>

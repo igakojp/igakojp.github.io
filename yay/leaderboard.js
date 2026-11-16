@@ -128,7 +128,14 @@
     try {
       const tl = await timelineUser(u.id);
       if (state.users.get(u.id) !== u) return;
-      if (tl === "private") { u.status = "private"; await sleep(250); return; }   // no profile call for private users
+      if (tl === "private") {
+        u.status = "private";   // never ranked; only the public profile (name/icon) is fetched
+        try {
+          const d = await apiGet(`${API}/users/${u.id}`);
+          if (state.users.get(u.id) === u) { if (d?.user?.nickname) u.nickname = d.user.nickname; const av = avatarOf(d?.user); if (av) u.avatar = av; }
+        } catch (e) { if (e.code === 429) return; }
+        await sleep(250); return;
+      }   // no profile call for private users
       absorb(u, tl);
       if (missing(u)) {
         const data = await apiGet(`${API}/users/${u.id}`);
@@ -258,7 +265,7 @@
     const list = [...state.users.values()].filter(u => u.status === "private" || u.status === "failed");
     $("unknownPanel").classList.toggle("hidden", !list.length);
     $("unknownCount").textContent = list.length ? `（${fmt(list.length)}人）` : "";
-    $("unknownList").innerHTML = list.map(u => `<li><a href="https://yay.space/user/${esc(u.id)}" target="_blank" rel="noopener"><i>?</i>@${esc(u.id)}</a></li>`).join("");
+    $("unknownList").innerHTML = list.map(u => `<li><a href="https://yay.space/user/${esc(u.id)}" target="_blank" rel="noopener">${u.avatar ? `<img src="${esc(u.avatar)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : "<i>?</i>"}${u.nickname ? esc(u.nickname) + " " : ""}<span>@${esc(u.id)}</span></a></li>`).join("");
   }
   function renderStatus(rows) {
     const all = state.users.size, unknown = [...state.users.values()].filter(u => u.status === "private" || u.status === "failed").length;

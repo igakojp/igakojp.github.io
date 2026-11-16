@@ -1,3 +1,10 @@
+/* Canvas roundRect polyfill for older Safari */
+if (typeof CanvasRenderingContext2D !== "undefined" && !CanvasRenderingContext2D.prototype.roundRect) {
+  CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
+    let rr = Array.isArray(r) ? r[0] : r; rr = Math.max(0, Math.min(rr || 0, Math.abs(w) / 2, Math.abs(h) / 2));
+    this.moveTo(x + rr, y); this.arcTo(x + w, y, x + w, y + h, rr); this.arcTo(x + w, y + h, x, y + h, rr); this.arcTo(x, y + h, x, y, rr); this.arcTo(x, y, x + w, y, rr); this.closePath();
+  };
+}
 (() => {
   "use strict";
   const CREATOR_ID = "11044343";
