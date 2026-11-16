@@ -23,6 +23,7 @@
     <section class="intro"><div class="eyebrow">YAY! PROFILE CARD</div><h1>自分だけの、<br><span>カードを作ろう。</span></h1><p>自己紹介カードとして作れますが、ランキングや相関図など、自由な使い方もできます。投稿のURLまたはユーザーIDで、カードを作るアカウントを選びます。文字・画像・タグ・ユーザー・お絵描きを自由に置いて、PNG画像で保存できます。</p></section>
     <section class="panel pc-pick">
       <label class="pc-field">投稿のURL、プロフィールURL、またはユーザーID<input id="pcInput" class="pc-in" placeholder="例: https://yay.space/post/123… または 11044343" autocomplete="off" spellcheck="false"></label>
+      <button id="pcLikers" class="secondary-btn pc-likers-entry" type="button">♥ いいねした人から探す</button>
       <label class="username-toggle pc-own"><input id="pcOwn" type="checkbox"><span>自分のアカウントです（カードは自分のアカウントでのみ作ってください）</span></label>
       <button id="pcFind" class="primary-btn" type="button"><span>ユーザーを確認</span></button>
       <div id="pcError" class="error-box hidden" role="alert"></div>
@@ -98,8 +99,10 @@
   <div id="pcPicker" class="pc-modal hidden" role="dialog" aria-modal="true" aria-labelledby="pkTitle">
     <div class="pc-modal-card panel">
       <div class="pc-modal-head"><b id="pkTitle">ユーザーを追加</b><button id="pkClose" class="secondary-btn" type="button">閉じる</button></div>
-      <label class="pc-field">ユーザーID・プロフィールURL・投稿のURL<input id="pkInput" class="pc-in" autocomplete="off" spellcheck="false" placeholder="例: 11044343"></label>
-      <button id="pkFind" class="primary-btn" type="button"><span>このユーザーを追加</span></button>
+      <label class="pc-field">ユーザーID・プロフィールURL・投稿のURL（名前を入れると、フォロワーの中から探します）<input id="pkInput" class="pc-in" autocomplete="off" spellcheck="false" placeholder="ID・URL、または名前で探す"></label>
+      <button id="pkFind" class="primary-btn" type="button"><span>追加する／名前で探す</span></button>
+      <button id="pkLikers" class="secondary-btn" type="button">いいねした人から探す</button>
+      <p class="subtle">「<a href="https://yay.space/post/615116972" target="_blank" rel="noopener">この投稿</a>」にいいねすると、名前で探せます。</p>
       <p id="pkErr" class="pc-warn hidden"></p>
       <div id="pkFolLbl" class="pc-lbl">フォロワーから選ぶ</div>
       <div id="pkList" class="pc-picklist" tabindex="0"></div>
@@ -107,6 +110,7 @@
     </div>
   </div>
   <script src="site.js"></script>
+  <script src="likers.js"></script>
   <script src="profile-card.js"></script>
 </body>
 </html>

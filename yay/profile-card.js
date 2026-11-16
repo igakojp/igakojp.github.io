@@ -349,41 +349,69 @@
   let pickCb = null;
   const modalOpen = () => !$("pcPicker").classList.contains("hidden");
   function openPicker(cb) {
-    pickCb = cb; $("pkErr").classList.add("hidden"); $("pkInput").value = "";
+    pickCb = cb; $("pkErr").classList.add("hidden"); $("pkInput").value = ""; query = ""; searchTok++;
     $("pkFolLbl").textContent = `${S.user.nickname} さんのフォロワーから選ぶ`; $("pcPicker").classList.remove("hidden"); document.body.classList.add("pc-modal-open");
     if (S.fol.uid !== String(S.user.id)) { S.fol = { uid: String(S.user.id), users: [], next: null, done: false, loading: false }; $("pkList").innerHTML = ""; $("pkMore").textContent = ""; }
-    if (!S.fol.users.length) loadFollowers();
+    if (!S.fol.users.length) loadFollowers(); else { $("pkMore").textContent = moreText(); }
   }
   function closePicker() { $("pcPicker").classList.add("hidden"); document.body.classList.remove("pc-modal-open"); pickCb = null; }
   async function pickUser(u) {
     const cb = pickCb; closePicker(); if (!cb) return;
     try { await cb(u); } catch (e) { showErr(e.message || "追加できませんでした。"); }
   }
+  /* follower list: names are filtered as you type; when the text is not an ID/URL it searches the owner's followers */
+  let query = "", searchTok = 0;
+  const isIdLike = t => /user\/\d+|post\/\d+|^@?\d+$/.test(String(t).trim());
+  const norm = x => String(x || "").normalize("NFKC").toLowerCase();
+  const matches = name => { const n = norm(name); return norm(query).split(/\s+/).filter(Boolean).every(t => n.includes(t)); };
+  function applyFilter() {
+    const searching = !!query.trim() && !isIdLike(query); let shown = 0;
+    [...$("pkList").children].forEach(b => { const ok = !searching || matches(b.dataset.n); b.hidden = !ok; if (ok) shown++; });
+    return { searching, shown };
+  }
+  function moreText() {
+    const f = S.fol, { searching, shown } = applyFilter(), q = query.trim();
+    if (searching) return shown ? `「${q}」に合う人: ${shown}人${f.done ? "（全員を確認しました）" : `（${f.users.length}人を確認済み。続きを探しています…）`}` : f.done ? `「${q}」に合う人は見つかりませんでした。` : `探しています…（${f.users.length}人を確認済み）`;
+    return f.done ? (f.users.length ? "これで全員です。" : "フォロワーが見つかりませんでした。") : "一番下までスクロールすると、続きを読み込みます。";
+  }
   function renderFollowers(list) {
     const box = $("pkList");
     list.forEach(u => {
       const b = el("button", { type: "button", className: "pc-pick-item" }, el("img", { src: u.profile_icon_thumbnail || u.profile_icon || "", alt: "", loading: "lazy", referrerPolicy: "no-referrer" }), el("span", { textContent: u.nickname || `@${u.id}` }));
-      b.onclick = () => pickUser(u); box.append(b);
+      b.dataset.n = u.nickname || ""; b.onclick = () => pickUser(u); box.append(b);
     });
   }
   async function loadFollowers() {
-    const f = S.fol; if (f.loading || f.done) return; f.loading = true; $("pkMore").textContent = "読み込み中…";
+    const f = S.fol; if (f.loading || f.done) return; f.loading = true; f.error = false; $("pkMore").textContent = "読み込み中…";
     try {
       const d = await getJson(`${V3}/users/${f.uid}/followers?number=50${f.next ? `&from=${encodeURIComponent(f.next)}` : ""}`);
       const seen = new Set(f.users.map(u => String(u.id))), fresh = (Array.isArray(d.users) ? d.users : []).filter(u => u && !seen.has(String(u.id)));
-      f.users.push(...fresh); renderFollowers(fresh);
+      f.users.push(...fresh); f.pages = (f.pages || 0) + 1; renderFollowers(fresh);
       f.next = d.next_page_value ? String(d.next_page_value) : null; if (!f.next || !fresh.length) f.done = true;
-      $("pkMore").textContent = f.done ? (f.users.length ? "これで全員です。" : "フォロワーが見つかりませんでした。") : "一番下までスクロールすると、続きを読み込みます。";
-    } catch (e) { $("pkMore").textContent = e.message; if (e.stop) f.done = true; }
+      $("pkMore").textContent = moreText();
+    } catch (e) { f.error = true; $("pkMore").textContent = e.message; if (e.stop) f.done = true; }
     finally { f.loading = false; }
-    const l = $("pkList"); if (!f.done && modalOpen() && l.scrollHeight <= l.clientHeight + 4) loadFollowers();
+    const l = $("pkList"); if (!f.done && !f.error && modalOpen() && (f.pages || 0) < 40 && l.scrollHeight <= l.clientHeight + 4) loadFollowers();
+  }
+  async function searchMore() {
+    const tok = ++searchTok, f = S.fol; $("pkMore").textContent = moreText();
+    while (tok === searchTok && !f.done && !f.error && modalOpen()) {
+      const { searching, shown } = applyFilter(); if (!searching || shown >= 8 || (f.pages || 0) >= 40) break;
+      if (f.loading) { await new Promise(r => setTimeout(r, 200)); continue; }
+      await loadFollowers();
+    }
+    if (tok === searchTok && !f.error) $("pkMore").textContent = moreText();
   }
   $("pkList").addEventListener("scroll", () => { const l = $("pkList"); if (l.scrollTop + l.clientHeight >= l.scrollHeight - 60) loadFollowers(); });
+  $("pkInput").addEventListener("input", () => { query = $("pkInput").value; $("pkErr").classList.add("hidden"); const { searching } = applyFilter(); if (searching) searchMore(); else { searchTok++; $("pkMore").textContent = moreText(); } });
   $("pkFind").onclick = async () => {
-    const btn = $("pkFind"); btn.disabled = true; $("pkErr").classList.add("hidden");
-    try { pickUser(await resolveUser($("pkInput").value)); } catch (e) { $("pkErr").textContent = e.message; $("pkErr").classList.remove("hidden"); } finally { btn.disabled = false; }
+    const v = $("pkInput").value.trim(), btn = $("pkFind"); $("pkErr").classList.add("hidden");
+    if (v && !isIdLike(v)) { query = v; searchMore(); return; }   // not an ID/URL: look for the name among the followers
+    btn.disabled = true;
+    try { pickUser(await resolveUser(v)); } catch (e) { $("pkErr").textContent = e.message; $("pkErr").classList.remove("hidden"); } finally { btn.disabled = false; }
   };
   $("pkInput").addEventListener("keydown", e => { if (e.key === "Enter" && !e.isComposing) $("pkFind").click(); });
+  $("pkLikers").onclick = () => { if (window.YayLikers) window.YayLikers.open(u => pickUser(u)); };
   $("pkClose").onclick = closePicker; $("pcPicker").addEventListener("pointerdown", e => { if (e.target === $("pcPicker")) closePicker(); });
   $("pcUserAdd").onclick = () => openPicker(async u => {
     const img = await loadImg(u.profile_icon || u.profile_icon_thumbnail);
@@ -477,6 +505,17 @@
     S.objs.push(mk("text", { x: 80, y: 460, w: 320, size: 40, bold: true, text: u.nickname, api: true }));
     $("pcEditor").classList.remove("hidden"); S.sel = null; syncPanel(); draw(); $("pcEditor").scrollIntoView({ behavior: "smooth", block: "start" });
   }
-  $("pcFind").onclick = findUser; $("pcInput").addEventListener("keydown", e => { if (e.key === "Enter" && !e.isComposing) findUser(); });
+  $("pcFind").onclick = findUser;
+  // Use the same liker picker both before opening the editor and inside the user-add dialog.
+  $("pcLikers").onclick = () => {
+    if (!window.YayLikers) return showErr("いいねした人の一覧を読み込めませんでした。ページを再読み込みしてください。");
+    window.YayLikers.open(u => {
+      $("pcInput").value = String(u.id);
+      showErr("");
+      $("pcUser").classList.add("hidden");
+      $("pcInput").focus();
+    });
+  };
+  $("pcInput").addEventListener("keydown", e => { if (e.key === "Enter" && !e.isComposing) findUser(); });
   syncTheme(); buildTiles();
 })();
