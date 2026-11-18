@@ -48,7 +48,7 @@
     let attempt = 0;
     while (true) {
       try {
-        const res = await fetch(url, { method: "GET", mode: "cors", credentials: "omit", headers: { Accept: "application/json" } });
+        const res = await window.YayAPI.fetch(url, { method: "GET", headers: { Accept: "application/json" } });
         if (res.status === 429) throw stopForRateLimit();
         if (res.status >= 500 && attempt++ < 2) { await sleep(1000 * 2 ** attempt); continue; }
         const body = await res.text();
@@ -114,7 +114,7 @@
   }
   // Returns the timeline's user object, or "private" when the timeline cannot be viewed (error_code -363).
   async function timelineUser(id) {
-    const res = await fetch(`${API}/posts/user_timeline?number=1&user_id=${id}`, { method: "GET", mode: "cors", credentials: "omit", headers: { Accept: "application/json" } });
+    const res = await window.YayAPI.fetch(`${API}/posts/user_timeline?number=1&user_id=${id}`, { method: "GET", headers: { Accept: "application/json" } });
     if (res.status === 429) throw stopForRateLimit();
     let data = null; try { data = JSON.parse(await res.text()); } catch { /* handled below */ }
     if (Number(data?.error_code) === 429 || (data && data.result && data.result !== "success" && /429|rate.?limit|too many requests|アクセス制限/i.test(String(data.message || "")))) throw stopForRateLimit();
@@ -362,7 +362,7 @@
       let creator = window.__yayCreator || null;
       if (!creator) {
         try {
-          const r = await fetch(`${API}/users/11044343`, { headers: { Accept: "application/json" }, mode: "cors", credentials: "omit" });
+          const r = await window.YayAPI.fetch(`${API}/users/11044343`, { headers: { Accept: "application/json" } });
           if (r.ok) { const d = await r.json(); if (d?.result === "success" && d.user?.id) creator = { id: String(d.user.id), nickname: d.user.nickname, avatar: avatarOf(d.user) }; }
         } catch { /* credit is optional */ }
       }

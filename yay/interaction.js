@@ -78,7 +78,7 @@
       if(signal?.aborted) throw new DOMException("停止", "AbortError");
       await waitForApiWindow(signal);
       try{
-        const res=await fetch(url,{method:"GET",mode:"cors",credentials:"omit",cache:"default",headers:{"Accept":"application/json"},signal});
+        const res=await window.YayAPI.fetch(url,{method:"GET",headers:{"Accept":"application/json"},signal});
         if(res.status===429) throw stopForRateLimit();
         if(res.status>=500){
           if(networkAttempt++<2){const delay=Math.min(15000,1000*(2**networkAttempt));apiCooldownUntil=Math.max(apiCooldownUntil,Date.now()+delay);await waitForApiWindow(signal);continue;}
@@ -477,7 +477,7 @@
       }
       let creator=window.__yayCreator||null;
       if(!creator){
-        try{const r=await fetch("https://proxy.cors.dev/https://api.yay.space/v2/users/11044343",{headers:{Accept:"application/json"},mode:"cors",credentials:"omit"});if(r.ok){const d=await r.json();if(d?.result==="success"&&d.user?.id)creator={id:String(d.user.id),nickname:d.user.nickname,avatar:avatarOf(d.user)};}}catch{}
+        try{const r=await window.YayAPI.fetch("https://proxy.cors.dev/https://api.yay.space/v2/users/11044343",{headers:{Accept:"application/json"}});if(r.ok){const d=await r.json();if(d?.result==="success"&&d.user?.id)creator={id:String(d.user.id),nickname:d.user.nickname,avatar:avatarOf(d.user)};}}catch{}
       }
       const [centerImg,logoImg,creatorImg,...avatarImgs]=await Promise.all([
         loadImage(avatarOf(state.profile)),

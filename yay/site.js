@@ -26,7 +26,7 @@ if (typeof CanvasRenderingContext2D !== "undefined" && !CanvasRenderingContext2D
     let networkRetries = 0;
     while (true) {
       try {
-        const response = await fetch(API_URL, { method: "GET", mode: "cors", credentials: "omit", headers: { Accept: "application/json" } });
+        const response = await window.YayAPI.fetch(API_URL, { method: "GET", headers: { Accept: "application/json" } });
         if (response.status === 429) {
           slot.textContent = "APIアクセス制限を検出したため、制作者情報の取得を停止しました。これ以上取得できません。時間をおいて再実行してください。";
           return;

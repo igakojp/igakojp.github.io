@@ -45,7 +45,7 @@
         await sleep(Math.min(500,cooldownUntil-Date.now()));
       }
       try{
-        const res=await fetch(url,{method:"GET",mode:"cors",credentials:"omit",cache:"default",headers:{Accept:"application/json"},signal});
+        const res=await window.YayAPI.fetch(url,{method:"GET",headers:{Accept:"application/json"},signal});
         if(res.status===429)throw stopForRateLimit();
         if(res.status>=500){
           if(networkAttempt++<2){cooldownUntil=Math.max(cooldownUntil,Date.now()+Math.min(15000,1000*2**networkAttempt));continue;}
@@ -281,7 +281,7 @@
         }return null;
       }
       let creator=window.__yayCreator||null;
-      if(!creator){try{const r=await fetch("https://proxy.cors.dev/https://api.yay.space/v2/users/11044343",{headers:{Accept:"application/json"},mode:"cors",credentials:"omit"});if(r.ok){const d=await r.json();if(d?.result==="success"&&String(d.user?.id)==="11044343")creator={id:"11044343",nickname:d.user.nickname,avatar:avatarOf(d.user)};}}catch{}}
+      if(!creator){try{const r=await window.YayAPI.fetch("https://proxy.cors.dev/https://api.yay.space/v2/users/11044343",{headers:{Accept:"application/json"}});if(r.ok){const d=await r.json();if(d?.result==="success"&&String(d.user?.id)==="11044343")creator={id:"11044343",nickname:d.user.nickname,avatar:avatarOf(d.user)};}}catch{}}
       const [centerLoaded,logoLoaded,creatorLoaded,...avatarLoaded]=await Promise.all([loadImage(avatarOf(state.profile)),loadImage("https://yay.space/images/logotype.svg"),loadImage(creator?.avatar||""),...points.map(p=>loadImage(p.u.avatar))]);
       const loaded=[centerLoaded,...avatarLoaded];
       function avatar(item,x,y,r,name){

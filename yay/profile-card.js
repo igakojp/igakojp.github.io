@@ -16,7 +16,7 @@
 
   /* ---------- network ---------- */
   async function getJson(url) {
-    const res = await fetch(url, { mode: "cors", credentials: "omit", headers: { Accept: "application/json" } });
+    const res = await window.YayAPI.fetch(url, { headers: { Accept: "application/json" } });
     let d = null; try { d = await res.json(); } catch { /* below */ }
     if (res.status === 429 || Number(d?.error_code) === 429) { const e = new Error("APIのアクセス制限を検出したため、処理を停止しました。時間をおいて再実行してください。"); e.stop = true; throw e; }
     if (res.status === 404) { const e = new Error("not found"); e.notFound = true; throw e; }

@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#10111a">
+  <title>Yay! 投稿ランキング</title><link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="ambient ambient-a"></div><div class="ambient ambient-b"></div>
+  <header class="topbar">
+    <a class="brand" href="index.html"><img class="brand-logo" src="https://yay.space/images/logotype.svg" alt="Yay!"><span><b>投稿ランキング</b></span></a>
+    <nav class="section-nav" aria-label="機能切り替え">
+      <a class="section-link" href="interaction.html">交流マップ</a><a class="section-link" href="review.html">レターマップ</a><a class="section-link" href="leaderboard.html">リーダーボード</a><a class="section-link" href="profile-card.html">自己紹介カード</a><a class="section-link active" href="post-ranking.html" aria-current="page">投稿ランキング</a>
+    </nav><div class="top-actions"><span class="privacy-pill"><i></i> 公開データのみ</span></div>
+  </header>
+  <main class="shell pr-shell">
+    <section class="intro"><div class="eyebrow">YAY! POST RANKING</div><h1>いちばん反応された<br><span>投稿を見つけよう。</span></h1><p>指定したユーザー本人の公開タイムラインを確認し、いいね・返信・(´∀｀∩)↑age↑ の数で投稿をランキングします。</p></section>
+    <section class="search-panel panel">
+      <div class="search-label">分析するユーザー</div><div class="search-row"><div class="search-input-wrap"><span class="at">@</span><input id="userInput" autocomplete="off" spellcheck="false" placeholder="Yay! の投稿URL・プロフィールURL・ユーザーID"></div><button id="startBtn" class="primary-btn"><span>分析を開始</span><span aria-hidden="true">↗</span></button></div>
+      <div class="search-hint">例：https://yay.space/post/614516067 または https://yay.space/user/5591497</div><div id="errorBox" class="error-box hidden" role="alert"></div>
+    </section>
+    <section id="profilePanel" class="profile panel hidden"><div class="cover"></div><div class="profile-main"><img id="avatar" class="avatar" alt=""><div class="profile-copy"><div class="profile-name" id="nickname">—</div><div class="profile-sub" id="profileId">—</div></div><div class="profile-stat"><b id="postCount">—</b><span>プロフィール上の総投稿数</span></div></div></section>
+    <section id="scanPanel" class="scan-panel panel hidden"><div class="section-head"><div><div class="eyebrow">タイムライン分析</div><h2 id="scanTitle">投稿を取得中</h2></div><span id="scanStatus" class="status-pill">準備中</span></div><div class="progress-meta"><span id="progressLabel">0 件を確認</span><b id="progressPercent">0%</b></div><div class="progress-track"><div id="progressFill" class="progress-fill"></div></div><div class="scan-stats"><div><b id="checkedCount">0</b><span>確認した投稿</span></div><div><b id="pageCount">0</b><span>取得ページ</span></div><div><b id="rankedCount">0</b><span>ランキング対象</span></div></div><div class="scan-actions"><button id="stopBtn" class="danger-btn">停止</button></div><p id="coverageNote" class="coverage-note">公開タイムラインから投稿を順番に取得します。</p></section>
+    <section id="resultsPanel" class="results hidden">
+      <div class="results-heading"><div><div class="eyebrow">RANKING RESULTS</div><h2>投稿ランキング</h2><p class="live-caption" id="resultSummary">取得できた投稿を反応数順に表示します。</p></div><div class="export-actions"><button id="imageBtn" class="primary-btn" type="button">画像をダウンロード</button><button id="csvBtn" class="quiet-btn">CSVを書き出す</button></div></div>
+      <div class="pr-tabs" role="tablist"><button class="pr-tab active" data-kind="likes">♥ いいね</button><button class="pr-tab" data-kind="replies">💬 返信</button><button class="pr-tab" data-kind="age">(´∀｀∩)↑age↑</button></div>
+      <div class="panel pr-board"><div class="pr-board-head"><div><h3 id="rankingTitle">♥ いいねランキング</h3><p id="metricNote">いいね数が多い順</p></div><label class="top-limit">表示件数 <select id="topLimit"><option>10</option><option>20</option><option>50</option><option value="100">100</option></select></label></div><div id="rankingList" class="pr-list"><div class="empty-state">まだ投稿がありません。</div></div></div>
+    </section>
+    <footer><span>Yay! 投稿ランキング</span><span>公開情報のみ · ログイン不要 · DMは取得しません</span><div id="creatorCredit" class="creator-credit" aria-live="polite">制作者情報を読み込み中…</div></footer>
+  </main>
+  <script src="yay-api.js"></script><script src="site.js"></script><script src="post-ranking.js"></script>
+</body></html>
