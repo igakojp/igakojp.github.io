@@ -425,6 +425,7 @@
         ctx.fillStyle = "#2b2140"; roundRect(ctx, W - 70 - lw - 56, fy - 46, lw + 56, 92, 46); ctx.fill();
         ctx.save(); ctx.filter = "brightness(0) invert(1)"; ctx.drawImage(logoImg, W - 70 - lw - 28, fy - lh / 2, lw, lh); ctx.restore();
       }
+      await window.drawYayCreatorFooter(canvas);
       const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/png"));
       if (!blob) throw new Error("PNG画像を作成できませんでした。");
       const url = URL.createObjectURL(blob), a = document.createElement("a");

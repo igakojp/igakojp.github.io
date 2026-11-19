@@ -245,6 +245,7 @@
       drawAvatar(center,cx,cy,145,state.profile.nickname);ctx.fillStyle="#fff";ctx.font="bold 34px system-ui";ctx.fillText(state.profile.nickname||`User ${state.userId}`,cx,cy+185);ctx.fillStyle="#c8eaff";ctx.font="26px system-ui";ctx.fillText(`@${state.userId}`,cx,cy+228);
       points.forEach((p,i)=>{drawAvatar(avatars[i],p.x,p.y,58,p.u.nickname);const medal=p.rank===1?"#f5c542":p.rank===2?"#c7d0da":p.rank===3?"#c9824b":"#35baff";ctx.beginPath();ctx.arc(p.x+42,p.y-42,20,0,Math.PI*2);ctx.fillStyle=medal;ctx.fill();ctx.fillStyle="#06213a";ctx.font="800 19px system-ui";ctx.fillText(String(p.rank),p.x+42,p.y-41);ctx.fillStyle="#fff";ctx.font="bold 24px system-ui";ctx.fillText(p.u.nickname.length>14?p.u.nickname.slice(0,13)+"…":p.u.nickname,p.x,p.y+86);ctx.fillStyle="#bceaff";ctx.font="22px system-ui";ctx.fillText(`${fmt(p.u.points)} 回`,p.x,p.y+113);});
       [center,...avatars].forEach(x=>{if(x?.obj)URL.revokeObjectURL(x.obj);});
+      await window.drawYayCreatorFooter(canvas);
       const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/png"));if(!blob)throw new Error("PNG画像を作成できませんでした。");
       const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=`yay-call-map-${state.userId}-top${$("topLimit").value}.png`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1500);
     }catch(e){showError(`画像を生成できませんでした: ${e.message}`);}

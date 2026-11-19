@@ -480,6 +480,7 @@
       ctx.fillText(`制作: ${cr?.nickname ? Array.from(cr.nickname).slice(0, 18).join("") : "Yay! ID 11044343"}`, 30, H - 28);
       if (logo) { const w0 = logo.naturalWidth || 130, h0 = logo.naturalHeight || 34, k = Math.min(130 / w0, 34 / h0), lw = Math.round(w0 * k), lh = Math.round(h0 * k), tc = document.createElement("canvas"); tc.width = lw; tc.height = lh; const g = tc.getContext("2d"); g.drawImage(logo, 0, 0, lw, lh); g.globalCompositeOperation = "source-in"; g.fillStyle = "#fff"; g.fillRect(0, 0, lw, lh); ctx.drawImage(tc, W - 30 - lw, H - 28 - lh / 2); }
       ctx.restore();
+      await window.drawYayCreatorFooter(c);
       const blob = await new Promise(r => c.toBlob(r, "image/png")); const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `yay-profile-card-${S.user.id}.png`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1500);
     } catch (e) { showErr(`画像を生成できませんでした: ${e.message}`); } finally { btn.disabled = false; }
   };
