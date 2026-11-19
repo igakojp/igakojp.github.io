@@ -516,7 +516,7 @@
       if(logoImg){
         const maxW=250,maxH=64,ratio=Math.min(maxW/(logoImg.naturalWidth||logoImg.width),maxH/(logoImg.naturalHeight||logoImg.height));
         const logoW=(logoImg.naturalWidth||logoImg.width)*ratio,logoH=(logoImg.naturalHeight||logoImg.height)*ratio;
-        ctx.save();ctx.filter="brightness(0) invert(1)";ctx.globalAlpha=.95;ctx.drawImage(logoImg,cx-logoW/2,2290-logoH/2,logoW,logoH);ctx.restore();
+        ctx.save();ctx.globalAlpha=.95;ctx.drawImage(window.yayWhiteImage(logoImg,logoW,logoH),cx-logoW/2,2290-logoH/2,logoW,logoH);ctx.restore();
       }
       objectUrls.forEach(u=>URL.revokeObjectURL(u));objectUrls.length=0;
       const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/png"));if(!blob)throw new Error("PNG画像を作成できませんでした。");

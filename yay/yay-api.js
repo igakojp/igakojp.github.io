@@ -205,7 +205,7 @@
         }
       }
       throw error;
-    } finally { inflight.delete(key); }
+    } finally { if (inflight.get(key) === task) inflight.delete(key); }
   }
   window.YayAPI = {
     fetch: request,

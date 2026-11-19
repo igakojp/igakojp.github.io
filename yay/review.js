@@ -197,7 +197,7 @@
         const previous=state.cursor;
         state.cursor=oldest!==null?oldest:null;
         updateProgress();updateLiveStats();
-        if(!state.cursor||state.cursor===previous||rows.length<50){state.exhausted=true;break;}
+        if(!state.cursor||state.cursor===previous){state.exhausted=true;break;}
       }
       if(state.stopped){setStatus("停止");$("coverageNote").textContent="分析を停止しました。ここまで取得したレターの結果を表示しています。";}
       else if(state.exhausted&&state.checked<state.total){
@@ -307,7 +307,7 @@
         ctx.fillStyle="#a9c7e4";ctx.font="20px system-ui, 'Noto Sans JP',sans-serif";ctx.fillText("このプロジェクトの制作者",158,creditY-17);
         ctx.fillStyle="#fff";ctx.font="bold 29px system-ui, 'Noto Sans JP',sans-serif";ctx.fillText(creator.nickname,158,creditY+20);ctx.restore();
       }
-      if(logoLoaded?.img){const im=logoLoaded.img,maxW=250,maxH=64,ratio=Math.min(maxW/(im.naturalWidth||im.width),maxH/(im.naturalHeight||im.height)),w=(im.naturalWidth||im.width)*ratio,h=(im.naturalHeight||im.height)*ratio;ctx.save();ctx.filter="brightness(0) invert(1)";ctx.globalAlpha=.95;ctx.drawImage(im,cx-w/2,2290-h/2,w,h);ctx.restore();}
+      if(logoLoaded?.img){const im=logoLoaded.img,maxW=250,maxH=64,ratio=Math.min(maxW/(im.naturalWidth||im.width),maxH/(im.naturalHeight||im.height)),w=(im.naturalWidth||im.width)*ratio,h=(im.naturalHeight||im.height)*ratio;ctx.save();ctx.globalAlpha=.95;ctx.drawImage(window.yayWhiteImage(im,w,h),cx-w/2,2290-h/2,w,h);ctx.restore();}
       [centerLoaded,logoLoaded,creatorLoaded,...avatarLoaded].forEach(x=>{if(x?.obj)URL.revokeObjectURL(x.obj);});
       const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/png"));if(!blob)throw new Error("PNG画像を作成できませんでした。");
       const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=`yay-letter-map-${state.userId}-top${$("topLimit").value}.png`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1500);

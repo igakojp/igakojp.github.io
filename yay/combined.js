@@ -122,7 +122,7 @@
       }
       const ids = rows.map(r => Number(r?.id)).filter(Boolean); if (ids.length) oldest = Math.min(...ids);
       updateProgress("レター", page+1);
-      if (!oldest || String(oldest) === String(cursor) || rows.length < 50) break;
+      if (!oldest || String(oldest) === String(cursor) ) break;
       cursor = String(oldest); await sleep(180);
     }
   }
@@ -183,7 +183,7 @@
     if (state.running) return;
     const parsed = parseInput($("userInput").value);
     if (!parsed) { $("errorBox").textContent = "Yay! のプロフィールURLまたはユーザーIDを入力してください。"; $("errorBox").classList.remove("hidden"); return; }
-    $("errorBox").classList.add("hidden"); $("analyzeBtn").disabled = true; state.running = true; state.stopped = false; state.users.clear(); state.seenPosts.clear(); state.seenReviews.clear(); state.seenCalls.clear(); state.timelineCount=0; state.reviewCount=0; state.pages=0; state.mapCentered=false;
+    $("errorBox").classList.add("hidden"); $("analyzeBtn").disabled = true; state.running = true; state.stopped = false; state.users.clear(); state.seenPosts.clear(); state.seenReviews.clear(); state.seenCalls.clear(); state.timelineCount=0; state.reviewCount=0; state.pages=0; state.mapCentered=false; state.timelinePrivate=false; state.timelinePrivate=false;
     controller = new AbortController(); $("scanSection").classList.remove("hidden"); $("resultsSection").classList.add("hidden"); $("scanStatus").textContent="準備中"; $("scanTitle").textContent="プロフィールを取得中"; $("stopBtn").disabled=false;
     try {
       let id = typeof parsed === "string" ? parsed : null;
@@ -192,7 +192,8 @@
       const profileData = await apiGet(`${API}/users/fresh/${encodeURIComponent(id)}`); const profile = profileData.user || profileData.data?.user || profileData;
       if (!profile?.id) throw new Error("プロフィール情報を取得できませんでした。");
       updateProfile(profile); $("scanStatus").textContent="分析中";
-      await scanTimeline();
+      try { await scanTimeline(); }
+      catch (e) { if (e.code !== -363) throw e; state.timelinePrivate = true; }   // private timeline: letters are still readable
       if (!state.stopped) await scanReviews();
       $("scanStatus").textContent = state.stopped ? "停止" : "完了";
       $("scanTitle").textContent = state.stopped ? "途中までの結果" : "すべての取得が完了しました";
@@ -202,7 +203,7 @@
         $("progressFill").style.width = "100%";
         $("progressPercent").textContent = "100%";
       }
-      $("coverageNote").textContent = state.stopped ? "停止するまでに取得できたデータを表示しています。" : "公開タイムラインとレターAPIから取得できたデータを集計しました。APIで取得できない非公開データは含まれません。";
+      $("coverageNote").textContent = state.stopped ? "停止するまでに取得できたデータを表示しています。" : state.timelinePrivate ? "このアカウントのタイムラインは非公開のため、投稿・通話は集計できません。レターのみを集計しました。" : "公開タイムラインとレターAPIから取得できたデータを集計しました。APIで取得できない非公開データは含まれません。";
       $("resultsSection").classList.remove("hidden"); render();
     } catch (e) {
       if (e.name !== "AbortError") {
@@ -226,7 +227,7 @@
       const {points}=mapPositions(users),cx=600,cy=600;
       const lines=points.map(p=>`<line x1="${cx}" y1="${cy}" x2="${p.x/2}" y2="${p.y/2}" stroke="#9bdcff" stroke-opacity=".28" stroke-width="2"/>`).join("");
       const nodes=points.map(p=>`<g><circle cx="${p.x/2}" cy="${p.y/2}" r="27" fill="#173e6c" stroke="#d8f3ff" stroke-width="3"/><text x="${p.x/2}" y="${p.y/2+6}" text-anchor="middle" fill="white" font-size="18">${esc(initials(p.u.nickname))}</text><circle cx="${p.x/2+20}" cy="${p.y/2-20}" r="11" fill="#35baff"/><text x="${p.x/2+20}" y="${p.y/2-16}" text-anchor="middle" fill="#06213a" font-size="10">${p.rank}</text><text x="${p.x/2}" y="${p.y/2+45}" text-anchor="middle" fill="white" font-size="12">${esc(p.u.nickname.slice(0,15))}</text><text x="${p.x/2}" y="${p.y/2+61}" text-anchor="middle" fill="#bceaff" font-size="11">${fmt(p.u.total)} 件</text></g>`).join("");
-      const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200"><defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#173e6c"/><stop offset="1" stop-color="#071a35"/></linearGradient></defs><rect width="1200" height="1200" fill="url(#bg)"/><text x="600" y="48" text-anchor="middle" fill="white" font-size="30" font-weight="bold">総合交流マップ · Top ${users.length}</text><text x="600" y="78" text-anchor="middle" fill="#c8eaff" font-size="16">${esc(state.profile?.nickname||`Yay! User ${state.userId}`)} · ${new Date().toLocaleDateString("ja-JP")}</text><circle cx="600" cy="600" r="200" fill="none" stroke="#9bdcff" stroke-opacity=".15"/><circle cx="600" cy="600" r="360" fill="none" stroke="#9bdcff" stroke-opacity=".15"/><circle cx="600" cy="600" r="450" fill="none" stroke="#9bdcff" stroke-opacity=".15"/>${lines}<circle cx="600" cy="600" r="58" fill="#245b86" stroke="#e5f7ff" stroke-width="4"/><text x="600" y="608" text-anchor="middle" fill="white" font-size="22">${esc(initials(state.profile?.nickname))}</text>${nodes}</svg>`;
+      const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="system-ui, 'Noto Sans JP', sans-serif"><defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#173e6c"/><stop offset="1" stop-color="#071a35"/></linearGradient></defs><rect width="1200" height="1200" fill="url(#bg)"/><text x="600" y="48" text-anchor="middle" fill="white" font-size="30" font-weight="bold">総合交流マップ · Top ${users.length}</text><text x="600" y="78" text-anchor="middle" fill="#c8eaff" font-size="16">${esc(state.profile?.nickname||`Yay! User ${state.userId}`)} · ${new Date().toLocaleDateString("ja-JP")}</text><circle cx="600" cy="600" r="200" fill="none" stroke="#9bdcff" stroke-opacity=".15"/><circle cx="600" cy="600" r="360" fill="none" stroke="#9bdcff" stroke-opacity=".15"/><circle cx="600" cy="600" r="450" fill="none" stroke="#9bdcff" stroke-opacity=".15"/>${lines}<circle cx="600" cy="600" r="58" fill="#245b86" stroke="#e5f7ff" stroke-width="4"/><text x="600" y="608" text-anchor="middle" fill="white" font-size="22">${esc(initials(state.profile?.nickname))}</text>${nodes}</svg>`;
       const canvas=document.createElement("canvas");canvas.width=1200;canvas.height=1200;
       const img=new Image(),svgUrl=URL.createObjectURL(new Blob([svg],{type:"image/svg+xml;charset=utf-8"}));
       try { img.src=svgUrl; await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=reject;}); }
@@ -236,8 +237,8 @@
       const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/png"));
       if(!blob)throw new Error("PNG画像を作成できませんでした。");
       const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=`yay-combined-map-${state.userId}-top${users.length}.png`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1500);
-    } catch(e) { showError(`画像を生成できませんでした: ${e.message}`); }
-    finally {btn.disabled=false;btn.textContent="画像をダウンロード";}
+    } catch(e) { { $("errorBox").textContent=`画像を生成できませんでした: ${e.message}`; $("errorBox").classList.remove("hidden"); } }
+    finally {btn.disabled=false;btn.textContent="マップ画像をダウンロード";}
   }
   $("analyzeBtn").addEventListener("click",start); $("userInput").addEventListener("keydown",e=>{if(e.key==="Enter")start();}); $("stopBtn").addEventListener("click",stop); $("jsonBtn").addEventListener("click",exportJSON); $("csvBtn").addEventListener("click",exportCSV); $("imageBtn").addEventListener("click",exportMapImage);
   $("userFilter").addEventListener("input",render); $("topLimit").addEventListener("change",render); $("showUsernames").addEventListener("change",render); $("closeDetail").addEventListener("click",()=>$("detailPanel").classList.add("hidden"));

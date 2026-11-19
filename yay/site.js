@@ -1,3 +1,13 @@
+/* White-out helper for the Yay! logo. Canvas ctx.filter is unsupported on Safari, so tint via an offscreen canvas. */
+window.yayWhiteImage = function(img, w, h) {
+  const k = 2, c = document.createElement("canvas");
+  c.width = Math.max(1, Math.ceil(w * k)); c.height = Math.max(1, Math.ceil(h * k));
+  const g = c.getContext("2d");
+  g.drawImage(img, 0, 0, c.width, c.height);
+  g.globalCompositeOperation = "source-in"; g.fillStyle = "#fff"; g.fillRect(0, 0, c.width, c.height);
+  return c;
+};
+
 
 /* Shared PNG footer: creator at bottom-left, Yay! logo centered. */
 window.drawYayCreatorFooter = async function(canvas) {
@@ -63,8 +73,8 @@ window.drawYayCreatorFooter = async function(canvas) {
   if (logoAsset?.img) {
     const im=logoAsset.img, maxW=125*scale, maxH=32*scale;
     const ratio=Math.min(maxW/im.width,maxH/im.height), w=im.width*ratio,h=im.height*ratio;
-    ctx.filter="brightness(0) invert(1)";ctx.globalAlpha=.96;
-    ctx.drawImage(im,(W-w)/2,y-h/2,w,h);
+    ctx.globalAlpha=.96;
+    ctx.drawImage(window.yayWhiteImage(im,w,h),(W-w)/2,y-h/2,w,h);
   }
   ctx.restore();
   [creatorAsset,logoAsset].forEach(asset=>{if(asset?.objectUrl)URL.revokeObjectURL(asset.objectUrl);});

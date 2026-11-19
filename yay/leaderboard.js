@@ -32,7 +32,7 @@
   const state = {
     users: new Map(),          // id -> user, only users who currently like the post
     sortKey: "level", sortDir: "desc", filter: "",
-    startId: null, sorted: [],
+    startId: null, startManual: false, sorted: [],
     stopped: false, refreshing: false, lastUpdated: null, loaded: false,
     hydrateQueue: [], hydrateActive: 0, timer: null, renderQueued: false, listSig: ""
   };
@@ -280,7 +280,10 @@
       sel.innerHTML = rows.map((r, i) => `<option value="${esc(r.id)}">${i + 1}位　${esc(r.nickname)}</option>`).join("");
     }
     if (!rows.length) return;
-    if (!state.startId || !rows.some(r => r.id === state.startId)) state.startId = rows[0].id;
+    // Until the user picks someone themselves, keep following the current #1 while loading is in progress.
+    const stillLoading = !state.loaded || [...state.users.values()].some(u => ["idle", "queued", "loading", "error"].includes(u.status));
+    if (!state.startManual && stillLoading) state.startId = rows[0].id;
+    else if (!state.startId || !rows.some(r => r.id === state.startId)) state.startId = rows[0].id;
     sel.value = state.startId;
   }
   function pickedRows() {
@@ -423,9 +426,8 @@
       if (logoImg) {
         const lw0 = logoImg.naturalWidth || logoImg.width, lh0 = logoImg.naturalHeight || logoImg.height, k = Math.min(210 / lw0, 56 / lh0), lw = lw0 * k, lh = lh0 * k;
         ctx.fillStyle = "#2b2140"; roundRect(ctx, W - 70 - lw - 56, fy - 46, lw + 56, 92, 46); ctx.fill();
-        ctx.save(); ctx.filter = "brightness(0) invert(1)"; ctx.drawImage(logoImg, W - 70 - lw - 28, fy - lh / 2, lw, lh); ctx.restore();
+        ctx.save(); ctx.drawImage(window.yayWhiteImage(logoImg, lw, lh), W - 70 - lw - 28, fy - lh / 2, lw, lh); ctx.restore();
       }
-      await window.drawYayCreatorFooter(canvas);
       const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/png"));
       if (!blob) throw new Error("PNG画像を作成できませんでした。");
       const url = URL.createObjectURL(blob), a = document.createElement("a");
@@ -447,7 +449,7 @@
   $("refreshBtn").addEventListener("click", () => refresh(true));
   $("autoRefresh").addEventListener("change", startTimer);
   $("imageBtn").addEventListener("click", exportImage);
-  $("startUser").addEventListener("change", e => { state.startId = e.target.value; render(); });
+  $("startUser").addEventListener("change", e => { state.startId = e.target.value; state.startManual = true; render(); });
   document.addEventListener("visibilitychange", () => { if (!document.hidden && state.loaded && !state.stopped && state.lastUpdated && Date.now() - state.lastUpdated > REFRESH_MS) refresh(false); });
 
   renderHead(); render(); startTimer(); refresh(false);

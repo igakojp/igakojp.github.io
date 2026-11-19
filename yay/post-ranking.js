@@ -173,10 +173,9 @@
       }
       if(logoAsset?.img){
         const img=logoAsset.img,iw=img.naturalWidth||img.width,ih=img.naturalHeight||img.height,k=Math.min(190/iw,48/ih),lw=iw*k,lh=ih*k;
-        ctx.save();ctx.fillStyle='rgba(255,255,255,.12)';canvasRoundRect(ctx,W-62-lw-48,fy-38,lw+48,76,38);ctx.fill();ctx.filter='brightness(0) invert(1)';ctx.drawImage(img,W-62-lw-24,fy-lh/2,lw,lh);ctx.restore();
+        ctx.save();ctx.fillStyle='rgba(255,255,255,.12)';canvasRoundRect(ctx,W-62-lw-48,fy-38,lw+48,76,38);ctx.fill();ctx.drawImage(window.yayWhiteImage(img,lw,lh),W-62-lw-24,fy-lh/2,lw,lh);ctx.restore();
       }else{ctx.textAlign='right';ctx.textBaseline='middle';ctx.fillStyle='#fff';ctx.font="bold 30px system-ui, sans-serif";ctx.fillText('Yay!',W-72,fy);}
       if(creatorAsset?.objectUrl)URL.revokeObjectURL(creatorAsset.objectUrl);if(logoAsset?.objectUrl)URL.revokeObjectURL(logoAsset.objectUrl);
-      await window.drawYayCreatorFooter(canvas);
       const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));if(!blob)throw new Error('PNG画像を作成できませんでした。');
       const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`yay-post-ranking-${state.kind}-top${rows.length}.png`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1500);
     }catch(e){error(`画像を生成できませんでした: ${e.message}`);}finally{btn.disabled=false;btn.textContent='画像をダウンロード';}
