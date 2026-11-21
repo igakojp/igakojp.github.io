@@ -24,12 +24,12 @@
   function tierOf(name, h, k = 1) {
     const S = v => Math.round(v * k), c = (s, l) => `hsl(${h}, ${S(s)}%, ${l}%)`;
     return { name, theme: { bg1: c(65, 96), bg2: c(45, 85), line: c(45, 66), accent: c(65, 34), head: c(35, 88) },
-      plate: { hi: c(85, 91), mid: c(55, 62), lo: c(60, 30), ink: c(70, 14), edge: c(65, 24) } };
+      plate: { hi: c(85, 91), mid: c(55, 62), lo: c(60, 30), ink: c(70, 14), edge: c(65, 24), stamp: c(80, 21) } };
   }
   const TIERS = [null, tierOf("新緑", 140), tierOf("空", 195), tierOf("桜", 338), tierOf("琥珀", 32), tierOf("紅", 4),
     tierOf("菫", 275), tierOf("藍", 228), tierOf("翡翠", 168), tierOf("白銀", 215, .16),
     { name: "漆黒", theme: { bg1: "#f1f1f4", bg2: "#cfcfd8", line: "#9a9aa8", accent: "#1f1f2a", head: "#dcdce4" },
-      plate: { hi: "#8c8c9c", mid: "#34343f", lo: "#0b0b11", ink: "#f4e4a6", edge: "#d6bf72" } }];
+      plate: { hi: "#8c8c9c", mid: "#34343f", lo: "#0b0b11", ink: "#f4e4a6", edge: "#d6bf72", stamp: "#14141c" } }];
   const S = { user: null, hd: null, av: null, logo: null, creator: null, stats: null };
 
   /* ---------- network (same approach as the other pages) ---------- */
@@ -171,6 +171,40 @@
     c.restore();
   }
 
+  // creator credit (bottom-left) and Yay! logo (bottom-right), each on a dark pill, drawn on top of everything else
+  function footerOverlay(c) {
+    const cr = S.creator, name = `制作: ${cr?.nickname ? Array.from(cr.nickname).join("") : "Yay! ID 11044343"}`, cy = H - 28, ph = 28;
+    c.save(); c.font = `600 20px ${SANS}`; c.textAlign = "left"; c.textBaseline = "middle";
+    c.fillStyle = "rgba(8,12,24,.92)"; rr(c, 24, cy - ph / 2, c.measureText(name).width + 28, ph, 14); c.fill();
+    c.fillStyle = "#fff"; c.fillText(name, 38, cy + 1);
+    if (S.logo) {
+      const w0 = S.logo.naturalWidth || 130, h0 = S.logo.naturalHeight || 34, k = Math.min(120 / w0, 20 / h0), lw = Math.round(w0 * k), lh = Math.round(h0 * k);
+      const t = document.createElement("canvas"); t.width = lw; t.height = lh; const tg = t.getContext("2d"); tg.drawImage(S.logo, 0, 0, lw, lh); tg.globalCompositeOperation = "source-in"; tg.fillStyle = "#fff"; tg.fillRect(0, 0, lw, lh);
+      c.fillStyle = "rgba(8,12,24,.92)"; rr(c, W - 24 - lw - 28, cy - ph / 2, lw + 28, ph, 14); c.fill();
+      c.drawImage(t, W - 24 - lw - 14, cy - lh / 2);
+    }
+    c.restore();
+  }
+
+  // year stamp: a bold ink seal in a dark shade of the tier colour, with a slightly uneven ring and worn ink (same spirit as the red 公開 seal).
+  // It is drawn on its own small canvas so the worn spots can really erase the ink, then placed on the card with a slight tilt.
+  function yearStamp(c, x, y, P, name, years) {
+    const N = 100, o = document.createElement("canvas"); o.width = N; o.height = N; const g = o.getContext("2d"), m = N / 2;
+    let seed = (years * 7 + 3) >>> 0; const rnd = () => { seed = (seed + 0x6D2B79F5) >>> 0; let t = seed; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+    const ink = P.stamp || P.lo; g.strokeStyle = ink; g.fillStyle = ink; g.lineJoin = "round";
+    const ring = (r, wd, jit) => { g.lineWidth = wd; g.beginPath(); for (let i = 0; i <= 180; i++) { const a = i / 180 * Math.PI * 2, rr = r + (rnd() * 2 - 1) * jit * .6 + Math.sin(a * 3 + years) * jit * .5; i ? g.lineTo(m + Math.cos(a) * rr, m + Math.sin(a) * rr) : g.moveTo(m + Math.cos(a) * rr, m + Math.sin(a) * rr); } g.closePath(); g.stroke(); };
+    ring(37, 4.6, .7); ring(31.2, 1.8, .5);
+    g.textAlign = "center"; g.textBaseline = "middle";
+    g.font = `700 ${fitSize(g, name, 42, 16, 700, SERIF, 10)}px ${SERIF}`; g.fillText(name, m, m - 19);
+    g.lineWidth = 1.6; g.beginPath(); g.moveTo(m - 19, m - 9); g.lineTo(m + 19, m - 9); g.stroke();
+    const yr = String(years), big = yr.length === 1 ? 42 : yr.length === 2 ? 32 : 24;
+    g.font = `700 ${big}px ${SERIF}`; const yw = g.measureText(yr).width; g.font = `700 17px ${SERIF}`; const kw = g.measureText("年").width, x0 = m - (yw + kw + 1) / 2;
+    g.textAlign = "left"; g.font = `700 ${big}px ${SERIF}`; g.fillText(yr, x0, m + 10); g.font = `700 17px ${SERIF}`; g.fillText("年", x0 + yw + 1, m + 18);
+    g.globalCompositeOperation = "destination-out"; g.fillStyle = "rgba(0,0,0,.9)"; // worn ink
+    for (let i = 0; i < 70; i++) { const a = rnd() * Math.PI * 2, d = rnd() * 38, r = .35 + rnd() * .75; g.beginPath(); g.arc(m + Math.cos(a) * d, m + Math.sin(a) * d, r, 0, Math.PI * 2); g.fill(); }
+    c.save(); c.translate(x, y); c.rotate(-.16); c.globalAlpha = .93; c.drawImage(o, -m, -m); c.restore();
+  }
+
   function render(c) {
     const u = S.user, ink = "#1c1c22", now = new Date();
     const made = u.created_at ? new Date(Number(u.created_at) * 1000) : null, ok = made && !isNaN(made);
@@ -193,7 +227,7 @@
     c.fillStyle = "rgba(10,12,24,.55)"; rr(c, W - 28 - 190, 22, 190, 44, 22); c.fill();
     c.fillStyle = "#fff"; c.font = `600 20px ${SANS}`; c.textAlign = "center"; c.fillText("非公式", W - 28 - 95, 45);
     // special plates (centre of the banner)
-    const plates = []; if (vip) plates.push([GOLD, "★ GOLD VIP ★", 0]); if (TR) plates.push([TR.plate, `${TR.name} ・ ${years}年`, tier]);
+    const plates = []; if (vip) plates.push([GOLD, "★ GOLD VIP ★", 0]); /* the year-tier plate in the banner was removed; the tier still sets the card colour and frame */
     if (vip) [[70, 150, 13], [200, 128, 9], [330, 160, 11], [880, 150, 10], [1010, 122, 13], [1100, 160, 9], [1160, 124, 11]].forEach(([sx, sy, sr]) => sparkle(c, sx, sy, sr));
     if (plates.length) {
       const pw = plates.length === 2 ? 230 : 270, gap = 14, total = pw * plates.length + gap * (plates.length - 1);
@@ -296,6 +330,10 @@
     const id = String(u.id), step = Math.min(46, 520 / id.length); c.font = `700 ${Math.round(step * 1.2)}px ${MONO}`; c.textAlign = "center";
     for (let i = 0; i < id.length; i++) c.fillText(id[i], 190 + step * i + step / 2, 570);
     c.font = `500 36px ${SERIF}`; c.textAlign = "left"; c.fillText("号", 190 + step * id.length + 18, 570); c.restore();
+    // year stamp: right end of the member-number row (aligned with the table below); falls back to the photo corner if the ID is too long
+    const numEnd = 190 + step * id.length + 18 + 38, stampX = 780 - 8 - 38;
+    const medalInRow = !!TR && numEnd + 14 < stampX - 38;
+    if (medalInRow) yearStamp(c, stampX, 568, TR.plate, TR.name, years);
 
     // numbers table
     const cols = [["フォロワー", u.followers_count], ["フォロー中", u.followings_count ?? u.following_count], ["投稿", u.posts_count], ["レター", u.reviews_count]], cw = 744 / 4;
@@ -338,6 +376,7 @@
     if (vip) { const gg = c.createLinearGradient(px, py, px + pw, py + ph); [[0, GOLD.hi], [.35, GOLD.mid], [.6, GOLD.hi], [1, GOLD.lo]].forEach(([o, col]) => gg.addColorStop(o, col)); c.strokeStyle = gg; c.lineWidth = 7; } else { c.strokeStyle = ink; c.lineWidth = 2.5; }
     rr(c, px - 4, py - 4, pw + 8, ph + 8, 8); c.stroke();
     if (vip) crown(c, px + pw - 30, py + 4, 92, .38);
+    if (TR && !medalInRow) yearStamp(c, px + 46, py + ph - 46, TR.plate, TR.name, years);
     c.fillStyle = ink; c.font = `600 20px ${SANS}`; c.textAlign = "center"; c.textBaseline = "middle";
     if (u.gender === 0) {
       c.fillText("男性", px + pw / 2, 676);
@@ -358,17 +397,11 @@
 
     // footer strip: credit (always) and logo (optional)
     c.fillStyle = "rgba(0,0,0,.55)"; c.fillRect(0, H - 44, W, 44);
-    const cr = S.creator; c.fillStyle = "#fff"; c.font = `600 20px ${SANS}`; c.textAlign = "left"; c.textBaseline = "middle";
-    c.fillText(`制作: ${cr?.nickname ? Array.from(cr.nickname).join("") : "Yay! ID 11044343"}`, 30, H - 22);
-    if (S.logo) {
-      const w0 = S.logo.naturalWidth || 130, h0 = S.logo.naturalHeight || 34, k = Math.min(120 / w0, 28 / h0), lw = Math.round(w0 * k), lh = Math.round(h0 * k);
-      const t = document.createElement("canvas"); t.width = lw; t.height = lh; const tg = t.getContext("2d"); tg.drawImage(S.logo, 0, 0, lw, lh); tg.globalCompositeOperation = "source-in"; tg.fillStyle = "#fff"; tg.fillRect(0, 0, lw, lh);
-      c.drawImage(t, W - 30 - lw, H - 22 - lh / 2);
-    }
     if (vip) sheen(c);
     c.restore();
     c.save(); c.strokeStyle = "rgba(0,0,0,.55)"; c.lineWidth = 3; rr(c, 1.5, 1.5, W - 3, H - 3, 35); c.stroke(); c.restore();
     if (vip) frame(c, GOLD, 11); else if (TR) frame(c, TR.plate, tier);
+    footerOverlay(c); // drawn last so the credit and the logo sit in front of the frame
   }
   const cv = $("lcCanvas"), cx = cv.getContext("2d");
   const draw = () => { if (S.user) render(cx); };
