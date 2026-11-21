@@ -236,9 +236,9 @@
       await window.drawYayCreatorFooter(canvas);
       const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/png"));
       if(!blob)throw new Error("PNG画像を作成できませんでした。");
-      const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=`yay-combined-map-${state.userId}-top${users.length}.png`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1500);
+      await window.yaySavePng(blob,`yay-combined-map-${state.userId}-top${users.length}.png`);
     } catch(e) { { $("errorBox").textContent=`画像を生成できませんでした: ${e.message}`; $("errorBox").classList.remove("hidden"); } }
-    finally {btn.disabled=false;btn.textContent="マップ画像をダウンロード";}
+    finally {btn.disabled=false;btn.textContent="マップ画像（PNG）をダウンロード";}
   }
   $("analyzeBtn").addEventListener("click",start); $("userInput").addEventListener("keydown",e=>{if(e.key==="Enter")start();}); $("stopBtn").addEventListener("click",stop); $("jsonBtn").addEventListener("click",exportJSON); $("csvBtn").addEventListener("click",exportCSV); $("imageBtn").addEventListener("click",exportMapImage);
   $("userFilter").addEventListener("input",render); $("topLimit").addEventListener("change",render); $("showUsernames").addEventListener("change",render); $("closeDetail").addEventListener("click",()=>$("detailPanel").classList.add("hidden"));

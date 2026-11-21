@@ -268,3 +268,39 @@ button.pc-tagthumb{padding:0;cursor:pointer;font:inherit;color:var(--muted)}
 
 /* Post ranking feature */
 .pr-shell{max-width:1180px}.pr-tabs{display:flex;gap:9px;flex-wrap:wrap;margin:18px 0 12px}.pr-tab{border:1px solid rgba(130,181,255,.2);border-radius:12px;padding:12px 18px;background:#08172a;color:#a9bad6;font:inherit;font-weight:800;cursor:pointer}.pr-tab.active{background:linear-gradient(110deg,#35bff0,#718cff);border-color:transparent;color:#061a31}.pr-board{padding:20px 22px;overflow:hidden}.pr-board-head{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:14px}.pr-board-head h3{margin:0 0 5px}.pr-board-head p{margin:0;color:var(--muted);font-size:12px}.pr-list{display:grid;gap:10px}.pr-item{display:grid;grid-template-columns:42px 48px minmax(0,1fr) 90px;align-items:center;gap:13px;padding:14px;border:1px solid rgba(130,181,255,.13);border-radius:14px;background:rgba(6,20,39,.68)}.pr-rank{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:rgba(100,180,255,.14);color:#bfeaff;font-weight:900}.pr-item:nth-child(1) .pr-rank{background:#f5c542;color:#382600}.pr-item:nth-child(2) .pr-rank{background:#c7d0da;color:#26313e}.pr-item:nth-child(3) .pr-rank{background:#c9824b;color:#351a08}.pr-avatar{width:46px;height:46px;border-radius:50%;overflow:hidden;background:linear-gradient(145deg,#5fcdf7,#4359a1);display:grid;place-items:center;color:white;font-weight:900}.pr-avatar img{width:100%;height:100%;object-fit:cover}.pr-content{min-width:0}.pr-meta{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.pr-meta strong{color:#e8f6ff;font-size:13px}.pr-meta span{color:#8299b8;font-size:11px}.pr-content p{margin:7px 0;color:#cbdcf1;font-size:13px;line-height:1.65;overflow-wrap:anywhere;white-space:pre-wrap}.pr-content a{font-size:11px;color:#75d9ff;text-decoration:none}.pr-content a:hover{text-decoration:underline}.pr-count{text-align:right}.pr-count b{display:block;color:#83e2ff;font-size:22px;font-variant-numeric:tabular-nums}.pr-count span{font-size:10px;color:#8ea6c8}.pr-board .empty-state{padding:36px 15px;text-align:center}@media(max-width:620px){.pr-board{padding:15px}.pr-board-head{align-items:flex-start;flex-direction:column}.pr-item{grid-template-columns:30px 40px minmax(0,1fr);gap:9px;padding:11px}.pr-avatar{width:38px;height:38px}.pr-count{grid-column:3;text-align:left;display:flex;align-items:baseline;gap:7px}.pr-count b{font-size:17px}.pr-content p{font-size:12px}.pr-tabs{display:grid;grid-template-columns:1fr 1fr}.pr-tab:last-child{grid-column:1/-1}}
+
+/* Profile card: effect panel */
+.pc-fx{display:grid;gap:10px;margin-top:6px}
+
+/* ===== Ease of use: phone / tablet / PC ===== */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+:where(a,button,select,input,summary,textarea):focus-visible{outline:2px solid #8de5ff;outline-offset:2px}
+.section-nav.fade-r{-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 26px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 26px),transparent)}
+.section-nav.fade-l{-webkit-mask-image:linear-gradient(270deg,#000 calc(100% - 26px),transparent);mask-image:linear-gradient(270deg,#000 calc(100% - 26px),transparent)}
+.section-nav.fade-l.fade-r{-webkit-mask-image:linear-gradient(90deg,transparent,#000 26px,#000 calc(100% - 26px),transparent);mask-image:linear-gradient(90deg,transparent,#000 26px,#000 calc(100% - 26px),transparent)}
+.th-btn{padding:8px 4px}
+/* Finger-sized targets on touch screens (phones and iPads) */
+@media (pointer:coarse){
+  .section-link{min-height:44px;font-size:12.5px}
+  .brand{min-height:44px;display:inline-flex;align-items:center}
+  .th-btn{min-height:44px}
+  .username-toggle,.lb-field{min-height:44px}
+  input[type=checkbox]{width:22px;height:22px}
+  select,.pc-in{min-height:44px}
+  .pc-field input[type=range]{height:44px}
+  .pc-layer{min-height:46px}
+  .pc-toolbar .secondary-btn,.pc-toolbar .primary-btn{min-height:46px}
+  .pc-pick-item{min-height:56px}
+}
+/* iPad / small laptop: give the card editor more room */
+@media (min-width:981px) and (max-width:1250px){.pc-editor{grid-template-columns:minmax(0,1fr) 320px}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+.search-input-wrap input{align-self:stretch;height:100%}
+
+/* user license card */
+.lic-wrap{display:grid;gap:14px}
+.lic-canvas{width:100%;height:auto;display:block;border-radius:22px;box-shadow:0 10px 40px #0008;background:#fff}
+.lic-opts{display:flex;flex-wrap:wrap;gap:12px 18px;align-items:end}
+.lic-opts .pc-field{min-width:160px}
+.lic-opts .primary-btn{margin-left:auto}
+@media (max-width:640px){.lic-opts .primary-btn{margin-left:0;width:100%}.lic-opts .pc-field{flex:1 1 100%}}

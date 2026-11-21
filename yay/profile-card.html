@@ -17,7 +17,7 @@
       <a class="section-link" href="call.html">通話マップ</a>
       <a class="section-link" href="combined.html">総合ランキング</a>
       <a class="section-link" href="leaderboard.html">リーダーボード</a>
-      <a class="section-link active" href="profile-card.html" aria-current="page">自己紹介カード</a>
+      <a class="section-link active" href="profile-card.html" aria-current="page">自己紹介カード</a><a class="section-link" href="license.html">ユーザー証</a>
       <a class="section-link" href="post-ranking.html">投稿ランキング</a>
     </nav>
     <div class="top-actions"><span class="privacy-pill"><i></i> 公開データのみ</span></div>
@@ -39,16 +39,19 @@
           <button class="secondary-btn" id="pcTagAdd" type="button">＋タググループ</button>
           <button class="secondary-btn" id="pcUserAdd" type="button">＋ユーザー</button>
           <button class="secondary-btn" id="pcImgBtn" type="button">＋画像</button>
+          <button class="secondary-btn" id="pcMediaBtn" type="button">＋GIF・動画</button>
+          <select id="pcFxAdd" class="pc-in" aria-label="エフェクトを追加"><option value="">✦ エフェクト</option></select>
           <select id="pcShapeAdd" class="pc-in" aria-label="図形を追加"><option value="">＋図形</option><option value="rect">四角</option><option value="round">角丸</option><option value="circle">円</option><option value="star">星</option><option value="heart">ハート</option><option value="line">線</option></select>
           <button class="secondary-btn" id="pcPen" type="button">✎ ペン: オフ</button>
-          <input id="pcFile" type="file" accept="image/*" hidden><input id="tagFile" type="file" accept="image/*" hidden>
+          <input id="pcFile" type="file" accept="image/*" hidden><input id="pcMediaFile" type="file" accept="image/gif,video/*,.gif,.mp4,.m4v,.mov,.webm" hidden><input id="tagFile" type="file" accept="image/*" hidden>
         </div>
         <div class="pc-toolbar">
           <label class="username-toggle"><input id="pcSnap" type="checkbox" checked><span>グリッドにはめる</span></label>
           <button class="secondary-btn" id="pcUndo" type="button">↶ 元に戻す</button><button class="secondary-btn" id="pcRedo" type="button">↷ やり直す</button>
+          <button class="primary-btn" id="pcPlay" type="button">⏸ アニメーション: 再生中</button>
         </div>
         <div class="pc-canvas-wrap"><canvas id="pcCanvas" width="1200" height="800"></canvas></div>
-        <p class="subtle pc-hint">ドラッグで動かすと、スマホのホーム画面のようにマス目にはまり、カードの外には出ません。角のハンドルで大きさ、上の丸いハンドルで回転できます。文字の内容は、パーツを選んで「文字の内容」で書き換えます（ダブルクリックでその欄に移動します）。</p>
+        <p class="subtle pc-hint">ドラッグで動かすと、スマホのホーム画面のようにマス目にはまり、カードの外には出ません。角のハンドルで大きさ、上の丸いハンドルで回転できます。文字の内容は、パーツを選んで「文字の内容」で書き換えます（「✎ 文字を編集」ボタン、またはダブルクリック／ダブルタップでその欄に移動します）。スマホ・タブレットでは、保存するとそのまま「画像を保存」できます。</p>
         <div class="pc-toolbar">
           <button class="secondary-btn" data-z="top" type="button">最前面</button><button class="secondary-btn" data-z="up" type="button">ひとつ前へ</button>
           <button class="secondary-btn" data-z="down" type="button">ひとつ後ろへ</button><button class="secondary-btn" data-z="bottom" type="button">最背面</button>
@@ -77,6 +80,24 @@
           </div>
           <div class="pc-toolbar"><label class="username-toggle"><input id="pBold" type="checkbox"><span><b>B</b> 太字</span></label><label class="username-toggle"><input id="pUnder" type="checkbox"><span><u>U</u> 下線</span></label><label class="username-toggle"><input id="pStrike" type="checkbox"><span><s>S</s> 取り消し線</span></label></div>
           <label class="pc-field">フォント<select id="pFont" class="pc-in"><option value="sans">ゴシック</option><option value="serif">明朝</option><option value="round">丸め</option><option value="mono">等幅</option></select></label>
+          <div id="pMediaWrap" class="pc-fx hidden">
+            <div class="pc-lbl">GIF・動画の設定</div>
+            <label class="pc-field">フレーム（保存されるコマ）: <b id="pMediaFrameVal">10%</b><input id="pMediaFrame" type="range" min="0" max="100" step="0.5" value="10"></label>
+            <p class="subtle" id="pMediaInfo"></p>
+            <p class="subtle">プレビューでは動きますが、保存するPNGは選んだコマです。スライダーを動かす（または「⏸ アニメーション」を押す）とそのコマで止まります。ファイルはアップロードされず、この端末の中だけで処理されます。動画の音は出ません。</p>
+          </div>
+          <div id="pFxWrap" class="pc-fx hidden">
+            <div class="pc-lbl">エフェクトの設定</div>
+            <label class="pc-field">種類<select id="pFxKind" class="pc-in"></select></label>
+            <div class="pc-grid">
+              <label class="pc-field">数<input id="pFxAmount" type="range" min="1" max="80" value="10"></label>
+              <label class="pc-field">大きさ（％）<input id="pFxScale" type="range" min="40" max="250" step="10" value="100"></label>
+            </div>
+            <label class="pc-field">フレーム（選んだコマ）: <b id="pFxFrameVal">30%</b><input id="pFxFrame" type="range" min="0" max="100" step="1" value="30"></label>
+            <button id="pFxShuffle" class="secondary-btn" type="button">🎲 配置をランダムにやり直す</button>
+            <p class="subtle">エフェクトはカード全体にかかる1枚の重ね絵で、動きません。「フレーム」のスライダーで、好きなコマ（瞬間）を選んでください。選んだコマがそのままPNGになります。別のエフェクトを選ぶと、前のものは自動で外れます（一度に使えるのは1つです）。</p>
+            <p class="subtle">色は「文字・塗りの色」、透明度は「不透明度」で変えられます（紙吹雪・桜の花びらは色が決まっています）。エフェクトはキャンバスをクリックしても選べません（他のパーツの邪魔をしないため）。「パーツ一覧」から選んでください。やめたいときは「✦ エフェクト」から「✕ エフェクトなし」を選ぶか、「削除」を押します。</p>
+          </div>
         </details>
         <details class="panel pc-box"><summary>パーツ一覧（上ほど前面）</summary><div id="pcLayers" class="pc-layers"></div></details>
         <details class="panel pc-box"><summary>テーマ・リング</summary>
@@ -115,6 +136,8 @@
   <script src="yay-api.js"></script>
   <script src="site.js"></script>
   <script src="likers.js"></script>
+  <script src="profile-fx.js"></script>
+  <script src="profile-media.js"></script>
   <script src="profile-card.js"></script>
 </body>
 </html>

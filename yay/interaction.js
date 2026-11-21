@@ -520,7 +520,7 @@
       }
       objectUrls.forEach(u=>URL.revokeObjectURL(u));objectUrls.length=0;
       const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/png"));if(!blob)throw new Error("PNG画像を作成できませんでした。");
-      const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=`yay-interaction-map-${state.userId}-top${$("topLimit").value}.png`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1500);
+      await window.yaySavePng(blob,`yay-interaction-map-${state.userId}-top${$("topLimit").value}.png`);
     }catch(e){showError(`画像を生成できませんでした: ${e.message}`);}
     finally{objectUrls.forEach(u=>URL.revokeObjectURL(u));btn.disabled=false;btn.textContent="画像をダウンロード";}
   }

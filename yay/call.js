@@ -247,7 +247,7 @@
       [center,...avatars].forEach(x=>{if(x?.obj)URL.revokeObjectURL(x.obj);});
       await window.drawYayCreatorFooter(canvas);
       const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/png"));if(!blob)throw new Error("PNG画像を作成できませんでした。");
-      const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=`yay-call-map-${state.userId}-top${$("topLimit").value}.png`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1500);
+      await window.yaySavePng(blob,`yay-call-map-${state.userId}-top${$("topLimit").value}.png`);
     }catch(e){showError(`画像を生成できませんでした: ${e.message}`);}
     finally{btn.disabled=false;btn.textContent="画像をダウンロード";}
   }

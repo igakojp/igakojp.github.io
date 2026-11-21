@@ -310,7 +310,7 @@
       if(logoLoaded?.img){const im=logoLoaded.img,maxW=250,maxH=64,ratio=Math.min(maxW/(im.naturalWidth||im.width),maxH/(im.naturalHeight||im.height)),w=(im.naturalWidth||im.width)*ratio,h=(im.naturalHeight||im.height)*ratio;ctx.save();ctx.globalAlpha=.95;ctx.drawImage(window.yayWhiteImage(im,w,h),cx-w/2,2290-h/2,w,h);ctx.restore();}
       [centerLoaded,logoLoaded,creatorLoaded,...avatarLoaded].forEach(x=>{if(x?.obj)URL.revokeObjectURL(x.obj);});
       const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/png"));if(!blob)throw new Error("PNG画像を作成できませんでした。");
-      const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=`yay-letter-map-${state.userId}-top${$("topLimit").value}.png`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1500);
+      await window.yaySavePng(blob,`yay-letter-map-${state.userId}-top${$("topLimit").value}.png`);
     }catch(e){showError(`画像を生成できませんでした: ${e.message}`);}
     finally{btn.disabled=false;btn.textContent="画像をダウンロード";}
   }

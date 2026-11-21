@@ -147,3 +147,26 @@ if (typeof CanvasRenderingContext2D !== "undefined" && !CanvasRenderingContext2D
   }
   loadCreator();
 })();
+
+/* Save a PNG: on phones/tablets open the share sheet (so it can go to Photos), otherwise download it. */
+window.yaySavePng = async function(blob, name) {
+  try {
+    const file = new File([blob], name, { type: "image/png" });
+    if (matchMedia("(pointer:coarse)").matches && navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file] }); return;
+    }
+  } catch (e) { if (e && e.name === "AbortError") return; /* cancelled by the user; any other error falls back to a download */ }
+  const url = URL.createObjectURL(blob), a = document.createElement("a");
+  a.href = url; a.download = name; document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 4000);
+};
+
+/* Top navigation: keep the current tab in view and show a fade where more tabs are hidden. */
+document.addEventListener("DOMContentLoaded", () => {
+  const nav = document.querySelector(".section-nav"); if (!nav) return;
+  const cur = nav.querySelector(".active"), upd = () => {
+    nav.classList.toggle("fade-l", nav.scrollLeft > 4);
+    nav.classList.toggle("fade-r", nav.scrollLeft + nav.clientWidth < nav.scrollWidth - 4);
+  };
+  if (cur) nav.scrollLeft = Math.max(0, cur.offsetLeft - (nav.clientWidth - cur.offsetWidth) / 2);
+  nav.addEventListener("scroll", upd, { passive: true }); addEventListener("resize", upd); upd();
+});

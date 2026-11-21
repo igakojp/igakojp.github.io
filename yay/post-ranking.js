@@ -177,7 +177,7 @@
       }else{ctx.textAlign='right';ctx.textBaseline='middle';ctx.fillStyle='#fff';ctx.font="bold 30px system-ui, sans-serif";ctx.fillText('Yay!',W-72,fy);}
       if(creatorAsset?.objectUrl)URL.revokeObjectURL(creatorAsset.objectUrl);if(logoAsset?.objectUrl)URL.revokeObjectURL(logoAsset.objectUrl);
       const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));if(!blob)throw new Error('PNG画像を作成できませんでした。');
-      const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`yay-post-ranking-${state.kind}-top${rows.length}.png`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1500);
+      await window.yaySavePng(blob,`yay-post-ranking-${state.kind}-top${rows.length}.png`);
     }catch(e){error(`画像を生成できませんでした: ${e.message}`);}finally{btn.disabled=false;btn.textContent='画像をダウンロード';}
   }
 
