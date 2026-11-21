@@ -10,13 +10,13 @@
   const el = (tag, props = {}, ...kids) => { const n = document.createElement(tag); Object.assign(n, props); kids.forEach(k => n.append(k)); return n; };
   const showErr = m => { $("pcError").textContent = m; $("pcError").classList.toggle("hidden", !m); };
   const setWarn = (p, kind) => { p.textContent = kind ? `${kind}らしき内容が含まれているため、反映していません。個人情報は書かないでください。` : ""; p.classList.toggle("hidden", !kind); };
-  const S = { objs: [], sel: null, pen: false, user: null, hist: [], redo: [], guides: [], fol: { uid: null, users: [], next: null, done: false, loading: false }, theme: { text: "#ffffff", bg1: "#1b2a55", bg2: "#0b1226", pattern: "none", radius: 48, shade: 25, shape: "circle", ring: "gradient", ring1: "#8de5ff", ring2: "#8b9cff", ringW: 12 } };
-  let uid = 1, drag = null;
+  const S = { play: !matchMedia("(prefers-reduced-motion: reduce)").matches, playStart: performance.now() / 1000, objs: [], sel: null, pen: false, user: null, hist: [], redo: [], guides: [], fol: { uid: null, users: [], next: null, done: false, loading: false }, theme: { text: "#ffffff", bg1: "#1b2a55", bg2: "#0b1226", pattern: "none", radius: 48, shade: 25, shape: "circle", ring: "gradient", ring1: "#8de5ff", ring2: "#8b9cff", ringW: 12 } };
+  let uid = 1, drag = null, fxLive = false, exporting = false;
   const mctx = document.createElement("canvas").getContext("2d");
 
   /* ---------- network ---------- */
   async function getJson(url) {
-    const res = await fetch(url, { mode: "cors", credentials: "omit", headers: { Accept: "application/json" } });
+    const res = await window.YayAPI.fetch(url, { headers: { Accept: "application/json" } });
     let d = null; try { d = await res.json(); } catch { /* below */ }
     if (res.status === 429 || Number(d?.error_code) === 429) { const e = new Error("APIのアクセス制限を検出したため、処理を停止しました。時間をおいて再実行してください。"); e.stop = true; throw e; }
     if (res.status === 404) { const e = new Error("not found"); e.notFound = true; throw e; }
@@ -107,7 +107,7 @@
     else if (o.kind === "line") { ctx.moveTo(x, y + h / 2); ctx.lineTo(x + w, y + h / 2); }
     else ctx.rect(x, y, w, h);
   }
-  function cover(ctx, img, x, y, w, h) { const k = Math.max(w / img.width, h / img.height); ctx.drawImage(img, x + (w - img.width * k) / 2, y + (h - img.height * k) / 2, img.width * k, img.height * k); }
+  function cover(ctx, img, x, y, w, h) { const iw = img.videoWidth || img.naturalWidth || img.width, ih = img.videoHeight || img.naturalHeight || img.height; if (!iw || !ih) return; const k = Math.max(w / iw, h / ih); ctx.drawImage(img, x + (w - iw * k) / 2, y + (h - ih * k) / 2, iw * k, ih * k); }
   function ringPath(ctx, o, inset) { ctx.beginPath(); if (S.theme.shape === "round") ctx.roundRect(o.x + inset, o.y + inset, o.w - inset * 2, o.h - inset * 2, (o.w - inset * 2) * .28); else ctx.ellipse(o.x + o.w / 2, o.y + o.h / 2, Math.max(1, o.w / 2 - inset), Math.max(1, o.h / 2 - inset), 0, 0, Math.PI * 2); }
   function drawAvatar(ctx, o) {
     const t = S.theme, rw = t.ring === "none" ? 0 : Math.min(t.ringW, o.w / 6);
@@ -149,7 +149,8 @@
       t.y = o.y + d / 2 - textBox(t).lines.length * o.size * 1.4 / 2; drawObj(ctx, t);
     } else if (o.type === "image" || o.type === "header") {
       ctx.save(); ctx.beginPath(); ctx.rect(o.x, o.y, o.w, o.h); ctx.clip();
-      if (o.img) cover(ctx, o.img, o.x, o.y, o.w, o.h);
+      const src = o.media && window.YayMedia ? window.YayMedia.pick(o, exporting, fxLive, performance.now() / 1000 - S.playStart) : o.img;
+      if (src) cover(ctx, src, o.x, o.y, o.w, o.h);
       if (o.type === "header") { ctx.fillStyle = `rgba(0,0,0,${S.theme.shade / 100})`; ctx.fillRect(o.x, o.y, o.w, o.h); }
       ctx.restore(); if (o.strokeW) { ctx.lineWidth = o.strokeW; ctx.strokeStyle = o.strokeC; ctx.strokeRect(o.x, o.y, o.w, o.h); }
     } else if (o.type === "avatar") drawAvatar(ctx, o);
@@ -157,6 +158,7 @@
       shapePath(ctx, o);
       if (o.fillOn && o.kind !== "line") { ctx.fillStyle = o.color; ctx.fill(); }
       if (o.strokeW || o.kind === "line") { ctx.lineWidth = o.strokeW || 6; ctx.strokeStyle = o.kind === "line" ? o.color : o.strokeC; ctx.lineJoin = "round"; ctx.stroke(); }
+    } else if (o.type === "effect") { if (window.YayFx) window.YayFx.draw(ctx, o, o.frame);   // never animated: always the chosen frame
     } else if (o.type === "pen") {
       ctx.translate(o.x, o.y); ctx.lineCap = ctx.lineJoin = "round"; ctx.strokeStyle = o.strokeC; ctx.lineWidth = o.strokeW; ctx.beginPath();
       o.pts.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); if (o.pts.length === 1) ctx.lineTo(o.pts[0][0] + .1, o.pts[0][1]); ctx.stroke();
@@ -175,19 +177,24 @@
   const cv = $("pcCanvas"), cx = cv.getContext("2d");
   const ctr = b => [b.x + b.w / 2, b.y + b.h / 2];
   const handles = b => [{ k: "se", x: b.x + b.w, y: b.y + b.h }, { k: "e", x: b.x + b.w, y: b.y + b.h / 2 }, { k: "s", x: b.x + b.w / 2, y: b.y + b.h }];
-  const rotPt = b => ({ k: "rot", x: b.x + b.w / 2, y: b.y - 50 });
+  const ui = () => clamp(W / (cv.getBoundingClientRect().width || W), 1, 3.4);   // 1 on a big screen, larger on phones
+  const rotPt = b => ({ k: "rot", x: b.x + b.w / 2, y: b.y - 50 * ui() });
   function rotated(ctx, o, f) { if (!o.rot) return f(); const [x0, y0] = ctr(bounds(o)); ctx.save(); ctx.translate(x0, y0); ctx.rotate(o.rot * Math.PI / 180); ctx.translate(-x0, -y0); f(); ctx.restore(); }
   function render(ctx, withUi) {
+    fxLive = !!(withUi && S.play); exporting = !withUi;   // the preview animates; saved images always use the chosen frame
     ctx.clearRect(0, 0, W, H); drawBg(ctx);
-    ctx.save(); ctx.beginPath(); ctx.roundRect(0, 0, W, H, S.theme.radius); ctx.clip(); S.objs.forEach(o => rotated(ctx, o, () => drawObj(ctx, o))); ctx.restore();
+    ctx.save(); ctx.beginPath(); ctx.roundRect(0, 0, W, H, S.theme.radius); ctx.clip();
+    S.objs.forEach(o => { if (o.type !== "effect") rotated(ctx, o, () => drawObj(ctx, o)); });
+    S.objs.forEach(o => { if (o.type === "effect") drawObj(ctx, o); });   // the one effect overlay always covers the whole card, on top
+    ctx.restore();
     if (!withUi) return;
     if (drag && drag.m !== "pen" && gridOn()) { ctx.save(); ctx.fillStyle = "rgba(255,255,255,.3)"; for (let x = G; x < W; x += G) for (let y = G; y < H; y += G) ctx.fillRect(x - 1.5, y - 1.5, 3, 3); ctx.restore(); }
     if (S.guides.length) { ctx.save(); ctx.strokeStyle = "#ff6fa8"; ctx.lineWidth = 2; ctx.setLineDash([8, 6]); S.guides.forEach(g => { ctx.beginPath(); if (g.x != null) { ctx.moveTo(g.x, 0); ctx.lineTo(g.x, H); } else { ctx.moveTo(0, g.y); ctx.lineTo(W, g.y); } ctx.stroke(); }); ctx.restore(); }
-    const o = sel(); if (!o) return; const b = bounds(o);
+    const o = sel(); if (!o || o.type === "effect") return; const b = bounds(o);   // the overlay has no frame or handles
     rotated(ctx, o, () => {
-      ctx.save(); ctx.strokeStyle = "#46caff"; ctx.lineWidth = 3; ctx.setLineDash([10, 7]); ctx.strokeRect(b.x, b.y, b.w, b.h); ctx.setLineDash([]); ctx.fillStyle = "#fff";
-      if (o.type !== "pen") handles(b).forEach(h => { ctx.beginPath(); ctx.rect(h.x - 13, h.y - 13, 26, 26); ctx.fill(); ctx.stroke(); });
-      const r = rotPt(b); ctx.beginPath(); ctx.moveTo(b.x + b.w / 2, b.y); ctx.lineTo(r.x, r.y); ctx.stroke(); ctx.beginPath(); ctx.arc(r.x, r.y, 15, 0, Math.PI * 2); ctx.fillStyle = "#46caff"; ctx.fill(); ctx.strokeStyle = "#fff"; ctx.stroke(); ctx.restore();
+      ctx.save(); const u = ui(); ctx.strokeStyle = "#46caff"; ctx.lineWidth = 3 * u; ctx.setLineDash([10 * u, 7 * u]); ctx.strokeRect(b.x, b.y, b.w, b.h); ctx.setLineDash([]); ctx.fillStyle = "#fff";
+      if (o.type !== "pen") handles(b).forEach(h => { ctx.beginPath(); ctx.rect(h.x - 13 * u, h.y - 13 * u, 26 * u, 26 * u); ctx.fill(); ctx.stroke(); });
+      const r = rotPt(b); ctx.beginPath(); ctx.moveTo(b.x + b.w / 2, b.y); ctx.lineTo(r.x, r.y); ctx.stroke(); ctx.beginPath(); ctx.arc(r.x, r.y, 15 * u, 0, Math.PI * 2); ctx.fillStyle = "#46caff"; ctx.fill(); ctx.strokeStyle = "#fff"; ctx.stroke(); ctx.restore();
     });
   }
   const draw = () => { render(cx, true); renderLayers(); };
@@ -196,11 +203,12 @@
   const gridOn = () => $("pcSnap").checked;
   const cloneObjs = () => S.objs.map(o => ({ ...o, pts: o.pts && o.pts.map(p => p.slice()), items: o.items && o.items.map(i => ({ ...i })) }));
   function hist() { S.hist.push({ objs: cloneObjs(), sel: S.sel }); if (S.hist.length > 60) S.hist.shift(); S.redo = []; }
-  function undo(redo) { const from = redo ? S.redo : S.hist, to = redo ? S.hist : S.redo, st = from.pop(); if (!st) return; to.push({ objs: cloneObjs(), sel: S.sel }); S.objs = st.objs; S.sel = st.sel; tgSig = ""; syncPanel(); draw(); }
+  function undo(redo) { const from = redo ? S.redo : S.hist, to = redo ? S.hist : S.redo, st = from.pop(); if (!st) return; to.push({ objs: cloneObjs(), sel: S.sel }); S.objs = st.objs; S.sel = st.sel; tgSig = ""; if (window.YayMedia) S.objs.forEach(o => { if (o.media) window.YayMedia.sync(o); }); syncPanel(); draw(); }
   let lastH = 0; const histSoon = () => { const t = Date.now(); if (t - lastH > 700) hist(); lastH = t; };
   function fit(o) {
     if (o.type === "pen") { const b = bounds(o); if (b.x < M) o.x += M - b.x; if (b.x + b.w > W - M) o.x -= b.x + b.w - (W - M); if (b.y < M) o.y += M - b.y; if (b.y + b.h > H - M) o.y -= b.y + b.h - (H - M); return; }
     if (o.type === "header") { o.x = 0; o.w = W; o.h = clamp(o.h, G, H - G * 2); o.y = clamp(o.y, 0, H - o.h); return; }
+    if (o.type === "effect") { o.x = 0; o.y = 0; o.w = W; o.h = H; o.rot = 0; return; }
     const textual = o.type === "text" || o.type === "tags";
     o.w = clamp(o.w, textual ? 80 : 40, W - M * 2); if (!textual) o.h = clamp(o.h, 20, H - M * 2);
     if (o.type === "person") o.w = Math.max(o.w, Math.min(o.h * 1.6, W - M * 2));
@@ -224,12 +232,13 @@
     const [x, y] = pos(e); cv.setPointerCapture(e.pointerId);
     if (S.pen) { hist(); const o = mk("pen", { x: 0, y: 0, pts: [[x, y]], strokeC: $("pStrokeC").value, strokeW: Math.max(2, +$("pStrokeW").value || 8) }); S.objs.push(o); S.sel = o.id; drag = { m: "pen", o }; draw(); return; }
     const cur = sel();
-    if (cur) {
+    if (cur && cur.type !== "effect") {
       const b = bounds(cur), [lx, ly] = toLocal(cur, x, y), hs = (cur.type !== "pen" ? handles(b) : []).concat([rotPt(b)]);
-      const h = hs.find(h => Math.abs(h.x - lx) < 26 && Math.abs(h.y - ly) < 26);
+      const reach = 26 * ui(), h = hs.find(h => Math.abs(h.x - lx) < reach && Math.abs(h.y - ly) < reach);
       if (h) { drag = { m: h.k, o: cur, x, y, b: { ...b }, size0: cur.size }; return; }
     }
-    const o = [...S.objs].reverse().find(o => hit(o, x, y)); S.sel = o ? o.id : null;
+    // The effect overlay covers the whole card, so it can never be clicked on the canvas: pick it from the parts list.
+    const o = [...S.objs].reverse().find(o => o.type !== "effect" && hit(o, x, y)); S.sel = o ? o.id : null;
     drag = o ? { m: "move", o, x, y, ox: o.x, oy: o.y } : null; syncPanel(); draw();
   });
   cv.addEventListener("pointermove", e => {
@@ -264,7 +273,7 @@
 
   /* ---------- panel ---------- */
   const P = { color: "pColor", size: "pSize", strokeC: "pStrokeC", strokeW: "pStrokeW", alpha: "pAlpha", rot: "pRot" };
-  const NAMES = { text: "文字", image: "画像", header: "ヘッダー", avatar: "アイコン", shape: "図形", pen: "ペンの線", tags: "タググループ", person: "ユーザー" };
+  const NAMES = { text: "文字", image: "画像", header: "ヘッダー", avatar: "アイコン", shape: "図形", pen: "ペンの線", tags: "タググループ", person: "ユーザー", effect: "エフェクト" };
   function syncPanel() {
     const o = sel(), isText = !!o && (o.type === "text" || o.type === "person");
     $("pcSelName").textContent = o ? `選択中: ${NAMES[o.type]}` : "パーツを選ぶとここで編集できます。";
@@ -273,6 +282,10 @@
       for (const k in P) $(P[k]).value = o[k]; $("pBold").checked = o.bold; $("pUnder").checked = o.under; $("pStrike").checked = o.strike; $("pFont").value = o.font; $("pFillOn").value = o.fillOn ? "1" : "0";
       if (isText && document.activeElement !== $("pText")) $("pText").value = o.type === "text" ? o.text : o.name;
     }
+    const fx = !!o && o.type === "effect"; $("pFxWrap").classList.toggle("hidden", !fx);
+    if (fx) { $("pFxKind").value = o.fx; $("pFxAmount").value = o.amount; $("pFxScale").value = o.fxScale; showFrame(o.frame); }
+    const md = !!o && !!o.media; $("pMediaWrap").classList.toggle("hidden", !md);
+    if (md) { showMediaFrame(o.frame || 0, o); $("pMediaInfo").textContent = `${o.media.kind === "gif" ? "GIF" : "動画"} · 長さ ${o.media.dur.toFixed(1)}秒`; }
     renderTagEditor();
   }
   const edit = (k, f) => $(k).addEventListener("input", () => { const o = sel(); if (!o) return; histSoon(); f(o, $(k)); draw(); });
@@ -422,6 +435,70 @@
   document.querySelectorAll("[data-add=text]").forEach(b => b.onclick = () => add(mk("text", { text: "テキスト", x: 120, y: 340, w: 600, size: 56 })));
   $("pcImgBtn").onclick = () => { if (imageNotice()) $("pcFile").click(); };
   $("pcFile").onchange = async e => { const f = e.target.files[0]; if (!f) return; const img = new Image(); img.src = URL.createObjectURL(f); await new Promise(r => { img.onload = r; }); const k = Math.min(500 / img.width, 400 / img.height, 1); add(mk("image", { img, x: 200, y: 300, w: img.width * k, h: img.height * k })); e.target.value = ""; };
+  /* ---------- GIF / video parts ---------- */
+  $("pcMediaBtn").onclick = () => { if (imageNotice()) $("pcMediaFile").click(); };
+  $("pcMediaFile").onchange = async e => {
+    const f = e.target.files[0]; e.target.value = ""; if (!f) return;
+    showErr(""); const btn = $("pcMediaBtn"), label = btn.textContent; btn.disabled = true; btn.textContent = "読み込み中…";
+    try {
+      const m = await window.YayMedia.load(f), k = Math.min(500 / m.w, 400 / m.h, 1);
+      const o = mk("image", { media: m, frame: .1, img: null, still: null, x: 200, y: 300, w: m.w * k, h: m.h * k });
+      await window.YayMedia.setFrame(o, .1); capture(); add(o); window.YayMedia.enforce(S.objs, S.play);
+    } catch (err) { showErr(err.message || "読み込めませんでした。"); } finally { btn.disabled = false; btn.textContent = label; }
+  };
+  /* ---------- effects (shooting stars, sparkles, snow ...) ---------- */
+  const FX = window.YayFx;
+  if (FX) for (const k in FX.KINDS) { for (const id of ["pcFxAdd", "pFxKind"]) $(id).append(el("option", { value: k, textContent: FX.KINDS[k] })); }
+  // Only one effect can exist. Picking another one replaces (deselects) the previous one; "なし" removes it.
+  const fxDefaults = k => { const d = FX.DEFAULTS[k]; return { fx: k, seed: FX.newSeed(), amount: d.amount, fxScale: d.scale, color: d.color, colorAuto: false }; };
+  $("pcFxAdd").append(el("option", { value: "__none", textContent: "✕ エフェクトなし" }));
+  $("pcFxAdd").onchange = e => {
+    const k = e.target.value; e.target.value = ""; if (!k || !FX) return;
+    const old = S.objs.find(o => o.type === "effect");
+    if (k === "__none") { if (!old) return; hist(); S.objs = S.objs.filter(o => o.type !== "effect"); if (S.sel === old.id) S.sel = null; syncPanel(); draw(); return; }
+    const keep = old ? old.frame : .3, alpha = old ? old.alpha : 100;
+    hist(); S.objs = S.objs.filter(o => o.type !== "effect");
+    const o = mk("effect", { ...fxDefaults(k), x: 0, y: 0, w: W, h: H, frame: keep, alpha, speed: 100 });
+    S.objs.push(o); S.sel = o.id; syncPanel(); draw();
+  };
+  const fxEdit = (id, f, ev = "input") => $(id).addEventListener(ev, () => { const o = sel(); if (!o || o.type !== "effect") return; histSoon(); f(o, $(id)); draw(); });
+  fxEdit("pFxKind", (o, e2) => { Object.assign(o, fxDefaults(e2.value)); syncPanel(); }, "change"); fxEdit("pFxAmount", (o, e2) => { o.amount = +e2.value; }); fxEdit("pFxScale", (o, e2) => { o.fxScale = +e2.value; });
+  // Loop animation: the preview plays forever; "frame" is the moment that gets saved into the PNG.
+  const nowSec = () => performance.now() / 1000;
+  const fxs = () => S.objs.filter(o => o.type === "effect");
+  function showFrame(f) { $("pFxFrame").value = Math.round((f || 0) * 100); $("pFxFrameVal").textContent = `${Math.round((f || 0) * 100)}%`; }
+  const YM = window.YayMedia;
+  function capture() {   // freeze what is on screen right now into each animated part's frame, without interrupting playback
+    if (!S.play) return; const t = nowSec() - S.playStart;
+    S.objs.forEach(o => { if (o.media && YM) o.frame = YM.live(o, t); });
+    S.playStart = nowSec();
+  }
+  function showMediaFrame(f, o) { $("pMediaFrame").value = Math.round(f * 1000) / 10; $("pMediaFrameVal").textContent = `${Math.round(f * 100)}%（${(f * o.media.dur).toFixed(1)}秒）`; }
+  function updatePlayBtn() { const b = $("pcPlay"); b.textContent = S.play ? "⏸ アニメーション: 再生中" : "▶ アニメーション: 停止中"; b.classList.toggle("primary-btn", S.play); b.classList.toggle("secondary-btn", !S.play); }
+  function setPlay(on) { if (on === S.play) return; if (!on) capture(); S.play = on; if (on) { S.playStart = nowSec(); if (YM) YM.seekAll(S.objs); } if (YM) YM.enforce(S.objs, S.play); updatePlayBtn(); draw(); }
+  $("pcPlay").onclick = () => setPlay(!S.play);
+  $("pFxFrame").addEventListener("input", () => {
+    const o = sel(); if (!o || o.type !== "effect") return; histSoon();   // the effect is static: the slider just picks its frame
+    o.frame = +$("pFxFrame").value / 100; showFrame(o.frame); draw();
+  });
+  $("pMediaFrame").addEventListener("input", () => {
+    const o = sel(); if (!o || !o.media || !YM) return; setPlay(false); histSoon();
+    const f = +$("pMediaFrame").value / 100; showMediaFrame(f, o); YM.setFrame(o, f).then(draw); draw();
+  });
+  const anim = () => S.objs.some(o => o.media);
+  let lastTick = 0, lastSync = 0;
+  (function tick(ts) {
+    requestAnimationFrame(tick);
+    if (document.hidden || $("pcEditor").classList.contains("hidden")) return;
+    if (YM && ts - lastSync > 500) { lastSync = ts; YM.enforce(S.objs, S.play); }
+    if (!S.play || ts - lastTick < 33 || !anim()) return;
+    lastTick = ts; render(cx, true);
+    const o = sel(), t = nowSec() - S.playStart;
+    if (o && o.media && YM && document.activeElement !== $("pMediaFrame")) showMediaFrame(YM.live(o, t), o);
+  })(0);
+  updatePlayBtn();
+  $("pFxShuffle").onclick = () => { const o = sel(); if (!o || o.type !== "effect" || !FX) return; hist(); o.seed = FX.newSeed(); draw(); };
+
   $("pcShapeAdd").onchange = e => { const k = e.target.value; if (k) add(mk("shape", { kind: k, x: 320, y: 360, w: 240, h: k === "line" ? 40 : 240, color: S.theme.ring1, colorAuto: false, strokeW: 0 })); e.target.value = ""; };
   $("pcPen").onclick = () => { S.pen = !S.pen; $("pcPen").textContent = `✎ ペン: ${S.pen ? "オン" : "オフ"}`; $("pcPen").classList.toggle("primary-btn", S.pen); cv.style.cursor = S.pen ? "crosshair" : ""; };
   function splitObj(o) {
@@ -435,10 +512,10 @@
     return [];
   }
   document.querySelectorAll("[data-z]").forEach(b => b.onclick = () => {
-    const o = sel(); if (!o) return; hist(); const i = S.objs.indexOf(o), a = S.objs, z = b.dataset.z;
+    const o = sel(); if (!o) return; if (o.type === "effect" && /^(dup|split|top|up|down|bottom)$/.test(b.dataset.z)) return; hist(); const i = S.objs.indexOf(o), a = S.objs, z = b.dataset.z;
     if (z === "del") { a.splice(i, 1); S.sel = null; }
     else if (z === "split") { const parts = splitObj(o); if (!parts.length) { S.hist.pop(); return; } a.splice(i, 1, ...parts); S.sel = parts[parts.length - 1].id; }
-    else if (z === "dup") { const c = Object.assign({}, o, { id: uid++, x: o.x + 30, y: o.y + 30, pts: o.pts && o.pts.map(p => p.slice()), items: o.items && o.items.map(it => ({ ...it, id: uid++ })) }); a.push(c); S.sel = c.id; }
+    else if (z === "dup") { const c = Object.assign({}, o, { id: uid++, x: o.x + 30, y: o.y + 30, pts: o.pts && o.pts.map(p => p.slice()), items: o.items && o.items.map(it => ({ ...it, id: uid++ })) }, o.media ? { media: window.YayMedia.clone(o.media), still: null } : {}); a.push(c); S.sel = c.id; }
     else { a.splice(i, 1); a.splice(z === "top" ? a.length : z === "bottom" ? 0 : z === "up" ? Math.min(a.length, i + 1) : Math.max(0, i - 1), 0, o); }
     tgSig = ""; syncPanel(); draw();
   });
@@ -447,7 +524,7 @@
     const sig = S.objs.map(o => o.id).join(",") + "|" + S.sel; if (sig === layerSig) return; layerSig = sig;
     const box = $("pcLayers"); box.innerHTML = "";
     [...S.objs].reverse().forEach(o => {
-      const extra = o.type === "text" ? (o.text || "").replace(/\n/g, " ") : o.type === "person" ? o.name : o.type === "tags" ? (o.label || o.items.map(i => i.text).join(" ")) : "";
+      const extra = o.type === "text" ? (o.text || "").replace(/\n/g, " ") : o.type === "person" ? o.name : o.type === "tags" ? (o.label || o.items.map(i => i.text).join(" ")) : o.type === "effect" ? (window.YayFx?.KINDS[o.fx] || "") : o.media ? (o.media.kind === "gif" ? "GIF" : "動画") : "";
       const b = el("button", { type: "button", className: "pc-layer" + (o.id === S.sel ? " on" : ""), textContent: NAMES[o.type] + (extra ? "：" + extra.slice(0, 14) : "") });
       b.onclick = () => { S.sel = o.id; syncPanel(); draw(); }; box.appendChild(b);
     });
@@ -459,6 +536,7 @@
     const mod = e.ctrlKey || e.metaKey, k = e.key.toLowerCase();
     if (mod && k === "z") { e.preventDefault(); undo(e.shiftKey); return; }
     if (mod && k === "y") { e.preventDefault(); undo(true); return; }
+    if (e.key === "Escape") { if (S.sel) { S.sel = null; syncPanel(); draw(); } return; }
     const o = sel(); if (!o) return;
     if (e.key === "Delete" || e.key === "Backspace") { e.preventDefault(); hist(); S.objs = S.objs.filter(q => q !== o); S.sel = null; syncPanel(); draw(); return; }
     const d = gridOn() ? (e.shiftKey ? G * 3 : G) : (e.shiftKey ? 10 : 1), m = { ArrowLeft: [-d, 0], ArrowRight: [d, 0], ArrowUp: [0, -d], ArrowDown: [0, d] }[e.key];
@@ -471,7 +549,7 @@
     if (bad) { showErr(`カードに${bad}らしき内容が含まれているため、保存できません。個人情報は削除してください。`); return; }
     showErr(""); const btn = $("pcSave"); btn.disabled = true;
     try {
-      const c = document.createElement("canvas"); c.width = W; c.height = H; const ctx = c.getContext("2d"); render(ctx, false);
+      const c = document.createElement("canvas"); c.width = W; c.height = H; const ctx = c.getContext("2d"); capture(); if (window.YayMedia) await window.YayMedia.prepare(S.objs, S.play); render(ctx, false);
       let cr = window.__yayCreator;
       if (!cr) { try { const d = await get("/users/11044343"); if (d.user?.nickname) cr = { nickname: d.user.nickname }; } catch { /* fall back to ID */ } }
       const logo = $("tLogo").checked ? await loadImg("https://yay.space/images/logotype.svg") : null;
@@ -480,7 +558,7 @@
       ctx.fillText(`制作: ${cr?.nickname ? Array.from(cr.nickname).slice(0, 18).join("") : "Yay! ID 11044343"}`, 30, H - 28);
       if (logo) { const w0 = logo.naturalWidth || 130, h0 = logo.naturalHeight || 34, k = Math.min(130 / w0, 34 / h0), lw = Math.round(w0 * k), lh = Math.round(h0 * k), tc = document.createElement("canvas"); tc.width = lw; tc.height = lh; const g = tc.getContext("2d"); g.drawImage(logo, 0, 0, lw, lh); g.globalCompositeOperation = "source-in"; g.fillStyle = "#fff"; g.fillRect(0, 0, lw, lh); ctx.drawImage(tc, W - 30 - lw, H - 28 - lh / 2); }
       ctx.restore();
-      const blob = await new Promise(r => c.toBlob(r, "image/png")); const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `yay-profile-card-${S.user.id}.png`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1500);
+        const blob = await new Promise(r => c.toBlob(r, "image/png")); await window.yaySavePng(blob, `yay-profile-card-${S.user.id}.png`);
     } catch (e) { showErr(`画像を生成できませんでした: ${e.message}`); } finally { btn.disabled = false; }
   };
 

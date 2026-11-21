@@ -32,7 +32,7 @@
   const state = {
     users: new Map(),          // id -> user, only users who currently like the post
     sortKey: "level", sortDir: "desc", filter: "",
-    startId: null, sorted: [],
+    startId: null, startManual: false, sorted: [],
     stopped: false, refreshing: false, lastUpdated: null, loaded: false,
     hydrateQueue: [], hydrateActive: 0, timer: null, renderQueued: false, listSig: ""
   };
@@ -48,7 +48,7 @@
     let attempt = 0;
     while (true) {
       try {
-        const res = await fetch(url, { method: "GET", mode: "cors", credentials: "omit", headers: { Accept: "application/json" } });
+        const res = await window.YayAPI.fetch(url, { method: "GET", headers: { Accept: "application/json" } });
         if (res.status === 429) throw stopForRateLimit();
         if (res.status >= 500 && attempt++ < 2) { await sleep(1000 * 2 ** attempt); continue; }
         const body = await res.text();
@@ -114,7 +114,7 @@
   }
   // Returns the timeline's user object, or "private" when the timeline cannot be viewed (error_code -363).
   async function timelineUser(id) {
-    const res = await fetch(`${API}/posts/user_timeline?number=1&user_id=${id}`, { method: "GET", mode: "cors", credentials: "omit", headers: { Accept: "application/json" } });
+    const res = await window.YayAPI.fetch(`${API}/posts/user_timeline?number=1&user_id=${id}`, { method: "GET", headers: { Accept: "application/json" } });
     if (res.status === 429) throw stopForRateLimit();
     let data = null; try { data = JSON.parse(await res.text()); } catch { /* handled below */ }
     if (Number(data?.error_code) === 429 || (data && data.result && data.result !== "success" && /429|rate.?limit|too many requests|アクセス制限/i.test(String(data.message || "")))) throw stopForRateLimit();
@@ -280,7 +280,10 @@
       sel.innerHTML = rows.map((r, i) => `<option value="${esc(r.id)}">${i + 1}位　${esc(r.nickname)}</option>`).join("");
     }
     if (!rows.length) return;
-    if (!state.startId || !rows.some(r => r.id === state.startId)) state.startId = rows[0].id;
+    // Until the user picks someone themselves, keep following the current #1 while loading is in progress.
+    const stillLoading = !state.loaded || [...state.users.values()].some(u => ["idle", "queued", "loading", "error"].includes(u.status));
+    if (!state.startManual && stillLoading) state.startId = rows[0].id;
+    else if (!state.startId || !rows.some(r => r.id === state.startId)) state.startId = rows[0].id;
     sel.value = state.startId;
   }
   function pickedRows() {
@@ -362,7 +365,7 @@
       let creator = window.__yayCreator || null;
       if (!creator) {
         try {
-          const r = await fetch(`${API}/users/11044343`, { headers: { Accept: "application/json" }, mode: "cors", credentials: "omit" });
+          const r = await window.YayAPI.fetch(`${API}/users/11044343`, { headers: { Accept: "application/json" } });
           if (r.ok) { const d = await r.json(); if (d?.result === "success" && d.user?.id) creator = { id: String(d.user.id), nickname: d.user.nickname, avatar: avatarOf(d.user) }; }
         } catch { /* credit is optional */ }
       }
@@ -423,12 +426,11 @@
       if (logoImg) {
         const lw0 = logoImg.naturalWidth || logoImg.width, lh0 = logoImg.naturalHeight || logoImg.height, k = Math.min(210 / lw0, 56 / lh0), lw = lw0 * k, lh = lh0 * k;
         ctx.fillStyle = "#2b2140"; roundRect(ctx, W - 70 - lw - 56, fy - 46, lw + 56, 92, 46); ctx.fill();
-        ctx.save(); ctx.filter = "brightness(0) invert(1)"; ctx.drawImage(logoImg, W - 70 - lw - 28, fy - lh / 2, lw, lh); ctx.restore();
+        ctx.save(); ctx.drawImage(window.yayWhiteImage(logoImg, lw, lh), W - 70 - lw - 28, fy - lh / 2, lw, lh); ctx.restore();
       }
       const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/png"));
       if (!blob) throw new Error("PNG画像を作成できませんでした。");
-      const url = URL.createObjectURL(blob), a = document.createElement("a");
-      a.href = url; a.download = `yay-like-ranking-${from}-${from + picked.length - 1}.png`; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1500);
+      await window.yaySavePng(blob, `yay-like-ranking-${from}-${from + picked.length - 1}.png`);
     } catch (e) { showError(`画像を生成できませんでした: ${e.message}`); }
     finally { objectUrls.forEach(u => URL.revokeObjectURL(u)); btn.disabled = false; label.textContent = "画像をダウンロード"; }
   }
@@ -446,7 +448,7 @@
   $("refreshBtn").addEventListener("click", () => refresh(true));
   $("autoRefresh").addEventListener("change", startTimer);
   $("imageBtn").addEventListener("click", exportImage);
-  $("startUser").addEventListener("change", e => { state.startId = e.target.value; render(); });
+  $("startUser").addEventListener("change", e => { state.startId = e.target.value; state.startManual = true; render(); });
   document.addEventListener("visibilitychange", () => { if (!document.hidden && state.loaded && !state.stopped && state.lastUpdated && Date.now() - state.lastUpdated > REFRESH_MS) refresh(false); });
 
   renderHead(); render(); startTimer(); refresh(false);

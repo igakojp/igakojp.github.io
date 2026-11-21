@@ -41,7 +41,7 @@
   async function load() {
     if (st.loading || st.done) return; st.loading = true; st.error = false; moreEl.textContent = "読み込み中…";
     try {
-      const res = await fetch(`${ROOT}/v1/posts/${POST_ID}/likers${st.from ? `?from_id=${encodeURIComponent(st.from)}` : ""}`, { mode: "cors", credentials: "omit", headers: { Accept: "application/json" } });
+      const res = await window.YayAPI.fetch(`${ROOT}/v1/posts/${POST_ID}/likers${st.from ? `?from_id=${encodeURIComponent(st.from)}` : ""}`, { headers: { Accept: "application/json" } });
       let d = null; try { d = await res.json(); } catch { /* below */ }
       if (res.status === 429 || Number(d?.error_code) === 429) { st.done = true; throw new Error("APIのアクセス制限を検出したため、処理を停止しました。時間をおいて開き直してください。"); }
       if (!res.ok || !d || (d.result && d.result !== "success")) throw new Error(d?.message || `読み込めませんでした (HTTP ${res.status})`);

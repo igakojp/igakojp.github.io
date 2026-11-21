@@ -45,7 +45,7 @@
         await sleep(Math.min(500,cooldownUntil-Date.now()));
       }
       try{
-        const res=await fetch(url,{method:"GET",mode:"cors",credentials:"omit",cache:"default",headers:{Accept:"application/json"},signal});
+        const res=await window.YayAPI.fetch(url,{method:"GET",headers:{Accept:"application/json"},signal});
         if(res.status===429)throw stopForRateLimit();
         if(res.status>=500){
           if(networkAttempt++<2){cooldownUntil=Math.max(cooldownUntil,Date.now()+Math.min(15000,1000*2**networkAttempt));continue;}
@@ -197,7 +197,7 @@
         const previous=state.cursor;
         state.cursor=oldest!==null?oldest:null;
         updateProgress();updateLiveStats();
-        if(!state.cursor||state.cursor===previous||rows.length<50){state.exhausted=true;break;}
+        if(!state.cursor||state.cursor===previous){state.exhausted=true;break;}
       }
       if(state.stopped){setStatus("停止");$("coverageNote").textContent="分析を停止しました。ここまで取得したレターの結果を表示しています。";}
       else if(state.exhausted&&state.checked<state.total){
@@ -281,7 +281,7 @@
         }return null;
       }
       let creator=window.__yayCreator||null;
-      if(!creator){try{const r=await fetch("https://proxy.cors.dev/https://api.yay.space/v2/users/11044343",{headers:{Accept:"application/json"},mode:"cors",credentials:"omit"});if(r.ok){const d=await r.json();if(d?.result==="success"&&String(d.user?.id)==="11044343")creator={id:"11044343",nickname:d.user.nickname,avatar:avatarOf(d.user)};}}catch{}}
+      if(!creator){try{const r=await window.YayAPI.fetch("https://proxy.cors.dev/https://api.yay.space/v2/users/11044343",{headers:{Accept:"application/json"}});if(r.ok){const d=await r.json();if(d?.result==="success"&&String(d.user?.id)==="11044343")creator={id:"11044343",nickname:d.user.nickname,avatar:avatarOf(d.user)};}}catch{}}
       const [centerLoaded,logoLoaded,creatorLoaded,...avatarLoaded]=await Promise.all([loadImage(avatarOf(state.profile)),loadImage("https://yay.space/images/logotype.svg"),loadImage(creator?.avatar||""),...points.map(p=>loadImage(p.u.avatar))]);
       const loaded=[centerLoaded,...avatarLoaded];
       function avatar(item,x,y,r,name){
@@ -307,10 +307,10 @@
         ctx.fillStyle="#a9c7e4";ctx.font="20px system-ui, 'Noto Sans JP',sans-serif";ctx.fillText("このプロジェクトの制作者",158,creditY-17);
         ctx.fillStyle="#fff";ctx.font="bold 29px system-ui, 'Noto Sans JP',sans-serif";ctx.fillText(creator.nickname,158,creditY+20);ctx.restore();
       }
-      if(logoLoaded?.img){const im=logoLoaded.img,maxW=250,maxH=64,ratio=Math.min(maxW/(im.naturalWidth||im.width),maxH/(im.naturalHeight||im.height)),w=(im.naturalWidth||im.width)*ratio,h=(im.naturalHeight||im.height)*ratio;ctx.save();ctx.filter="brightness(0) invert(1)";ctx.globalAlpha=.95;ctx.drawImage(im,cx-w/2,2290-h/2,w,h);ctx.restore();}
+      if(logoLoaded?.img){const im=logoLoaded.img,maxW=250,maxH=64,ratio=Math.min(maxW/(im.naturalWidth||im.width),maxH/(im.naturalHeight||im.height)),w=(im.naturalWidth||im.width)*ratio,h=(im.naturalHeight||im.height)*ratio;ctx.save();ctx.globalAlpha=.95;ctx.drawImage(window.yayWhiteImage(im,w,h),cx-w/2,2290-h/2,w,h);ctx.restore();}
       [centerLoaded,logoLoaded,creatorLoaded,...avatarLoaded].forEach(x=>{if(x?.obj)URL.revokeObjectURL(x.obj);});
       const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/png"));if(!blob)throw new Error("PNG画像を作成できませんでした。");
-      const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=`yay-letter-map-${state.userId}-top${$("topLimit").value}.png`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1500);
+      await window.yaySavePng(blob,`yay-letter-map-${state.userId}-top${$("topLimit").value}.png`);
     }catch(e){showError(`画像を生成できませんでした: ${e.message}`);}
     finally{btn.disabled=false;btn.textContent="画像をダウンロード";}
   }

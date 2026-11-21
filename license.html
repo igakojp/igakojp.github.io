@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#10111a">
+  <title>Yay! ユーザー証</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="ambient ambient-a"></div><div class="ambient ambient-b"></div>
+  <header class="topbar">
+    <a class="brand" href="index.html"><img class="brand-logo" src="https://yay.space/images/logotype.svg" alt="Yay!"><span><b>ユーザー証</b></span></a>
+    <nav class="section-nav" aria-label="マップ切り替え">
+      <a class="section-link" href="interaction.html">交流マップ</a>
+      <a class="section-link" href="review.html">レターマップ</a>
+      <a class="section-link" href="call.html">通話マップ</a>
+      <a class="section-link" href="combined.html">総合ランキング</a>
+      <a class="section-link" href="leaderboard.html">リーダーボード</a>
+      <a class="section-link" href="profile-card.html">自己紹介カード</a>
+      <a class="section-link active" href="license.html" aria-current="page">ユーザー証</a>
+      <a class="section-link" href="post-ranking.html">投稿ランキング</a>
+    </nav>
+    <div class="top-actions"><span class="privacy-pill"><i></i> 公開データのみ</span></div>
+  </header>
+  <main class="shell pc-shell">
+    <section class="intro"><div class="eyebrow">YAY! MEMBER CARD</div><h1>免許証みたいな、<br><span>ユーザー証をつくろう。</span></h1><p>ユーザーIDか投稿のURLを入れると、公開されているプロフィールの情報から、免許証のようなカードを作ります。アイコン、いちばん上のバナー、名前、登録した日、番号（ユーザーID）、使っている年数、フォロワー数、投稿数、レター数などが入ります。できたカードは画像で保存できます。本物の免許証や身分証ではなく、遊びで作る非公式のカードです。</p></section>
+    <section class="panel pc-pick">
+      <label class="pc-field">投稿のURL、プロフィールURL、またはユーザーID<input id="lcInput" class="pc-in" placeholder="例: https://yay.space/post/123… または 11044343" autocomplete="off" spellcheck="false"></label>
+      <button id="lcLikers" class="secondary-btn pc-likers-entry" type="button">♥ いいねした人から探す</button>
+      <label class="username-toggle pc-own"><input id="lcOwn" type="checkbox"><span>自分のアカウントです（カードは自分のアカウントでのみ作ってください）</span></label>
+      <button id="lcFind" class="primary-btn" type="button"><span>ユーザーを確認</span></button>
+      <div id="lcError" class="error-box hidden" role="alert"></div>
+      <div id="lcUser" class="pc-user hidden"></div>
+    </section>
+    <section id="lcResult" class="panel lic-wrap hidden">
+      <canvas id="lcCanvas" class="lic-canvas" width="1200" height="860" aria-label="ユーザー証のプレビュー"></canvas>
+      <div class="lic-opts">
+        <label class="pc-field">カードの色<select id="lcTheme" class="pc-in"><option value="blue">ブルー</option><option value="green">グリーン</option><option value="gold">ゴールド</option><option value="pink">ピンク</option></select></label>
+        <label class="username-toggle"><input id="lcLogo" type="checkbox" checked><span>画像にYay!ロゴを入れる（制作者の表示は常に入ります）</span></label>
+        <button id="lcSave" class="primary-btn" type="button"><span>画像をダウンロード</span></button>
+      </div>
+      <p class="subtle">数字はカードを作った時点の、公開されている情報です。「利用中」の長さは、登録した日から今日までで数えています。「1日平均」は、投稿数を利用日数で割った数です。下の段の「直近の平均いいね」「返信の割合」「最新の投稿」は、最近の投稿（最大50件）から数えています。投稿が取れなかったときは「—」になります。</p>
+    </section>
+    <footer><span>Yay! ユーザー証</span><span>公開情報のみ · ログイン不要 · データは保存されません</span><div id="creatorCredit" class="creator-credit" aria-live="polite">制作者情報を読み込み中…</div></footer>
+  </main>
+  <script src="yay-api.js"></script>
+  <script src="site.js"></script>
+  <script src="likers.js"></script>
+  <script src="license.js"></script>
+</body>
+</html>
