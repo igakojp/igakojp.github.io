@@ -16,6 +16,20 @@
     gold:  { bg1: "#fdf6df", bg2: "#f0dfa8", line: "#d2b45c", accent: "#9a6200", head: "#ecc9b5" },
     pink:  { bg1: "#fff3f7", bg2: "#f6d3e2", line: "#e49cbc", accent: "#c2336f", head: "#efd0c8" }
   };
+  /* Special plates.
+   * VIP accounts get the gold card, a gold plate, a crown and sparkles.
+   * Every year of account age (1 to 10) has its own colour: card colour, plate and frame get richer with each year,
+   * and from year 10 on it stays at the top tier (the plate still shows the real number of years). */
+  const GOLD = { hi: "#fff4b8", mid: "#e0b020", lo: "#8f6200", ink: "#4a2f00", edge: "#7a5200" };
+  function tierOf(name, h, k = 1) {
+    const S = v => Math.round(v * k), c = (s, l) => `hsl(${h}, ${S(s)}%, ${l}%)`;
+    return { name, theme: { bg1: c(65, 96), bg2: c(45, 85), line: c(45, 66), accent: c(65, 34), head: c(35, 88) },
+      plate: { hi: c(85, 91), mid: c(55, 62), lo: c(60, 30), ink: c(70, 14), edge: c(65, 24) } };
+  }
+  const TIERS = [null, tierOf("新緑", 140), tierOf("空", 195), tierOf("桜", 338), tierOf("琥珀", 32), tierOf("紅", 4),
+    tierOf("菫", 275), tierOf("藍", 228), tierOf("翡翠", 168), tierOf("白銀", 215, .16),
+    { name: "漆黒", theme: { bg1: "#f1f1f4", bg2: "#cfcfd8", line: "#9a9aa8", accent: "#1f1f2a", head: "#dcdce4" },
+      plate: { hi: "#8c8c9c", mid: "#34343f", lo: "#0b0b11", ink: "#f4e4a6", edge: "#d6bf72" } }];
   const S = { user: null, hd: null, av: null, logo: null, creator: null, stats: null };
 
   /* ---------- network (same approach as the other pages) ---------- */
@@ -107,9 +121,61 @@
   }
   function field(c, x, y, w, h, ink) { c.save(); c.fillStyle = "rgba(255,255,255,.72)"; c.strokeStyle = ink; c.lineWidth = 2.4; rr(c, x, y, w, h, 12); c.fill(); c.stroke(); c.restore(); }
 
+  // metallic plate with a short text; pips (1 to 10) show the year tier underneath
+  function plate(c, x, y, w, h, P, text, pips = 0) {
+    c.save();
+    const g = c.createLinearGradient(x, y, x, y + h); g.addColorStop(0, P.hi); g.addColorStop(.45, P.mid); g.addColorStop(.55, P.mid); g.addColorStop(1, P.lo);
+    c.shadowColor = "rgba(0,0,0,.4)"; c.shadowBlur = 10; c.shadowOffsetY = 2; c.fillStyle = g; rr(c, x, y, w, h, 12); c.fill();
+    c.shadowColor = "transparent"; c.shadowBlur = 0; c.shadowOffsetY = 0;
+    c.strokeStyle = P.edge; c.lineWidth = 2.5; rr(c, x, y, w, h, 12); c.stroke();
+    c.strokeStyle = "rgba(255,255,255,.7)"; c.lineWidth = 1.5; rr(c, x + 4, y + 4, w - 8, h - 8, 9); c.stroke();
+    c.fillStyle = P.ink; c.textAlign = "center"; c.textBaseline = "middle"; c.font = `800 ${fitSize(c, text, w - 28, 24, 800, SANS, 14)}px ${SANS}`;
+    c.fillText(text, x + w / 2, y + h / 2 + 1);
+    for (let i = 0; i < pips; i++) {
+      const px = x + w / 2 + (i - (pips - 1) / 2) * 15, py = y + h + 11;
+      c.beginPath(); c.arc(px, py, 5, 0, Math.PI * 2); c.fillStyle = P.mid; c.fill(); c.strokeStyle = "rgba(0,0,0,.55)"; c.lineWidth = 3.5; c.stroke(); c.strokeStyle = "#fff"; c.lineWidth = 1.8; c.stroke();
+    }
+    c.restore();
+  }
+  // outer frame of the card; a higher tier gets a thicker frame and more inner lines
+  function frame(c, P, tier) {
+    c.save();
+    const g = c.createLinearGradient(0, 0, W, H);
+    [[0, P.hi], [.25, P.mid], [.5, P.hi], [.75, P.lo], [1, P.mid]].forEach(([o, col]) => g.addColorStop(o, col));
+    const lw = tier === 11 ? 12 : 5 + Math.ceil(tier / 2), m = lw / 2 + 1.5;
+    c.strokeStyle = g; c.lineWidth = lw; rr(c, m, m, W - m * 2, H - m * 2, 36 - m); c.stroke();
+    c.strokeStyle = P.edge; c.globalAlpha = .75; c.lineWidth = 2; rr(c, lw + 6, lw + 6, W - 2 * (lw + 6), H - 2 * (lw + 6), 30 - lw); c.stroke();
+    if (tier >= 6) { c.lineWidth = 1.4; rr(c, lw + 12, lw + 12, W - 2 * (lw + 12), H - 2 * (lw + 12), 26 - lw); c.stroke(); }
+    c.restore();
+  }
+  // soft diagonal shine across a gold card
+  function sheen(c) {
+    const g = c.createLinearGradient(0, 0, W, H); g.addColorStop(0, "rgba(255,255,255,0)"); g.addColorStop(.42, "rgba(255,255,255,0)");
+    g.addColorStop(.5, "rgba(255,250,210,.28)"); g.addColorStop(.58, "rgba(255,255,255,0)"); g.addColorStop(1, "rgba(255,255,255,0)");
+    c.fillStyle = g; c.fillRect(0, 0, W, H);
+  }
+  function sparkle(c, x, y, r) {
+    c.save(); c.translate(x, y); c.beginPath();
+    for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4 - Math.PI / 2, d = i % 2 ? r * .3 : r; c.lineTo(Math.cos(a) * d, Math.sin(a) * d); }
+    c.closePath(); c.fillStyle = "rgba(255,238,160,.96)"; c.strokeStyle = "rgba(160,110,0,.85)"; c.lineWidth = 1.6; c.fill(); c.stroke(); c.restore();
+  }
+  function crown(c, x, y, w, rot) {
+    const h = w * .72; c.save(); c.translate(x, y); c.rotate(rot);
+    const g = c.createLinearGradient(0, -h / 2, 0, h / 2); g.addColorStop(0, GOLD.hi); g.addColorStop(.5, GOLD.mid); g.addColorStop(1, GOLD.lo);
+    c.shadowColor = "rgba(0,0,0,.4)"; c.shadowBlur = 8; c.shadowOffsetY = 2; c.fillStyle = g; c.strokeStyle = GOLD.edge; c.lineWidth = 3; c.lineJoin = "round";
+    c.beginPath(); c.moveTo(-w / 2, h / 2); c.lineTo(-w / 2, -h / 2); c.lineTo(-w / 4, 0); c.lineTo(0, -h * .62); c.lineTo(w / 4, 0); c.lineTo(w / 2, -h / 2); c.lineTo(w / 2, h / 2); c.closePath(); c.fill();
+    c.shadowColor = "transparent"; c.shadowBlur = 0; c.shadowOffsetY = 0; c.stroke();
+    c.fillStyle = GOLD.lo; c.fillRect(-w / 2 + 1.5, h / 2 - h * .24, w - 3, h * .24 - 1);
+    [[-w / 2, -h / 2, "#fff"], [0, -h * .62, "#ff5d73"], [w / 2, -h / 2, "#fff"]].forEach(([jx, jy, col]) => { c.beginPath(); c.arc(jx, jy, w * .06, 0, Math.PI * 2); c.fillStyle = col; c.fill(); c.strokeStyle = GOLD.edge; c.lineWidth = 2; c.stroke(); });
+    c.beginPath(); c.arc(0, h / 2 - h * .12, w * .045, 0, Math.PI * 2); c.fillStyle = "#7fd6ff"; c.fill();
+    c.restore();
+  }
+
   function render(c) {
-    const u = S.user, T = THEMES["blue"] || THEMES.blue, ink = "#1c1c22", now = new Date();
+    const u = S.user, ink = "#1c1c22", now = new Date();
     const made = u.created_at ? new Date(Number(u.created_at) * 1000) : null, ok = made && !isNaN(made);
+    const vip = !!(u.vip && !u.hide_vip), years = ok ? span(made, now).y : 0, tier = Math.min(10, years), TR = tier >= 1 ? TIERS[tier] : null;
+    const T = vip ? THEMES.gold : TR ? TR.theme : THEMES.blue;
     c.clearRect(0, 0, W, H); c.save(); rr(c, 0, 0, W, H, 36); c.clip();
     // paper
     let g = c.createLinearGradient(0, 0, W, H); g.addColorStop(0, T.bg1); g.addColorStop(1, T.bg2); c.fillStyle = g; c.fillRect(0, 0, W, H);
@@ -126,6 +192,13 @@
     c.fillStyle = "#fff"; c.font = `700 24px ${SANS}`; c.textAlign = "left"; c.textBaseline = "middle"; c.fillText("Yay! ユーザー証", 48, 45);
     c.fillStyle = "rgba(10,12,24,.55)"; rr(c, W - 28 - 190, 22, 190, 44, 22); c.fill();
     c.fillStyle = "#fff"; c.font = `600 20px ${SANS}`; c.textAlign = "center"; c.fillText("非公式", W - 28 - 95, 45);
+    // special plates (centre of the banner)
+    const plates = []; if (vip) plates.push([GOLD, "★ GOLD VIP ★", 0]); if (TR) plates.push([TR.plate, `${TR.name} ・ ${years}年`, tier]);
+    if (vip) [[70, 150, 13], [200, 128, 9], [330, 160, 11], [880, 150, 10], [1010, 122, 13], [1100, 160, 9], [1160, 124, 11]].forEach(([sx, sy, sr]) => sparkle(c, sx, sy, sr));
+    if (plates.length) {
+      const pw = plates.length === 2 ? 230 : 270, gap = 14, total = pw * plates.length + gap * (plates.length - 1);
+      plates.forEach(([P, text, pips], i) => plate(c, W / 2 - total / 2 + i * (pw + gap), 22, pw, 44, P, text, pips));
+    }
 
     // 氏名 + 登録日
     label(c, "氏名", 36, 236, 76, 44, ink); field(c, 122, 214, 640, 88, ink);
@@ -261,7 +334,10 @@
     const px = 852, py = 318, pw = 312, ph = 330;
     c.save(); c.fillStyle = "#fff"; rr(c, px - 4, py - 4, pw + 8, ph + 8, 8); c.fill(); rr(c, px, py, pw, ph, 5); c.clip();
     if (S.av) cover(c, S.av, px, py, pw, ph); else { c.fillStyle = T.line; c.fillRect(px, py, pw, ph); }
-    c.restore(); c.strokeStyle = ink; c.lineWidth = 2.5; rr(c, px - 4, py - 4, pw + 8, ph + 8, 8); c.stroke();
+    c.restore();
+    if (vip) { const gg = c.createLinearGradient(px, py, px + pw, py + ph); [[0, GOLD.hi], [.35, GOLD.mid], [.6, GOLD.hi], [1, GOLD.lo]].forEach(([o, col]) => gg.addColorStop(o, col)); c.strokeStyle = gg; c.lineWidth = 7; } else { c.strokeStyle = ink; c.lineWidth = 2.5; }
+    rr(c, px - 4, py - 4, pw + 8, ph + 8, 8); c.stroke();
+    if (vip) crown(c, px + pw - 30, py + 4, 92, .38);
     c.fillStyle = ink; c.font = `600 20px ${SANS}`; c.textAlign = "center"; c.textBaseline = "middle";
     if (u.gender === 0) {
       c.fillText("男性", px + pw / 2, 676);
@@ -283,12 +359,16 @@
     // footer strip: credit (always) and logo (optional)
     c.fillStyle = "rgba(0,0,0,.55)"; c.fillRect(0, H - 44, W, 44);
     const cr = S.creator; c.fillStyle = "#fff"; c.font = `600 20px ${SANS}`; c.textAlign = "left"; c.textBaseline = "middle";
-    c.fillText(`制作: ${cr?.nickname ? Array.from(cr.nickname).slice(0, 18).join("") : "Yay! ID 11044343"}`, 30, H - 22);
+    c.fillText(`制作: ${cr?.nickname ? Array.from(cr.nickname).join("") : "Yay! ID 11044343"}`, 30, H - 22);
+    if (S.logo) {
       const w0 = S.logo.naturalWidth || 130, h0 = S.logo.naturalHeight || 34, k = Math.min(120 / w0, 28 / h0), lw = Math.round(w0 * k), lh = Math.round(h0 * k);
       const t = document.createElement("canvas"); t.width = lw; t.height = lh; const tg = t.getContext("2d"); tg.drawImage(S.logo, 0, 0, lw, lh); tg.globalCompositeOperation = "source-in"; tg.fillStyle = "#fff"; tg.fillRect(0, 0, lw, lh);
       c.drawImage(t, W - 30 - lw, H - 22 - lh / 2);
+    }
+    if (vip) sheen(c);
     c.restore();
     c.save(); c.strokeStyle = "rgba(0,0,0,.55)"; c.lineWidth = 3; rr(c, 1.5, 1.5, W - 3, H - 3, 35); c.stroke(); c.restore();
+    if (vip) frame(c, GOLD, 11); else if (TR) frame(c, TR.plate, tier);
   }
   const cv = $("lcCanvas"), cx = cv.getContext("2d");
   const draw = () => { if (S.user) render(cx); };

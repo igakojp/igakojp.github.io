@@ -50,6 +50,7 @@ window.drawYayCreatorFooter = async function(canvas) {
   ]);
   const y = H - 42 * scale;
   ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0); /* callers may leave a scale() on the context; the footer is laid out in raw canvas pixels */
   if (creator?.nickname) {
     const x = 22 * scale, cardW = 280 * scale, cardH = 56 * scale;
     ctx.fillStyle = "rgba(4,18,38,.82)";
@@ -71,8 +72,8 @@ window.drawYayCreatorFooter = async function(canvas) {
     ctx.fillText(String(creator.nickname).slice(0,22),x+58*scale,y+11*scale);
   }
   if (logoAsset?.img) {
-    const im=logoAsset.img, maxW=125*scale, maxH=32*scale;
-    const ratio=Math.min(maxW/im.width,maxH/im.height), w=im.width*ratio,h=im.height*ratio;
+    const im=logoAsset.img, maxW=125*scale, maxH=32*scale, iw=im.naturalWidth||im.width||125, ih=im.naturalHeight||im.height||32;
+    const ratio=Math.min(maxW/iw,maxH/ih), w=iw*ratio,h=ih*ratio;
     ctx.globalAlpha=.96;
     ctx.drawImage(window.yayWhiteImage(im,w,h),(W-w)/2,y-h/2,w,h);
   }

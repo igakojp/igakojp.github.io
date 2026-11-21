@@ -223,22 +223,29 @@
   async function exportMapImage() {
     const users=sortedUsers().slice(0,Number($("topLimit").value||50)); if(!users.length)return;
     const btn=$("imageBtn");btn.disabled=true;btn.textContent="画像を生成中…";
+    const objs=[];
     try {
-      const {points}=mapPositions(users),cx=600,cy=600;
-      const lines=points.map(p=>`<line x1="${cx}" y1="${cy}" x2="${p.x/2}" y2="${p.y/2}" stroke="#9bdcff" stroke-opacity=".28" stroke-width="2"/>`).join("");
-      const nodes=points.map(p=>`<g><circle cx="${p.x/2}" cy="${p.y/2}" r="27" fill="#173e6c" stroke="#d8f3ff" stroke-width="3"/><text x="${p.x/2}" y="${p.y/2+6}" text-anchor="middle" fill="white" font-size="18">${esc(initials(p.u.nickname))}</text><circle cx="${p.x/2+20}" cy="${p.y/2-20}" r="11" fill="#35baff"/><text x="${p.x/2+20}" y="${p.y/2-16}" text-anchor="middle" fill="#06213a" font-size="10">${p.rank}</text><text x="${p.x/2}" y="${p.y/2+45}" text-anchor="middle" fill="white" font-size="12">${esc(p.u.nickname.slice(0,15))}</text><text x="${p.x/2}" y="${p.y/2+61}" text-anchor="middle" fill="#bceaff" font-size="11">${fmt(p.u.total)} 件</text></g>`).join("");
-      const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="system-ui, 'Noto Sans JP', sans-serif"><defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#173e6c"/><stop offset="1" stop-color="#071a35"/></linearGradient></defs><rect width="1200" height="1200" fill="url(#bg)"/><text x="600" y="48" text-anchor="middle" fill="white" font-size="30" font-weight="bold">総合交流マップ · Top ${users.length}</text><text x="600" y="78" text-anchor="middle" fill="#c8eaff" font-size="16">${esc(state.profile?.nickname||`Yay! User ${state.userId}`)} · ${new Date().toLocaleDateString("ja-JP")}</text><circle cx="600" cy="600" r="200" fill="none" stroke="#9bdcff" stroke-opacity=".15"/><circle cx="600" cy="600" r="360" fill="none" stroke="#9bdcff" stroke-opacity=".15"/><circle cx="600" cy="600" r="450" fill="none" stroke="#9bdcff" stroke-opacity=".15"/>${lines}<circle cx="600" cy="600" r="58" fill="#245b86" stroke="#e5f7ff" stroke-width="4"/><text x="600" y="608" text-anchor="middle" fill="white" font-size="22">${esc(initials(state.profile?.nickname))}</text>${nodes}</svg>`;
-      const canvas=document.createElement("canvas");canvas.width=1200;canvas.height=1200;
-      const img=new Image(),svgUrl=URL.createObjectURL(new Blob([svg],{type:"image/svg+xml;charset=utf-8"}));
-      try { img.src=svgUrl; await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=reject;}); }
-      finally { URL.revokeObjectURL(svgUrl); }
-      const ctx=canvas.getContext("2d");ctx.drawImage(img,0,0);
+      const W=2400,H=2400,cx=1200,cy=1200,{points}=mapPositions(users),canvas=document.createElement("canvas");canvas.width=1200;canvas.height=1200;
+      const ctx=canvas.getContext("2d");ctx.scale(.5,.5);
+      const bg=ctx.createLinearGradient(0,0,W,H);bg.addColorStop(0,"#173e6c");bg.addColorStop(1,"#071a35");ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+      const glow=ctx.createRadialGradient(cx,cy,80,cx,cy,1100);glow.addColorStop(0,"rgba(65,190,255,.24)");glow.addColorStop(1,"rgba(5,16,44,0)");ctx.fillStyle=glow;ctx.fillRect(0,0,W,H);
+      const nick=u=>String(u?.nickname||`User ${u?.id??""}`),clip=(t,n)=>{const a=Array.from(t);return a.length>n?a.slice(0,n-1).join("")+"…":t;};
+      const font=px=>`${px}px system-ui, "Noto Sans JP", sans-serif`;
+      ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillStyle="#fff";ctx.font=`800 ${font(58)}`;ctx.fillText(`総合交流マップ · Top ${users.length}`,cx,72);
+      ctx.fillStyle="#c8eaff";ctx.font=font(28);ctx.fillText(`${state.profile?.nickname||`Yay! User ${state.userId}`} · ${new Date().toLocaleDateString("ja-JP")}`,cx,125);
+      [400,720,900].forEach(r=>{ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.strokeStyle="rgba(164,225,255,.16)";ctx.lineWidth=3;ctx.stroke();});
+      points.forEach(p=>{ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(p.x,p.y);ctx.strokeStyle="rgba(168,226,255,.27)";ctx.lineWidth=3;ctx.stroke();});
+      async function loadImage(url){if(!url)return null;for(const src of [url,`https://proxy.cors.dev/${url}`])try{const r=await fetch(src,{mode:"cors",credentials:"omit"});if(!r.ok)continue;const b=await r.blob();if(!b.type.startsWith("image/"))continue;const obj=URL.createObjectURL(b);objs.push(obj);const img=new Image();img.src=obj;await new Promise((ok,no)=>{img.onload=ok;img.onerror=no;});return img;}catch{}return null;}
+      const [center,...avatars]=await Promise.all([loadImage(avatarOf(state.profile)),...points.map(p=>loadImage(p.u.avatar))]);
+      function drawAvatar(im,x,y,r,name){ctx.save();ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.clip();if(im&&im.width&&im.height){const s=Math.max(r*2/im.width,r*2/im.height);ctx.drawImage(im,x-im.width*s/2,y-im.height*s/2,im.width*s,im.height*s);}else{ctx.fillStyle="#367eb2";ctx.fillRect(x-r,y-r,r*2,r*2);ctx.fillStyle="#fff";ctx.font=`800 ${font(r)}`;ctx.fillText(initials(name),x,y);}ctx.restore();ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.strokeStyle="#effaff";ctx.lineWidth=10;ctx.stroke();}
+      drawAvatar(center,cx,cy,145,state.profile?.nickname);ctx.fillStyle="#fff";ctx.font=`bold ${font(34)}`;ctx.fillText(clip(String(state.profile?.nickname||`User ${state.userId}`),20),cx,cy+185);ctx.fillStyle="#c8eaff";ctx.font=font(26);ctx.fillText(`@${state.userId}`,cx,cy+228);
+      points.forEach(p=>{drawAvatar(avatars[points.indexOf(p)],p.x,p.y,58,nick(p.u));const medal=p.rank===1?"#f5c542":p.rank===2?"#c7d0da":p.rank===3?"#c9824b":"#35baff";ctx.beginPath();ctx.arc(p.x+42,p.y-42,20,0,Math.PI*2);ctx.fillStyle=medal;ctx.fill();ctx.fillStyle="#06213a";ctx.font=`800 ${font(19)}`;ctx.fillText(String(p.rank),p.x+42,p.y-41);ctx.fillStyle="#fff";ctx.font=`bold ${font(24)}`;ctx.fillText(clip(nick(p.u),14),p.x,p.y+86);ctx.fillStyle="#bceaff";ctx.font=font(22);ctx.fillText(`${fmt(p.u.total)} 件`,p.x,p.y+113);});
       await window.drawYayCreatorFooter(canvas);
       const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/png"));
-      if(!blob)throw new Error("PNG画像を作成できませんでした。");
+      if(!blob)throw new Error("画像を作成できませんでした。");
       await window.yaySavePng(blob,`yay-combined-map-${state.userId}-top${users.length}.png`);
-    } catch(e) { { $("errorBox").textContent=`画像を生成できませんでした: ${e.message}`; $("errorBox").classList.remove("hidden"); } }
-    finally {btn.disabled=false;btn.textContent="マップ画像（PNG）をダウンロード";}
+    } catch(e) { $("errorBox").textContent=`画像を生成できませんでした: ${e?.message||e}`; $("errorBox").classList.remove("hidden"); }
+    finally {objs.forEach(o=>URL.revokeObjectURL(o));btn.disabled=false;btn.textContent="マップ画像をダウンロード";}
   }
   $("analyzeBtn").addEventListener("click",start); $("userInput").addEventListener("keydown",e=>{if(e.key==="Enter")start();}); $("stopBtn").addEventListener("click",stop); $("jsonBtn").addEventListener("click",exportJSON); $("csvBtn").addEventListener("click",exportCSV); $("imageBtn").addEventListener("click",exportMapImage);
   $("userFilter").addEventListener("input",render); $("topLimit").addEventListener("change",render); $("showUsernames").addEventListener("change",render); $("closeDetail").addEventListener("click",()=>$("detailPanel").classList.add("hidden"));
