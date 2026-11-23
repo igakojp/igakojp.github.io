@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ページが見つかりません</title>
+  <script>
+    /* GitHub Pages serves this file for every unknown URL. The ユーザー情報 page uses real
+       paths (…/profile/user/123/album), so hand those back to profile/index.html. */
+    (function () {
+      var p = location.pathname, i = p.lastIndexOf("/profile/");
+      if (i < 0 && /\/profile$/.test(p)) { location.replace(p + "/" + location.search + location.hash); return; }
+      if (i >= 0) location.replace(p.slice(0, i + 9) + "?route=" + encodeURIComponent(p.slice(i + 9)) + location.hash);
+    })();
+  </script>
+  <style>
+    body{margin:0;min-height:100vh;display:grid;place-items:center;background:#07101f;color:#f4f7ff;font-family:system-ui,"Noto Sans JP",sans-serif;text-align:center;padding:20px;box-sizing:border-box}
+    a{color:#78ddff}
+  </style>
+</head>
+<body>
+  <main>
+    <h1>ページが見つかりません</h1>
+    <p>URLを確認するか、<a href="javascript:history.back()">前のページに戻って</a>ください。</p>
+  </main>
+</body>
+</html>

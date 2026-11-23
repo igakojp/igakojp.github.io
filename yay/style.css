@@ -304,3 +304,34 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .lic-opts .pc-field{min-width:160px}
 .lic-opts .primary-btn{margin-left:auto}
 @media (max-width:640px){.lic-opts .primary-btn{margin-left:0;width:100%}.lic-opts .pc-field{flex:1 1 100%}}
+
+/* ---- small-screen layout hardening ----
+ * 1) The header used to be exactly 72px tall while its tab row wrapped onto a second line, so the tabs hung out of the header.
+ * 2) The "my account" checkbox label could not wrap, which made the whole page wider than the phone and made the browser zoom out.
+ * 3) A stray wide element must never stretch the page, so horizontal overflow is clipped as a safety net.
+ * 4) The official wordmark is dark; it is turned white so it can be read on the dark header and footer. */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+html,body{max-width:100%;overflow-x:hidden}
+@supports (overflow:clip){html,body{overflow-x:clip}}
+img,canvas,svg,video{max-width:100%}
+.topbar{height:auto;min-height:72px;padding-top:8px;padding-bottom:8px}
+.brand-logo,.footer-yay-logo{filter:brightness(0) invert(1)}
+.username-toggle{white-space:normal;max-width:100%;line-height:1.45;text-align:left}
+.username-toggle span{min-width:0;overflow-wrap:anywhere}
+.pc-own{min-width:0;max-width:100%}
+@media(max-width:720px){
+  .topbar{min-height:0;row-gap:2px;padding-top:6px;padding-bottom:6px}
+  .brand{flex:0 0 auto}
+  .section-nav{order:3;flex:1 1 100%;width:100%;margin:0;padding:2px 0}
+  .shell{padding-top:22px}
+  .intro h1,.intro p,.search-panel,.scan-panel,.panel{max-width:100%;overflow-wrap:anywhere}
+  .results-heading,.map-toolbar,.export-actions,.top-limit,.lb-status-actions{flex-wrap:wrap}
+  footer{min-width:0}
+}
+
+/* ---- touch devices ----
+ * iOS Safari zooms the whole page when a text field or select under 16px gets focus, and does not zoom back out,
+ * which pushed the layout sideways on phones. Keep form controls at 16px on touch screens. */
+@media (pointer:coarse){
+  input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),select,textarea{font-size:16px!important}
+}

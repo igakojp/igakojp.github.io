@@ -3,14 +3,16 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#10111a">
+  <meta name="theme-color" content="#ffffff">
   <title>Yay! ネットワークツール</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="yay-theme.css">
 </head>
 <body>
   <div class="ambient ambient-a"></div><div class="ambient ambient-b"></div>
   <header class="topbar">
     <a class="brand" href="index.html"><img class="brand-logo" src="https://yay.space/images/logotype.svg" alt="Yay!"><span><b>ネットワークツール</b></span></a>
+    <form class="yay-search" action="profile/index.html" method="get" role="search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg><input name="q" placeholder="ユーザーを検索（ID・URL）" aria-label="ユーザーを検索（ユーザーID、プロフィールURL、投稿URL）" autocomplete="off" enterkeyhint="search"></form>
     <div class="top-actions"><span class="privacy-pill"><i></i> 公開データのみ</span></div>
   </header>
   <main class="shell home-shell">
@@ -43,6 +45,9 @@
       </a>
       <a class="feature-card panel" href="license.html">
         <div class="feature-icon">▣</div><div class="feature-copy"><div class="eyebrow">FEATURE 08</div><h2>ユーザー証</h2><p>アイコン・バナー・登録日・フォロワー数などを、免許証のようなカードにまとめて画像で保存できます。</p><span class="feature-cta">ユーザー証を作る <b>↗</b></span></div>
+      </a>
+      <a class="feature-card panel" href="profile/index.html">
+        <div class="feature-icon">◎</div><div class="feature-copy"><div class="eyebrow">FEATURE 09</div><h2>ユーザー情報</h2><p>ユーザーID・プロフィールURL・投稿URLから、アイコン・バナー・登録日・フォロワー・投稿・アルバム・レター・サークル・通話などの公開情報をまとめて表示します。</p><span class="feature-cta">ユーザー情報を開く <b>↗</b></span></div>
       </a>
     </section>
     <section class="home-note panel"><b>利用について</b><p>ログイン不要。公開APIから取得できる情報のみを使用します。非公開の投稿やDMの内容は取得しません。</p></section>

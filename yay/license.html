@@ -3,15 +3,15 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#10111a">
+  <meta name="theme-color" content="#ffffff">
   <title>Yay! ユーザー証</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css"><link rel="stylesheet" href="yay-theme.css">
 </head>
 <body>
   <div class="ambient ambient-a"></div><div class="ambient ambient-b"></div>
   <header class="topbar">
     <a class="brand" href="index.html"><img class="brand-logo" src="https://yay.space/images/logotype.svg" alt="Yay!"><span><b>ユーザー証</b></span></a>
-    <nav class="section-nav" aria-label="マップ切り替え">
+    <form class="yay-search" action="profile/index.html" method="get" role="search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg><input name="q" placeholder="ユーザーを検索（ID・URL）" aria-label="ユーザーを検索（ユーザーID、プロフィールURL、投稿URL）" autocomplete="off" enterkeyhint="search"></form><nav class="section-nav" aria-label="マップ切り替え">
       <a class="section-link" href="interaction.html">交流マップ</a>
       <a class="section-link" href="review.html">レターマップ</a>
       <a class="section-link" href="call.html">通話マップ</a>
@@ -20,6 +20,7 @@
       <a class="section-link" href="profile-card.html">自己紹介カード</a>
       <a class="section-link active" href="license.html" aria-current="page">ユーザー証</a>
       <a class="section-link" href="post-ranking.html">投稿ランキング</a>
+      <a class="section-link" href="profile/index.html">ユーザー情報</a>
     </nav>
     <div class="top-actions"><span class="privacy-pill"><i></i> 公開データのみ</span></div>
   </header>
@@ -39,7 +40,7 @@
         <button id="lcSave" class="primary-btn" type="button"><span>画像をダウンロード</span></button>
       </div>
       <p class="subtle">数字はカードを作った時点の、公開されている情報です。「利用中」の長さは、登録した日から今日までで数えています。「1日平均」は、投稿数を利用日数で割った数です。下の段の「直近の平均いいね」「返信の割合」「最新の投稿」は、最近の投稿（最大50件）から数えています。投稿が取れなかったときは「—」になります。</p>
-      <p class="subtle">VIPのアカウント（VIPを非表示にしている場合を除く）は、カードがゴールドになり、「GOLD VIP」のプレート・王冠・キラキラ・金色の写真枠が付きます。登録してからの年数ごとにプレートとカードの色が変わり、1年は新緑、2年は空、3年は桜、4年は琥珀、5年は紅、6年は菫、7年は藍、8年は翡翠、9年は白銀、10年以上は漆黒です。年数が上がるほど枠も豪華になり、プレートの下の点が年数の段階を表します。VIPと年数の両方に当てはまる場合は2つのプレートが並びます。</p>
+      <p class="subtle">VIPのアカウント（VIPを非表示にしている場合を除く）は、カードがゴールドになり、「GOLD VIP」のプレート・王冠・キラキラ・金色の写真枠が付きます。登録してからの年数ごとにカードの色と枠が変わり、1年は新緑、2年は空、3年は桜、4年は琥珀、5年は紅、6年は菫、7年は藍、8年は翡翠、9年は白銀、10年以上は漆黒です。年数が上がるほど枠も豪華になり、番号の行の右はしに、色と同じインクの「年数の印」（段階の名前と年数）が押されます。</p>
     </section>
     <footer><span>Yay! ユーザー証</span><span>公開情報のみ · ログイン不要 · データは保存されません</span><div id="creatorCredit" class="creator-credit" aria-live="polite">制作者情報を読み込み中…</div></footer>
   </main>

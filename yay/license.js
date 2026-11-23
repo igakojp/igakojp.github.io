@@ -13,7 +13,7 @@
   const THEMES = {
     blue:  { bg1: "#f1f7fd", bg2: "#cfe3f4", line: "#8fbbe0", accent: "#1d6fc4", head: "#e9cfc6" },
     green: { bg1: "#f2faf0", bg2: "#cfe8cb", line: "#8cc588", accent: "#1f8a43", head: "#e6d6bd" },
-    gold:  { bg1: "#fdf6df", bg2: "#f0dfa8", line: "#d2b45c", accent: "#9a6200", head: "#ecc9b5" },
+    gold:  { bg1: "#fdf6df", bg2: "#f0dfa8", line: "#d2b45c", accent: "#9a6200", head: "#efdca0" },
     pink:  { bg1: "#fff3f7", bg2: "#f6d3e2", line: "#e49cbc", accent: "#c2336f", head: "#efd0c8" }
   };
   /* Special plates.
@@ -173,7 +173,7 @@
 
   // creator credit (bottom-left) and Yay! logo (bottom-right), each on a dark pill, drawn on top of everything else
   function footerOverlay(c) {
-    const cr = S.creator, name = `制作: ${cr?.nickname ? Array.from(cr.nickname).join("") : "Yay! ID 11044343"}`, cy = H - 28, ph = 28;
+    const cr = S.creator, name = `制作: ${cr?.nickname ? Array.from(cr.nickname).slice(0, 18).join("") : "Yay! ID 11044343"}`, cy = H - 28, ph = 28;
     c.save(); c.font = `600 20px ${SANS}`; c.textAlign = "left"; c.textBaseline = "middle";
     c.fillStyle = "rgba(8,12,24,.92)"; rr(c, 24, cy - ph / 2, c.measureText(name).width + 28, ph, 14); c.fill();
     c.fillStyle = "#fff"; c.fillText(name, 38, cy + 1);
@@ -222,6 +222,7 @@
     if (S.hd) { c.save(); c.beginPath(); c.rect(0, 0, W, bh); c.clip(); cover(c, S.hd, 0, 0, W, bh); c.restore(); } else { g = c.createLinearGradient(0, 0, W, bh); g.addColorStop(0, T.accent); g.addColorStop(1, "#1b2a55"); c.fillStyle = g; c.fillRect(0, 0, W, bh); }
     g = c.createLinearGradient(0, 0, 0, bh); g.addColorStop(0, "rgba(0,0,0,.38)"); g.addColorStop(.55, "rgba(0,0,0,0)"); g.addColorStop(1, "rgba(0,0,0,.18)"); c.fillStyle = g; c.fillRect(0, 0, W, bh);
     c.fillStyle = ink; c.fillRect(0, bh, W, 4);
+    if (vip) sheen(c); // drawn behind the fields and text so it never washes them out
     c.fillStyle = "rgba(10,12,24,.55)"; rr(c, 28, 22, 330, 44, 22); c.fill();
     c.fillStyle = "#fff"; c.font = `700 24px ${SANS}`; c.textAlign = "left"; c.textBaseline = "middle"; c.fillText("Yay! ユーザー証", 48, 45);
     c.fillStyle = "rgba(10,12,24,.55)"; rr(c, W - 28 - 190, 22, 190, 44, 22); c.fill();
@@ -375,7 +376,7 @@
     c.restore();
     if (vip) { const gg = c.createLinearGradient(px, py, px + pw, py + ph); [[0, GOLD.hi], [.35, GOLD.mid], [.6, GOLD.hi], [1, GOLD.lo]].forEach(([o, col]) => gg.addColorStop(o, col)); c.strokeStyle = gg; c.lineWidth = 7; } else { c.strokeStyle = ink; c.lineWidth = 2.5; }
     rr(c, px - 4, py - 4, pw + 8, ph + 8, 8); c.stroke();
-    if (vip) crown(c, px + pw - 30, py + 4, 92, .38);
+    if (vip) crown(c, px + pw - 42, py + 32, 84, .38);
     if (TR && !medalInRow) yearStamp(c, px + 46, py + ph - 46, TR.plate, TR.name, years);
     c.fillStyle = ink; c.font = `600 20px ${SANS}`; c.textAlign = "center"; c.textBaseline = "middle";
     if (u.gender === 0) {
@@ -397,7 +398,6 @@
 
     // footer strip: credit (always) and logo (optional)
     c.fillStyle = "rgba(0,0,0,.55)"; c.fillRect(0, H - 44, W, 44);
-    if (vip) sheen(c);
     c.restore();
     c.save(); c.strokeStyle = "rgba(0,0,0,.55)"; c.lineWidth = 3; rr(c, 1.5, 1.5, W - 3, H - 3, 35); c.stroke(); c.restore();
     if (vip) frame(c, GOLD, 11); else if (TR) frame(c, TR.plate, tier);
