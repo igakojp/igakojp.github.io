@@ -7,7 +7,7 @@
     cursor:null,seenPosts:new Set(),seenCalls:new Set(),paused:false,stopped:false,
     running:false,controller:null,complete:false,exhausted:false,topLimit:50,mapCentered:false
   };
-  const fmt=n=>Number(n||0).toLocaleString();
+  const fmt=n=>Number(n||0).toLocaleString("ja-JP");
   const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const sleep=ms=>new Promise(r=>setTimeout(r,ms));
   const setHidden=(id,yes)=>$(id).classList.toggle("hidden",yes);
@@ -168,7 +168,7 @@
     const u=state.scores.get(id);if(!u)return;
     $("detailTitle").textContent=`${u.nickname} · ${fmt(u.points)} 回の通話`;
     $("detailContent").innerHTML=`<p class="profile-link-row"><a href="https://yay.space/user/${u.id}" target="_blank" rel="noopener">${esc(u.nickname)} のプロフィールを開く ↗</a></p>`+
-      u.evidence.slice().sort((a,b)=>b.createdAt-a.createdAt).map(e=>`<div class="evidence-item"><div class="evidence-meta"><span>${e.createdAt?new Date(e.createdAt*1000).toLocaleString():"日時不明"}</span><span>通話 #${esc(e.callId)}</span></div><p>${esc([e.genre,e.game].filter(Boolean).join(" · ")||"通話")}</p><span class="subtle">${durationText(e.duration)} · ${esc(e.role||"役割情報なし")} · 参加者 ${fmt(e.participantCount)} 人</span></div>`).join("");
+      u.evidence.slice().sort((a,b)=>b.createdAt-a.createdAt).map(e=>`<div class="evidence-item"><div class="evidence-meta"><span>${e.createdAt?new Date(e.createdAt*1000).toLocaleString("ja-JP"):"日時不明"}</span><span>通話 #${esc(e.callId)}</span></div><p>${esc([e.genre,e.game].filter(Boolean).join(" · ")||"通話")}</p><span class="subtle">${durationText(e.duration)} · ${esc(e.role||"役割情報なし")} · 参加者 ${fmt(e.participantCount)} 人</span></div>`).join("");
     setHidden("detailPanel",false);$("detailPanel").scrollIntoView({behavior:"smooth",block:"nearest"});
   }
   function setStatus(t){$("scanStatus").textContent=t;$("scanTitle").textContent=t==="完了"?"分析完了":t==="一時停止"?"一時停止中":t==="停止"?"分析を停止しました":"通話投稿を確認中";}

@@ -4,7 +4,7 @@
   const ROOT = "https://proxy.cors.dev/https://api.yay.space";
   const DEFAULT_AVATAR = "https://cdn.yay.space/img/default-profile-icon-thumb.png";
   const $ = id => document.getElementById(id);
-  const fmt = n => Number(n || 0).toLocaleString();
+  const fmt = n => Number(n || 0).toLocaleString("ja-JP");
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
   const state = { userId:null, profile:null, users:new Map(), seenPosts:new Set(), seenReviews:new Set(), seenCalls:new Set(), timelineCount:0, reviewCount:0, pages:0, stopped:false, running:false, totalEvents:0, mapCentered:false };
@@ -64,6 +64,13 @@
       const id = String(reply.id); if (!perPost.has(id)) perPost.set(id, { user:reply, reasons:new Set() });
       perPost.get(id).reasons.add("返信");
     }
+    // アゲ ((´∀｀∩)↑age↑): the shared post is in shareable.post
+    const age = post.shareable?.type === "post" ? post.shareable.post?.user : null;
+    if (age?.id && Number(age.id) !== state.userId) {
+      const id = String(age.id); if (!perPost.has(id)) perPost.set(id, { user:age, reasons:new Set() });
+      perPost.get(id).reasons.add("アゲ");
+    }
+    if (Number(post.reposts_count) > 0) state.agedPosts.push(post.id);
     for (const [id, item] of perPost) {
       const u = getUser(id, item.user); if (!u) continue;
       const key = `post:${post.id}`;
@@ -104,6 +111,26 @@
       cursor = String(oldest);
       // Continue by the oldest post ID even when the API returns fewer than 50 rows.
       await sleep(180);
+    }
+  }
+  // people who アゲ'd the user's posts (each counts as an interaction)
+  async function scanReposts() {
+    const ids = [...new Set(state.agedPosts || [])];
+    for (let i = 0; i < ids.length && !state.stopped; i++) {
+      let cursor = null;
+      for (let page = 0; page < 20 && !state.stopped; page++) {
+        const data = await apiGet(`${API}/posts/${ids[i]}/reposts?number=50${cursor ? `&from_post_id=${cursor}` : ""}`);
+        const rows = Array.isArray(data.posts) ? data.posts : [];
+        for (const r of rows) {
+          const u = getUser(r.user?.id, r.user); if (!u) continue;
+          const key = `age:${r.id}`; if (u.evidence.some(e => e.key === key)) continue;
+          u.interaction++; u.evidence.push({ key, source:"交流", detail:"アゲされた", date:Number(r.created_at || 0), url:`https://yay.space/post/${r.id}` });
+        }
+        updateProgress("アゲ", i + 1);
+        const last = rows.length ? String(rows[rows.length - 1].id) : null;
+        if (rows.length < 50 || !last || last === cursor) break;
+        cursor = last; await sleep(180);
+      }
     }
   }
   async function scanReviews() {
@@ -183,7 +210,7 @@
     if (state.running) return;
     const parsed = parseInput($("userInput").value);
     if (!parsed) { $("errorBox").textContent = "Yay! のプロフィールURLまたはユーザーIDを入力してください。"; $("errorBox").classList.remove("hidden"); return; }
-    $("errorBox").classList.add("hidden"); $("analyzeBtn").disabled = true; state.running = true; state.stopped = false; state.users.clear(); state.seenPosts.clear(); state.seenReviews.clear(); state.seenCalls.clear(); state.timelineCount=0; state.reviewCount=0; state.pages=0; state.mapCentered=false; state.timelinePrivate=false; state.timelinePrivate=false;
+    $("errorBox").classList.add("hidden"); $("analyzeBtn").disabled = true; state.running = true; state.stopped = false; state.users.clear(); state.seenPosts.clear(); state.seenReviews.clear(); state.seenCalls.clear(); state.agedPosts=[]; state.timelineCount=0; state.reviewCount=0; state.pages=0; state.mapCentered=false; state.timelinePrivate=false; state.timelinePrivate=false;
     controller = new AbortController(); $("scanSection").classList.remove("hidden"); $("resultsSection").classList.add("hidden"); $("scanStatus").textContent="準備中"; $("scanTitle").textContent="プロフィールを取得中"; $("stopBtn").disabled=false;
     try {
       let id = typeof parsed === "string" ? parsed : null;
@@ -194,6 +221,7 @@
       updateProfile(profile); $("scanStatus").textContent="分析中";
       try { await scanTimeline(); }
       catch (e) { if (e.code !== -363) throw e; state.timelinePrivate = true; }   // private timeline: letters are still readable
+      if (!state.stopped && state.agedPosts.length) await scanReposts();
       if (!state.stopped) await scanReviews();
       $("scanStatus").textContent = state.stopped ? "停止" : "完了";
       $("scanTitle").textContent = state.stopped ? "途中までの結果" : "すべての取得が完了しました";

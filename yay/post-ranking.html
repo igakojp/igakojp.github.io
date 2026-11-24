@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#ffffff">
-  <title>Yay! 投稿ランキング</title><link rel="stylesheet" href="style.css?v=20261124c"><link rel="stylesheet" href="yay-theme.css?v=20261124c">
+  <title>Yay! 投稿ランキング</title><link rel="stylesheet" href="style.css?v=20261124f"><link rel="stylesheet" href="yay-theme.css?v=20261124f">
 </head>
 <body>
   <div class="ambient ambient-a"></div><div class="ambient ambient-b"></div>
@@ -25,10 +25,10 @@
     <section id="scanPanel" class="scan-panel panel hidden"><div class="section-head"><div><div class="eyebrow">タイムライン分析</div><h2 id="scanTitle">投稿を取得中</h2></div><span id="scanStatus" class="status-pill">準備中</span></div><div class="progress-meta"><span id="progressLabel">0 件を確認</span><b id="progressPercent">0%</b></div><div class="progress-track"><div id="progressFill" class="progress-fill"></div></div><div class="scan-stats"><div><b id="checkedCount">0</b><span>確認した投稿</span></div><div><b id="pageCount">0</b><span>取得ページ</span></div><div><b id="rankedCount">0</b><span>ランキング対象</span></div></div><div class="scan-actions"><button id="stopBtn" class="danger-btn">停止</button></div><p id="coverageNote" class="coverage-note">公開タイムラインから投稿を順番に取得します。</p></section>
     <section id="resultsPanel" class="results hidden">
       <div class="results-heading"><div><div class="eyebrow">ランキング結果</div><h2>投稿ランキング</h2><p class="live-caption" id="resultSummary">取得できた投稿を反応数順に表示します。</p></div><div class="export-actions"><button id="imageBtn" class="primary-btn" type="button">画像をダウンロード</button><button id="csvBtn" class="quiet-btn">CSVを書き出す</button></div></div>
-      <div class="pr-tabs" role="tablist"><button class="pr-tab active" data-kind="likes">♥ いいね</button><button class="pr-tab" data-kind="replies">💬 返信</button><button class="pr-tab" data-kind="age">(´∀｀∩)↑age↑</button></div>
+      <div class="pr-tabs" role="tablist"><button class="pr-tab active" data-kind="likes">♥ いいね</button><button class="pr-tab" data-kind="replies">💬 返信</button><button class="pr-tab" data-kind="age">↑ アゲ</button></div>
       <div class="panel pr-board"><div class="pr-board-head"><div><h3 id="rankingTitle">♥ いいねランキング</h3><p id="metricNote">いいね数が多い順</p></div><label class="top-limit">表示件数 <select id="topLimit"><option>10</option><option>20</option><option>50</option><option value="100">100</option></select></label></div><div id="rankingList" class="pr-list"><div class="empty-state">まだ投稿がありません。</div></div></div>
     </section>
     <footer><span>Yay! 投稿ランキング</span><span>公開情報のみ · ログイン不要 · DMは取得しません</span><div id="creatorCredit" class="creator-credit" aria-live="polite">制作者情報を読み込み中…</div></footer>
   </main>
-  <script src="yay-api.js?v=20261124c"></script><script src="site.js?v=20261124c"></script><script src="post-ranking.js?v=20261124c"></script>
+  <script src="yay-api.js?v=20261124f"></script><script src="site.js?v=20261124f"></script><script src="post-ranking.js?v=20261124f"></script>
 </body></html>

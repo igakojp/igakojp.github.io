@@ -5,11 +5,11 @@
   const $ = id => document.getElementById(id);
   const state = {
     profile:null, userId:null, posts:[], scores:new Map(), feed:[], pages:0,
-    checked:0, total:0, cursor:null, seen:new Set(), paused:false, stopped:false,
+    checked:0, total:0, cursor:null, seen:new Set(), agedPosts:[], paused:false, stopped:false,
     running:false, controller:null, startedAt:null, complete:false,
     timelineExhausted:false, retryCount:0, lastPageOldest:null, topLimit:50, profileQueue:[], profileInFlight:0, profileQueued:new Set(), mapCentered:false
   };
-  const fmt = n => Number(n||0).toLocaleString();
+  const fmt = n => Number(n||0).toLocaleString("ja-JP");
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const sleep = ms => new Promise(r => setTimeout(r,ms));
   let apiCooldownUntil = 0;
@@ -154,7 +154,7 @@
   }
   function resetScan(){
     state.posts=[];state.scores=new Map();state.feed=[];state.pages=0;state.checked=0;
-    state.total=Number(state.profile?.posts_count||0);state.cursor=null;state.seen=new Set();
+    state.total=Number(state.profile?.posts_count||0);state.cursor=null;state.seen=new Set();state.agedPosts=[];
     state.paused=false;state.stopped=false;state.running=false;state.complete=false;
     state.timelineExhausted=false;state.startedAt=new Date().toISOString();state.retryCount=0;
     state.lastPageOldest=null;state.profileQueue=[];state.profileInFlight=0;state.profileQueued=new Set();state.mapCentered=false;
@@ -238,9 +238,36 @@
       if(existing) existing.reasons.add("Reply");
       else perPost.set(id,{user:replyUser,reasons:new Set(["Reply"])});
     }
+    // アゲ ((´∀｀∩)↑age↑): a post that shares someone else's post carries it in shareable.post
+    const ageUser=post.shareable?.type==="post"?post.shareable.post?.user:null;
+    if(ageUser?.id && Number(ageUser.id)!==state.userId){
+      const id=Number(ageUser.id), existing=perPost.get(id);
+      if(existing) existing.reasons.add("Age");
+      else perPost.set(id,{user:ageUser,reasons:new Set(["Age"])});
+    }
+    const LABEL={Reply:"返信",Mention:"メンション",Age:"アゲ"};
     for(const {user,reasons} of perPost.values()){
-      const reason=reasons.size>1?"返信・メンション":([...reasons][0]==="Reply"?"返信":"メンション");
+      const reason=["Reply","Mention","Age"].filter(r=>reasons.has(r)).map(r=>LABEL[r]).join("・");
       addScore(user,post,reason);
+    }
+    // remember own posts that others アゲ'd; who did it is fetched after the timeline scan
+    if(Number(post.reposts_count)>0) state.agedPosts.push(post.id);
+  }
+  // People who アゲ'd the user's posts: /v2/posts/{id}/reposts lists the posts that shared it.
+  async function scanReposts(signal){
+    const ids=[...new Set(state.agedPosts)];
+    for(let i=0;i<ids.length && !state.stopped;i++){
+      await waitWhilePaused();
+      $("scanStatus").textContent=`アゲしてくれた人を確認中 ${i+1} / ${ids.length}`;
+      let cursor=null;
+      for(let page=0;page<20 && !state.stopped;page++){
+        const data=await apiGet(`${API}/posts/${ids[i]}/reposts?number=50${cursor?`&from_post_id=${cursor}`:""}`,signal);
+        const rows=Array.isArray(data.posts)?data.posts:[];
+        for(const r of rows) addScore(r.user,r,"アゲされた");
+        const last=rows.length?String(rows[rows.length-1].id):null;
+        if(rows.length<50 || !last || last===cursor) break;
+        cursor=last;
+      }
     }
   }
   function sortedScores(){return [...state.scores.values()].sort((a,b)=>b.points-a.points||a.nickname.localeCompare(b.nickname));}
@@ -310,7 +337,7 @@
     const u=state.scores.get(id);if(!u)return;
     $("detailTitle").textContent=`${u.nickname} · ${fmt(u.points)} 件の交流`;
     const profileUrl=`https://yay.space/user/${u.id}`;
-    $("detailContent").innerHTML=`<p class="profile-link-row"><a href="${profileUrl}" target="_blank" rel="noopener">${esc(u.nickname)} のプロフィールを開く ↗</a></p>`+u.evidence.slice().sort((a,b)=>b.createdAt-a.createdAt).map(e=>`<div class="evidence-item"><div class="evidence-meta"><span>${esc(e.reason)} · ${new Date(e.createdAt*1000).toLocaleString()}</span><span>#${e.postId}</span></div><p>${esc(e.text||"(本文なし)")}</p><a href="${e.url}" target="_blank" rel="noopener">元の投稿を開く ↗</a></div>`).join("");
+    $("detailContent").innerHTML=`<p class="profile-link-row"><a href="${profileUrl}" target="_blank" rel="noopener">${esc(u.nickname)} のプロフィールを開く ↗</a></p>`+u.evidence.slice().sort((a,b)=>b.createdAt-a.createdAt).map(e=>`<div class="evidence-item"><div class="evidence-meta"><span>${esc(e.reason)} · ${new Date(e.createdAt*1000).toLocaleString("ja-JP")}</span><span>#${e.postId}</span></div><p>${esc(e.text||"(本文なし)")}</p><a href="${e.url}" target="_blank" rel="noopener">元の投稿を開く ↗</a></div>`).join("");
     setHidden("detailPanel",false);$("detailPanel").scrollIntoView({behavior:"smooth",block:"nearest"});
   }
   function setStatus(text){$("scanStatus").textContent=text;$("scanTitle").textContent=text==="完了"?"分析完了":text==="一時停止"?"一時停止中":text==="停止"?"分析を停止しました":text==="非公開アカウント"?"非公開アカウント":"投稿を確認中";}
@@ -361,6 +388,7 @@
           state.timelineExhausted=true;break;
         }
       }
+      if(!state.stopped && state.agedPosts.length) await scanReposts(controller.signal);
       if(state.stopped){setStatus("停止");$("coverageNote").textContent="分析を停止しました。ここまでに取得した結果は表示されています。";}
       else if(state.timelineExhausted && state.checked<state.total){
         setStatus("一部完了");$("scanStatus").textContent="追加ページを確認できませんでした";

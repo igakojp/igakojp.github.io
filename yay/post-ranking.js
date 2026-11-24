@@ -55,7 +55,7 @@
     return state.posts.map(post => ({ post, count:metric(post,state.kind) })).filter(row => row.count != null).sort((a,b) => b.count-a.count || Number(b.post.id)-Number(a.post.id));
   }
   function render() {
-    const labels = { likes:["♥ いいねランキング","いいね数が多い順"], replies:["💬 返信ランキング","返信数が多い順"], age:["(´∀｀∩)↑age↑ランキング","age数が多い順"] };
+    const labels = { likes:["♥ いいねランキング","いいね数が多い順"], replies:["💬 返信ランキング","返信数が多い順"], age:["アゲ（(´∀｀∩)↑age↑）ランキング","アゲ数が多い順"] };
     $("rankingTitle").textContent = labels[state.kind][0]; $("metricNote").textContent = labels[state.kind][1];
     const limit = Number($("topLimit").value || 10), rows = currentRows().slice(0,limit);
     $("rankedCount").textContent = fmt(currentRows().length);
@@ -140,7 +140,7 @@
       const canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;const ctx=canvas.getContext('2d');
       const bg=ctx.createLinearGradient(0,0,W,H);bg.addColorStop(0,'#171a2b');bg.addColorStop(.55,'#28213c');bg.addColorStop(1,'#172d3b');ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
       ctx.fillStyle='rgba(255,255,255,.045)';ctx.beginPath();ctx.arc(1280,70,280,0,Math.PI*2);ctx.fill();
-      const title={likes:'♥ いいねランキング',replies:'💬 返信ランキング',age:'(´∀｀∩)↑age↑ランキング'}[state.kind];
+      const title={likes:'♥ いいねランキング',replies:'💬 返信ランキング',age:'アゲ（(´∀｀∩)↑age↑）ランキング'}[state.kind];
       ctx.textBaseline='middle';ctx.textAlign='left';ctx.fillStyle='#fff';ctx.font="800 64px system-ui, 'Noto Sans JP', sans-serif";ctx.fillText(title,70,100);
       ctx.fillStyle='#c6c5da';ctx.font="26px system-ui, 'Noto Sans JP', sans-serif";ctx.fillText(`${state.profile?.nickname||'Yay! ユーザー'}  (@${state.userId})`,74,170);
       ctx.fillText(`${fmt(state.posts.length)} 件を確認 · TOP ${rows.length} · ${new Date().toLocaleDateString('ja-JP')}`,74,220);

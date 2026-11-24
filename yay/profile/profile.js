@@ -64,24 +64,32 @@
   };
 
   /* ---------------- routing ---------------- */
-  const routeHref = route => PATH_MODE ? BASE + route : `#/${route}`;
+  /* Routes live in the query string: profile/?user/123/album. That address is always the real file
+   * profile/index.html, so reloading or going back never hits GitHub Pages' own "404 File not found".
+   * Older addresses still work: profile/user/123 (via ../404.html → ?route=…), and #/user/123. */
+  const routeHref = route => PATH_MODE ? (route ? `${BASE}?${route}` : BASE) : `#/${route}`;
   const rlink = (route, inner, cls = "", extra = "") => `<a href="${esc(routeHref(route))}" data-route="${esc(route)}"${cls ? ` class="${cls}"` : ""}${extra}>${inner}</a>`;
+  const safeDecode = v => { try { return decodeURIComponent(v); } catch { return v; } };
   function currentRoute() {
-    const params = new URLSearchParams(location.search);
-    if (params.has("route")) {
-      const r = String(params.get("route") || "").replace(/^\/+/, "");
-      if (PATH_MODE) history.replaceState(null, "", BASE + r + location.hash);
-      return r;
-    }
-    if (location.hash.startsWith("#/")) return decodeURIComponent(location.hash.slice(2));
-    if (PATH_MODE) {
+    const params = new URLSearchParams(location.search), raw = location.search.slice(1);
+    let r = null;
+    if (params.has("route")) r = String(params.get("route") || "");
+    else if (raw && !/^[^/]*=/.test(raw)) r = safeDecode(raw.replace(/\+/g, " "));   // ?user/123 (no "key=" form)
+    else if (location.hash.startsWith("#/")) r = safeDecode(location.hash.slice(2));
+    else if (PATH_MODE) {
       const here = location.href.split(/[?#]/)[0];
-      if (here.startsWith(BASE)) return decodeURIComponent(here.slice(BASE.length)).replace(/^index\.html$/, "");
+      if (here.startsWith(BASE)) r = safeDecode(here.slice(BASE.length)).replace(/^index\.html$/, "");
     }
-    return "";
+    r = String(r || "").replace(/^\/+/, "");
+    // show the clean ?route address from now on
+    if (PATH_MODE && (params.has("route") || location.hash.startsWith("#/") || location.href.split(/[?#]/)[0] !== BASE)) {
+      const want = routeHref(r);
+      if (location.href !== want) history.replaceState({ route: r }, "", want);
+    }
+    return r;
   }
   function go(route, replace = false) {
-    if (PATH_MODE) { history[replace ? "replaceState" : "pushState"]({ route }, "", BASE + route); render(); }
+    if (PATH_MODE) { history[replace ? "replaceState" : "pushState"]({ route }, "", routeHref(route)); render(); }
     else if (replace) { history.replaceState({ route }, "", `#/${route}`); render(); }
     else location.hash = `#/${route}`;
   }
@@ -407,7 +415,7 @@
   }
   function header(u) {
     const cover = img(u.cover_image), ava = img(u.profile_icon), sp = span(u.created_at), online = u.online_status === "online" || u.is_online;
-    const shareUrl = PATH_MODE ? `${BASE}user/${u.id}` : `${location.href.split("#")[0]}#/user/${u.id}`;
+    const shareUrl = PATH_MODE ? `${BASE}?user/${u.id}` : `${location.href.split("#")[0]}#/user/${u.id}`;
     return `<div class="ys-cover">${cover ? `<img src="${esc(cover)}" alt=""><button class="ys-cover-btn" type="button" data-zoom="${esc(cover)}" aria-label="バナー画像を拡大"></button>` : ""}
         <a class="ys-menu" href="https://yay.space/user/${esc(u.id)}" target="_blank" rel="noopener" title="Yay! で開く" aria-label="Yay! で開く">↗</a></div>
       <div class="ys-profile">
@@ -459,11 +467,11 @@
   const emptyMsg = (L, msg) => (L.loading || L.error || !L.done || L.items.length) ? "" : `<div class="ys-empty">${msg}</div>`;
 
   /* ---- posts ---- */
-  const POST_TYPES = [["all", "すべて"], ["text", "テキスト"], ["image", "画像"], ["video", "動画"], ["call", "通話"], ["reply", "返信"], ["repost", "リポスト"], ["other", "その他"]];
+  const POST_TYPES = [["all", "すべて"], ["text", "テキスト"], ["image", "画像"], ["video", "動画"], ["call", "通話"], ["survey", "アンケート"], ["reply", "返信"], ["repost", "アゲ"], ["other", "その他"]];
   function postKind(p) {
-    if (p.post_type === "repost" || p.repost) return "repost";
+    if (p.post_type === "repost" || p.repost || p.shareable?.type === "post") return "repost";
     if (p.in_reply_to) return "reply";
-    if (["text", "image", "video", "call"].includes(p.post_type)) return p.post_type;
+    if (["text", "image", "video", "call", "survey"].includes(p.post_type)) return p.post_type;
     return "other";
   }
   function tabPosts() {
@@ -476,7 +484,7 @@
     const filtered = v.type !== "all" || v.q || v.sort !== "new";
     const pinned = filtered ? [] : (L.extra?.pinned || []);
     const typeSel = `<label class="ys-ctl">種類<select data-view="posts" data-prop="type">${POST_TYPES.map(([k, l]) => `<option value="${k}"${v.type === k ? " selected" : ""}>${l}</option>`).join("")}</select></label>`;
-    return `${toolbar("posts", [["new", "新しい順"], ["old", "古い順"], ["likes", "いいねが多い順"], ["replies", "返信が多い順"], ["reposts", "(´∀｀∩)↑age↑が多い順"], ["gifts", "ギフトが多い順"]], typeSel)}
+    return `${toolbar("posts", [["new", "新しい順"], ["old", "古い順"], ["likes", "いいねが多い順"], ["replies", "返信が多い順"], ["reposts", "アゲが多い順"], ["gifts", "ギフトが多い順"]], typeSel)}
       ${summary(L.items)}
       ${pinned.map(p => postCard(p, { pinned: true })).join("")}
       ${items.map(p => postCard(p)).join("") || (L.items.length && filtered ? `<div class="ys-empty">条件に合う投稿はまだありません。${L.done ? "" : "下までスクロールすると続きを探します。"}</div>` : emptyMsg(L, "まだ投稿がありません。"))}
@@ -521,20 +529,47 @@
       <div class="ys-post-body">
         <div class="ys-post-top"><span class="ys-post-who">${rlink(`user/${pu.id}`, esc(pu.nickname || pu.id), "ys-post-name")}${roleBadges(pu)}</span>${rlink(`post/${p.id}`, ago(p.created_at), "ys-post-time", ` title="${esc(fmtDate(p.created_at))}"`)}</div>
         ${opts.replyName ? `<div class="ys-reply-label">返信: ${opts.replyName}</div>` : ""}
-        ${opts.pinned || kind === "repost" || p.edited_at || (p.group_id && view.kind !== "group") ? `<div class="ys-post-meta">${[opts.pinned ? "📌 ピン留め" : "", kind === "repost" ? "リポスト" : "", p.edited_at ? "編集済み" : "", p.group_id && view.kind !== "group" ? rlink(`group/${p.group_id}`, "サークルの投稿", "ys-group-chip") : ""].filter(Boolean).join(" · ")}</div>` : ""}
+        ${opts.pinned || kind === "repost" || p.edited_at || (p.group_id && view.kind !== "group") ? `<div class="ys-post-meta">${[opts.pinned ? "📌 ピン留め" : "", kind === "repost" ? "アゲ" : "", p.edited_at ? "編集済み" : "", p.group_id && view.kind !== "group" ? rlink(`group/${p.group_id}`, "サークルの投稿", "ys-group-chip") : ""].filter(Boolean).join(" · ")}</div>` : ""}
         ${showReplyTo ? `<div class="ys-reply-to">返信先: ${p.in_reply_to_post.user ? rlink(`user/${p.in_reply_to_post.user.id}`, esc(p.in_reply_to_post.user.nickname)) : ""} ${rlink(`post/${p.in_reply_to_post.id}`, esc(String(p.in_reply_to_post.text || "（投稿）").slice(0, 120)), "ys-reply-text")}</div>` : ""}
         ${p.text ? `<p class="ys-post-text${textClass(p)}">${postText(p)}</p>` : ""}
+        ${p.shareable?.type === "post" && p.shareable.post ? sharedPost(p.shareable.post) : ""}
+        ${p.survey ? surveyBox(p.survey) : ""}
+        ${p.shared_url ? urlCard(p.shared_url) : ""}
         ${call ? `<div class="ys-post-call">${ICON.phone}<span>${call.active ? "通話中" : "通話"} · ${call.call_type === "video" ? "ビデオ" : "音声"} · ${num(call.conference_call_users_count)}人</span></div>` : ""}
         ${n ? `<div class="ys-media ${n === 1 ? "n1" : n === 2 ? "n2" : n === 3 ? "n3" : n === 4 ? "n4" : "nmany"}">${media.map(m => `<button type="button" class="ys-thumb" data-media="${esc(m.src)}" data-type="${m.type}" data-post="${esc(p.id)}"><img src="${esc(m.thumb)}" alt="" loading="lazy">${m.type === "video" ? `<span class="ys-play"></span>` : ""}</button>`).join("")}</div>` : ""}
         <ul class="ys-post-actions">
           <li>${p.conversation_id && (replies || p.in_reply_to) ? rlink(`conversation/${p.conversation_id}`, `${ICON.reply}${replies ? num(replies) : ""}`, "ys-act", ' title="会話を見る"') : `<span class="ys-act" title="返信">${ICON.reply}${replies ? num(replies) : ""}</span>`}</li>
           <li>${rlink(`post/${p.id}`, `${ICON.heart}${Number(p.likes_count) ? num(p.likes_count) : ""}`, "ys-act", ' title="いいねした人を見る"')}</li>
-          ${Number(p.reposts_count) ? `<li><span class="ys-act" title="(´∀｀∩)↑age↑">${ICON.repost}${num(p.reposts_count)}</span></li>` : ""}
+          ${Number(p.reposts_count) ? `<li><span class="ys-act" title="アゲ（(´∀｀∩)↑age↑）された数">${ICON.repost}${num(p.reposts_count)}</span></li>` : ""}
           <li><span class="ys-act" title="ギフト">${ICON.gift}${Number(p.total_gifts_count) ? num(p.total_gifts_count) : ""}</span></li>
           ${p.conversation_id && (replies || p.in_reply_to) && !opts.inThread ? `<li class="ys-act-more">${rlink(`conversation/${p.conversation_id}`, "会話を見る", "ys-act-link")}</li>` : ""}
         </ul>
       </div>
     </article>`;
+  }
+  // アンケート: yay.space only shows the results after you vote; here they are always visible
+  function surveyBox(sv) {
+    const total = Number(sv.votes_count || 0), max = Math.max(1, ...(sv.choices || []).map(c => Number(c.votes_count || 0)));
+    return `<div class="ys-survey"><div class="ys-survey-head">アンケート · ${num(total)}票</div>${(sv.choices || []).map(c => {
+      const n = Number(c.votes_count || 0), pct = total ? Math.round(n / total * 100) : 0;
+      return `<div class="ys-survey-row${n === max && n ? " top" : ""}"><i style="width:${pct}%"></i><span>${esc(c.label)}</span><b>${pct}%<small>${num(n)}票</small></b></div>`;
+    }).join("")}</div>`;
+  }
+  // link preview (shared_url) like yay.space's URL card
+  function urlCard(u) {
+    if (!u.url) return "";
+    let host = ""; try { host = new URL(u.url).hostname; } catch { /* keep empty */ }
+    const inner = `${u.image_url ? `<img src="${esc(img(u.image_url))}" alt="" loading="lazy">` : ""}<span class="ys-url-copy"><b>${esc(u.title || u.url)}</b>${u.description ? `<small>${esc(String(u.description).slice(0, 120))}</small>` : ""}<em>${esc(host)}</em></span>`;
+    const m = String(u.url).match(/^https?:\/\/yay\.space\/(user|post|group|conversation)\/(\d+)/);
+    return m ? rlink(`${m[1]}/${m[2]}`, inner, "ys-url") : `<a class="ys-url" href="${esc(u.url)}" target="_blank" rel="noopener noreferrer">${inner}</a>`;
+  }
+  // the post that an アゲ shares, shown as a quoted card like on yay.space
+  function sharedPost(q) {
+    const qu = q.user || {}, a = avatarOf(qu), m = mediaOf(q);
+    return `<div class="ys-shared" data-open-post="${esc(q.id)}"><div class="ys-shared-top">${a ? `<img src="${esc(a)}" alt="" loading="lazy">` : ""}${rlink(`user/${qu.id}`, esc(qu.nickname || qu.id), "ys-shared-name")}${roleBadges(qu)}<span class="ys-shared-time">${ago(q.created_at)}</span></div>
+      ${q.text ? `<p class="ys-shared-text${textClass(q)}">${postText(q)}</p>` : ""}
+      ${m.length ? `<div class="ys-shared-media">${m.slice(0, 4).map(x => `<img src="${esc(x.thumb)}" alt="" loading="lazy">`).join("")}</div>` : ""}
+      <div class="ys-shared-foot">${rlink(`post/${q.id}`, "アゲ元の投稿を見る →")}</div></div>`;
   }
   function userChip(u, extra = "") {
     if (!u) return "";
@@ -735,7 +770,7 @@
   const CAT_ORDER = ["基本", "数値", "日時", "状態", "画像", "チャット・レター設定", "その他"];
   // API values that are English words, shown in Japanese (the original value stays visible in small text)
   const VALUE_JA = {
-    post_type: { text: "テキスト", image: "画像", video: "動画", call: "通話", repost: "(´∀｀∩)↑age↑", survey: "アンケート", shareable_url: "URLの共有", share: "シェア" },
+    post_type: { text: "テキスト", image: "画像", video: "動画", call: "通話", repost: "アゲ", survey: "アンケート", shareable_url: "URLの共有", share: "シェア" },
     call_type: { voice: "音声通話", video: "ビデオ通話" },
     online_status: { online: "オンライン", offline: "オフライン", hidden: "非表示" },
     joinable_by: { anyone: "全員", users: "全員", followers: "フォロワー", mutual_follows: "相互フォロー", invite_only: "招待のみ" },
@@ -809,7 +844,7 @@
     const L = st.likers, replies = Number(p.in_reply_to_post_count || 0);
     app.innerHTML = `${crumb}
       <section class="ys-box ys-page">${backBar()}${postCard(p, { big: true })}
-        <div class="ys-post-facts"><span>${fmtDate(p.created_at)}</span>${p.edited_at ? `<span>編集 ${fmtDate(p.edited_at)}</span>` : ""}<span>いいね <b>${num(p.likes_count)}</b></span><span>返信 <b>${num(replies)}</b></span>${Number(p.reposts_count) ? `<span>(´∀｀∩)↑age↑ <b>${num(p.reposts_count)}</b></span>` : ""}${Number(p.total_gifts_count) ? `<span>ギフト <b>${num(p.total_gifts_count)}</b></span>` : ""}
+        <div class="ys-post-facts"><span>${fmtDate(p.created_at)}</span>${p.edited_at ? `<span>編集 ${fmtDate(p.edited_at)}</span>` : ""}<span>いいね <b>${num(p.likes_count)}</b></span><span>返信 <b>${num(replies)}</b></span>${Number(p.reposts_count) ? `<span>アゲ <b>${num(p.reposts_count)}</b></span>` : ""}${Number(p.total_gifts_count) ? `<span>ギフト <b>${num(p.total_gifts_count)}</b></span>` : ""}
           <a href="https://yay.space/post/${esc(p.id)}" target="_blank" rel="noopener">Yay! で開く ↗</a></div>
         ${p.conversation_id && (replies || p.in_reply_to) ? `<div class="ys-conv-link">${rlink(`conversation/${p.conversation_id}`, `${ICON.reply}<span>${replies ? `${num(replies)}件の返信を含む会話を見る` : "この投稿がある会話を見る"}</span><b>›</b>`)}</div>` : ""}
       </section>
@@ -822,7 +857,7 @@
         }).join("")}</ul>
         ${emptyMsg(L, "まだ誰もいいねしていません。")}${more("likers", L, "人")}
       </section>
-      ${Number(p.reposts_count) ? `<section class="ys-box ys-likers"><h2 class="ys-box-title">(´∀｀∩)↑age↑した投稿 <small>${num(p.reposts_count)}</small></h2>${feedBlock("reposts", feed(`reposts:${id}`), x => postCard(x), "件", "表示できる↑age↑はありません。")}</section>` : ""}
+      ${Number(p.reposts_count) ? `<section class="ys-box ys-likers"><h2 class="ys-box-title">アゲしてくれた人（(´∀｀∩)↑age↑） <small>${num(p.reposts_count)}</small></h2>${feedBlock("reposts", feed(`reposts:${id}`), x => postCard(x), "件", "表示できるアゲはありません。")}</section>` : ""}
       <section class="ys-box">${allData(p, "この投稿のすべてのデータ")}</section>`;
     startFeeds([["likers", L, "likers", id], ...(Number(p.reposts_count) ? [["reposts", feed(`reposts:${id}`), "reposts", id]] : [])]);
   }
@@ -972,9 +1007,9 @@
 
   /* ---- generic "every field" table ---- */
   const LABELS = Object.assign({}, ...Object.entries(FIELDS).map(([k, v]) => ({ [k]: v[1] })), {
-    text: "本文", post_type: "投稿の種類", color: "文字色", font_size: "文字の大きさ", likes_count: "いいね数", reposts_count: "(´∀｀∩)↑age↑数",
+    text: "本文", post_type: "投稿の種類", color: "文字色", font_size: "文字の大きさ", likes_count: "いいね数", reposts_count: "アゲされた数", shareable: "アゲ元", shareable_url: "共有URL",
     in_reply_to_post_count: "返信数", total_gifts_count: "ギフト数", reported_count: "通報された回数", updated_at: "更新日時", edited_at: "編集日時",
-    repostable: "↑age↑できる", highlighted: "ハイライト", hidden: "非表示", thread_id: "スレッドID", group_id: "サークルID", conversation_id: "会話ID",
+    repostable: "アゲできる", highlighted: "ハイライト", hidden: "非表示", thread_id: "スレッドID", group_id: "サークルID", conversation_id: "会話ID",
     in_reply_to: "返信先の投稿ID", language: "言語", message_tags: "メンション・タグ", mentions: "メンションされた人", attachment: "画像1", videos: "動画",
     shared_url: "共有URL", survey: "アンケート", tag: "タグ", gifts_count: "ギフトの内訳", conference_call: "通話",
     topic: "サークル名", description: "説明", guidelines: "ルール", user_id: "オーナーのユーザーID", groups_users_count: "メンバー数", threads_count: "スレッド数",

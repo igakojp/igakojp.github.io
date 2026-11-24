@@ -511,3 +511,116 @@ a:has(>.ys-group-icon){flex:none}
 /* long bios / circle descriptions fold like yay.space's "もっと見る" */
 .ys-bio.folded{max-height:9.6em;overflow:hidden;-webkit-mask-image:linear-gradient(#000 70%,transparent);mask-image:linear-gradient(#000 70%,transparent)}
 .ys-more-btn{display:inline-block;margin:6px 0 0;padding:0;border:0;background:none;color:#0069e5;font-size:13px;font-weight:700;cursor:pointer}
+
+/* ---- viewer header: logo · search · ツール一覧 (no tool tabs on these pages) ---- */
+.ys-topbar{gap:20px!important}
+.ys-topbar .yay-search{flex:1 1 auto!important;max-width:460px;margin:0 auto!important}
+.ys-tools-link{flex:none;display:inline-flex;align-items:center;height:38px;padding:0 16px;border:1px solid #757575;border-radius:150px;color:#757575;font-size:13px;text-decoration:none;white-space:nowrap}
+.ys-tools-link:hover{border-color:var(--pink);color:var(--pink)}
+@media (max-width:720px){
+  .ys-topbar{flex-wrap:nowrap!important;gap:10px!important;padding:0 12px!important;min-height:58px!important}
+  .ys-topbar .brand{min-height:58px}
+  .ys-topbar .brand>span:last-child{display:none!important}
+  .ys-topbar .yay-search{max-width:none;margin:0!important}
+  .ys-tools-link{height:34px;padding:0 12px;font-size:12px}
+}
+
+/* ---- アゲ (shared post), アンケート, link cards ---- */
+.ys-shared{margin-top:12px;padding:14px 16px;border:1px solid #e0e0e0;border-radius:14px;background:#fff;cursor:pointer;transition:background .15s}
+.ys-shared:hover{background:#fafafa}
+.ys-shared-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px}
+.ys-shared-top img{width:26px;height:26px;border-radius:50%;object-fit:cover}
+.ys-shared-name{font-weight:700;color:var(--text);text-decoration:none}
+.ys-shared-time{margin-left:auto;color:var(--light);font-size:12px}
+.ys-shared-text{margin:8px 0 0;font-size:14px;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere;color:var(--text2)}
+.ys-shared-media{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;margin-top:10px;max-width:360px}
+.ys-shared-media img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:8px}
+.ys-shared-foot{margin-top:10px;font-size:12px}
+.ys-shared-foot a{color:#0069e5;text-decoration:none;font-weight:700}
+.ys-survey{margin-top:12px;display:grid;gap:8px;max-width:520px}
+.ys-survey-head{font-size:12px;color:var(--gray);font-weight:700}
+.ys-survey-row{position:relative;display:flex;align-items:center;gap:12px;min-height:42px;padding:8px 14px;border:1px solid #e0e0e0;border-radius:150px;overflow:hidden;font-size:14px}
+.ys-survey-row i{position:absolute;left:0;top:0;bottom:0;background:#f4f4f4;z-index:0}
+.ys-survey-row.top i{background:var(--pink-soft)}
+.ys-survey-row span,.ys-survey-row b{position:relative;z-index:1}
+.ys-survey-row span{flex:1;min-width:0;overflow-wrap:anywhere}
+.ys-survey-row b{flex:none;font-size:13px}
+.ys-survey-row b small{margin-left:6px;font-weight:400;color:var(--gray)}
+.ys-url{display:flex;margin-top:12px;max-width:560px;border:1px solid #e0e0e0;border-radius:14px;overflow:hidden;text-decoration:none;color:var(--text);background:#fff}
+.ys-url:hover{background:#fafafa}
+.ys-url img{flex:none;width:120px;height:auto;min-height:90px;object-fit:cover;background:#f4f4f4}
+.ys-url-copy{display:flex;flex-direction:column;gap:4px;padding:12px 14px;min-width:0}
+.ys-url-copy b{font-size:14px;overflow-wrap:anywhere}
+.ys-url-copy small{font-size:12px;color:var(--gray);line-height:1.5}
+.ys-url-copy em{font-style:normal;font-size:11px;color:var(--light)}
+
+/* ---- breathing room: less crammed everywhere ---- */
+.ys-container{max-width:860px}
+.ys-main{padding:24px 0 32px}
+.ys-crumbs{margin:0 0 14px;gap:6px 8px}
+.ys-subnav{gap:8px;margin:0 0 18px}
+.ys-subnav-a{padding:8px 16px}
+.ys-profile{padding:0 24px 30px}
+.ys-name{margin-top:14px}
+.ys-sub{margin-top:6px;line-height:1.7}
+.ys-badges{gap:8px;margin-top:12px}
+.ys-bio{margin-top:14px;line-height:1.85}
+.ys-dl{gap:10px 26px;margin-top:16px}
+.ys-actions{gap:10px;margin-top:20px}
+.ys-tab{padding:16px 16px 14px;min-width:84px}
+.ys-toolbar{padding:16px 24px;gap:12px 16px}
+.ys-stats{padding:14px 24px;gap:6px 22px;line-height:1.8}
+.ys-post{gap:18px;padding:24px}
+.ys-post-text{margin-top:8px;line-height:1.8}
+.ys-post-meta,.ys-reply-to,.ys-reply-label{margin-top:6px}
+.ys-reply-to{padding:10px 14px;line-height:1.7}
+.ys-media{margin-top:14px;gap:6px}
+.ys-post-actions{gap:26px;margin-top:14px}
+.ys-album{gap:10px;padding:20px 24px}
+.ys-letter{padding:20px 24px}
+.ys-letter-text{margin-top:12px;line-height:1.8}
+.ys-top{gap:10px;padding:16px 24px}
+.ys-group{gap:16px;padding:20px 24px}
+.ys-group-meta{gap:4px 18px;margin-top:6px}
+.ys-group-snip{margin-top:6px;line-height:1.7}
+.ys-pad{padding:22px 24px}
+.ys-pad h2{margin-bottom:16px}
+.ys-about{gap:14px 28px;line-height:1.7}
+.ys-callrow{padding:22px 24px}
+.ys-callrow-people{gap:8px;margin-top:14px}
+.ys-callrow-meta{gap:4px 18px;margin-top:10px}
+.ys-box-title{padding:18px 24px}
+.ys-more{padding:26px 24px 30px}
+.ys-explore-a{padding:20px 24px;gap:6px}
+.ys-hero{padding:32px 30px}
+.ys-hero p{margin-bottom:18px}
+.fl-search{padding:18px 24px}
+.fl-tools{padding:14px 24px;gap:10px}
+.fl-stats{margin:14px 24px 6px;padding:14px 18px}
+.fl-row{gap:16px;padding:16px 24px}
+.fl-main{gap:16px}
+.fl-bio{margin-top:3px}
+.fl-tags{gap:6px;margin-top:8px}
+.fl-tag{height:24px;padding:0 10px;font-size:12px}
+.ys-table th,.ys-table td{padding:12px 24px;line-height:1.6}
+.ys-chip{padding:4px 14px 4px 4px}
+.ys-call-float .cf-people a{padding:10px 16px}
+@media (max-width:600px){
+  .ys-main{padding:0 0 24px}
+  .ys-crumbs{padding:14px 16px 0;margin-bottom:10px}
+  .ys-subnav{padding:4px 12px 2px;margin-bottom:10px}
+  .ys-profile{padding:0 18px 24px}
+  .ys-toolbar{padding:14px 18px}
+  .ys-stats{padding:12px 18px}
+  .ys-post{gap:12px;padding:18px}
+  .ys-post-actions{gap:20px}
+  .ys-album{gap:3px;padding:3px}
+  .ys-letter,.ys-group,.ys-pad,.ys-callrow,.ys-box-title,.ys-top,.ys-explore-a{padding-left:18px;padding-right:18px}
+  .fl-search,.fl-tools,.fl-row{padding-left:16px;padding-right:16px}
+  .fl-stats{margin-left:16px;margin-right:16px}
+  .fl-row,.fl-main{gap:12px}
+  .ys-table th,.ys-table td{padding:10px 14px}
+  .ys-url img{width:90px}
+  .ys-shared{padding:12px 14px}
+}
+.ys-shared-text a,.ys-url-copy a{color:#0069e5;text-decoration:none}

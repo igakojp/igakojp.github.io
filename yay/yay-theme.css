@@ -210,3 +210,47 @@ footer{color:var(--yay-gray)!important;border-top:1px solid #e6e6e6!important}
 .yay-modal-close svg{width:18px;height:18px;stroke:#9e9e9e;stroke-width:2.6;stroke-linecap:round}
 .yay-modal-body{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 @media (max-width:600px){.yay-modal{padding:0;place-items:end stretch}.yay-modal-card{width:100%;max-height:92dvh;border-radius:16px 16px 0 0}}
+
+/* ---------------- breathing room (less crammed) ---------------- */
+body{line-height:1.7}
+.shell{padding-top:32px!important;padding-bottom:40px!important}
+.intro{margin-bottom:26px!important;padding:30px 32px!important}
+.intro p{font-size:15px!important;line-height:1.95!important}
+.shell > .panel,.shell > section.panel,.results > .panel,.results > section{margin-bottom:24px!important}
+.search-panel,.scan-panel,.lb-join,.lb-status,.lb-tools,.lb-unknown,.pc-pick,.ranking-panel,.detail-panel,.history-panel,.home-note,.lic-wrap,.pr-board,.pc-stage,.pc-side>.panel,.feed-panel,.chart-panel{padding:26px 30px!important}
+.overview-grid,.content-grid{gap:18px!important;margin-bottom:24px!important}
+.metric{padding:22px 24px!important}
+.scan-stats{gap:14px!important;margin:24px 0!important}
+.scan-stats div{padding:16px!important}
+.search-row,.lb-tools-row,.lb-export-row,.pc-pick,.map-toolbar,.pc-toolbar{gap:14px 16px!important}
+.subtle,.search-hint,.live-caption,.map-disclaimer,.coverage-note,.lb-hint,.lb-join p,.lb-formula-body p,.pc-field,.lb-field,.pc-lbl,.top-limit,.metric span,.metric small,.scan-stats span,.profile-sub{font-size:12.5px!important;line-height:1.8!important}
+.section-head,.results-heading{margin-bottom:18px!important;gap:16px!important}
+.section-head h2,.results-heading h2{font-size:21px!important;line-height:1.5!important}
+.lb-table th{padding:14px 14px!important}
+.lb-table td{padding:14px 14px!important}
+.lb-stat b{font-size:26px!important}
+.lb-status{gap:18px 40px!important}
+.pr-list{gap:12px!important}
+.pr-item{padding:18px 20px!important;gap:16px!important}
+.pr-content p{line-height:1.8!important}
+.evidence-item{padding:16px 0!important}
+.evidence-item p{line-height:1.8!important}
+.rank-row{padding:12px!important}
+.feature-list{gap:22px!important;margin:28px 0!important}
+.feature-card{padding:28px!important;gap:22px!important}
+.feature-copy p{line-height:1.9!important;margin-bottom:20px!important}
+.home-note p{line-height:1.9!important}
+.map-toolbar{margin:20px 0 14px!important}
+.username-toggle{padding:10px 16px!important}
+footer{gap:18px 28px!important;padding:40px 4px 24px!important;margin-top:16px}
+.creator-credit{gap:14px!important;padding-top:18px!important}
+@media (max-width:720px){
+  .shell{padding:18px 14px 28px!important}
+  .intro{padding:22px 20px!important;margin-bottom:18px!important}
+  .shell > .panel,.shell > section.panel,.results > .panel,.results > section{margin-bottom:16px!important}
+  .search-panel,.scan-panel,.lb-join,.lb-status,.lb-tools,.lb-unknown,.pc-pick,.ranking-panel,.detail-panel,.history-panel,.home-note,.lic-wrap,.pr-board,.pc-stage,.pc-side>.panel,.feed-panel,.chart-panel{padding:20px 18px!important}
+  .feature-card{padding:22px!important;gap:16px!important}
+  .feature-list{gap:14px!important;margin:18px 0!important}
+  .lb-table th,.lb-table td{padding:12px 10px!important}
+  footer{padding:28px 4px 18px!important}
+}

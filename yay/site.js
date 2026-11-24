@@ -180,8 +180,9 @@ document.addEventListener("DOMContentLoaded", () => {
   "use strict";
   if (window.__profileBase) return;
   const RE = /^https?:\/\/(?:www\.)?yay\.space\/(user|post|group|conversation)\/(\d+)(?:\/(album|reviews))?\/?(?:[?#].*)?$/;
+  // profile/?user/123 is always the real file profile/index.html, so it never hits GitHub Pages' 404
   const viewerUrl = route => /^https?:$/.test(location.protocol)
-    ? new URL(`profile/${route}`, location.href).href
+    ? new URL(`profile/?${route}`, location.href).href
     : new URL(`profile/index.html#/${route}`, location.href).href;
   function fix(a) {
     if (!a || a.dataset.yayExternal != null || a.dataset.yayLinked) return;

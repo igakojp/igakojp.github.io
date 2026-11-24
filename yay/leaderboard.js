@@ -9,7 +9,7 @@
   const RATE_LIMIT_MESSAGE = "Yay! APIのアクセス制限を検出したため、処理を完全に停止しました。これ以上取得できません。時間をおいてから「今すぐ更新」を押してください。";
 
   const $ = id => document.getElementById(id);
-  const fmt = n => Number(n || 0).toLocaleString();
+  const fmt = n => Number(n || 0).toLocaleString("ja-JP");
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const sleep = ms => new Promise(r => setTimeout(r, ms));
   const num = v => (v === null || v === undefined || v === "" || !Number.isFinite(Number(v))) ? null : Number(v);

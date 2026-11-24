@@ -7,7 +7,7 @@
     total:0, cursor:null, seen:new Set(), paused:false, stopped:false,
     running:false, controller:null, complete:false, exhausted:false, topLimit:50, mapCentered:false
   };
-  const fmt = n => Number(n||0).toLocaleString();
+  const fmt = n => Number(n||0).toLocaleString("ja-JP");
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const sleep = ms => new Promise(r=>setTimeout(r,ms));
   let cooldownUntil=0;
@@ -160,7 +160,7 @@
     const u=state.scores.get(id);if(!u)return;
     $("detailTitle").textContent=`${u.nickname} · ${fmt(u.points)} 通のレター`;
     $("detailContent").innerHTML=`<p class="profile-link-row"><a href="https://yay.space/user/${u.id}" target="_blank" rel="noopener">${esc(u.nickname)} のプロフィールを開く ↗</a></p>`+
-      u.evidence.slice().sort((a,b)=>b.createdAt-a.createdAt).map(e=>`<div class="evidence-item"><div class="evidence-meta"><span>${e.createdAt?new Date(e.createdAt*1000).toLocaleString():"日時不明"}</span><span>#${e.reviewId}</span></div><p>${esc(e.comment||"(本文なし)")}</p><span class="subtle">${e.mutual?"相互レビュー":"相互レビューではない"}</span></div>`).join("");
+      u.evidence.slice().sort((a,b)=>b.createdAt-a.createdAt).map(e=>`<div class="evidence-item"><div class="evidence-meta"><span>${e.createdAt?new Date(e.createdAt*1000).toLocaleString("ja-JP"):"日時不明"}</span><span>#${e.reviewId}</span></div><p>${esc(e.comment||"(本文なし)")}</p><span class="subtle">${e.mutual?"相互レビュー":"相互レビューではない"}</span></div>`).join("");
     setHidden("detailPanel",false);$("detailPanel").scrollIntoView({behavior:"smooth",block:"nearest"});
   }
   function setStatus(text){$("scanStatus").textContent=text;$("scanTitle").textContent=text==="完了"?"分析完了":text==="一時停止"?"一時停止中":text==="停止"?"分析を停止しました":"レターを確認中";}
