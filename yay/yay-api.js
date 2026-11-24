@@ -5,7 +5,7 @@
 (() => {
   "use strict";
   if (window.YayAPI) return;
-  const STORAGE_KEY = "yay_api_cache_v1";
+  const STORAGE_KEY = "yay_api_cache_v2_ja"; // v2: answers are requested in Japanese (older entries may be English)
   const CACHE_LIMIT = 180;
   const DEFAULT_TTL = 90_000;
   const COOLDOWN_KEY = "yay_api_rate_limit_v1";
@@ -15,6 +15,7 @@
     { id: "corsproxy-io", label: "CORSProxy.io", build: target => `https://corsproxy.io/?url=${encodeURIComponent(target)}` },
     { id: "allorigins", label: "AllOrigins", build: target => `https://api.allorigins.win/raw?url=${encodeURIComponent(target)}` }
   ];
+  try { localStorage.removeItem("yay_api_cache_v1"); } catch {} // old cache (could hold English answers)
   const memory = new Map(), inflight = new Map(), health = new Map();
   let globalCooldownUntil = 0, activeIndex = 0, rateLimitCount = 0, retryWaitSeconds = 5, noticeTimer = null;
   try {
@@ -121,10 +122,12 @@
     return res.status === 429 || Number(data?.error_code) === 429 || /rate.?limit|too many requests|アクセス制限/i.test(msg);
   }
   async function request(input, options = {}) {
+    // yay.space asks the API for Japanese with every call; without it some text (circle categories etc.) comes back in English
+    options = { ...options, headers: { "Accept-Language": "ja", ...(options.headers || {}) } };
     const method = String(options.method || "GET").toUpperCase();
     const target = targetOf(input);
     if (method !== "GET") return fetch(providers[activeIndex].build(target), options);
-    const key = `${method}:${target}`;
+    const key = `${method}:ja:${target}`;
     const cached = readCache(key);
     if (cached !== null) return new Response(cached, { status: 200, headers: { "Content-Type": "application/json", "X-Yay-Cache": "HIT" } });
     if (inflight.has(key)) {
@@ -158,7 +161,7 @@
       for (let offset = 0; offset < providers.length; offset++) {
         const index = (start + offset) % providers.length, provider = providers[index];
         try {
-          const response = await fetch(provider.build(target), { ...options, method, mode: "cors", credentials: "omit" });
+          const response = await fetch(provider.build(target), { ...options, method, mode: "cors", credentials: "omit", cache: "no-store" }); // the relay's HTTP cache ignores Accept-Language, so never reuse it
           const body = await response.text();
           if (markRateLimit(response, body)) {
             const wait = registerRateLimit(response);

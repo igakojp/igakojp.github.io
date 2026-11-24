@@ -5,13 +5,13 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#ffffff">
   <title>Yay! リーダーボード</title>
-  <link rel="stylesheet" href="style.css"><link rel="stylesheet" href="yay-theme.css">
+  <link rel="stylesheet" href="style.css?v=20261124c"><link rel="stylesheet" href="yay-theme.css?v=20261124c">
 </head>
 <body>
   <div class="ambient ambient-a"></div><div class="ambient ambient-b"></div>
   <header class="topbar">
     <a class="brand" href="https://yay.space/" target="_blank" rel="noopener"><img class="brand-logo" src="https://yay.space/images/logotype.svg" alt="Yay!"><span><b>リーダーボード</b></span></a>
-    <form class="yay-search" action="profile/index.html" method="get" role="search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg><input name="q" placeholder="ユーザーを検索（ID・URL）" aria-label="ユーザーを検索（ユーザーID、プロフィールURL、投稿URL）" autocomplete="off" enterkeyhint="search"></form><nav class="section-nav" aria-label="マップ切り替え">
+    <form class="yay-search" action="profile/index.html" method="get" role="search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg><input name="q" placeholder="ユーザーを検索" aria-label="ユーザーを検索（ユーザーID、プロフィールURL、投稿URL）" autocomplete="off" enterkeyhint="search"></form><nav class="section-nav" aria-label="マップ切り替え">
       <a class="section-link" href="interaction.html">交流マップ</a>
       <a class="section-link" href="review.html">レターマップ</a>
       <a class="section-link" href="call.html">通話マップ</a>
@@ -26,7 +26,7 @@
 
   <main class="shell lb-shell">
     <section class="intro">
-      <div class="eyebrow">YAY! LEADERBOARD</div>
+      <div class="eyebrow">Yay! リーダーボード</div>
       <h1>いいねするだけで、<br><span>みんなの順位に参加。</span></h1>
       <p>対象の投稿に「いいね」するだけで参加できます。返信やメンションは不要です。フォロワー数・投稿数などで順位が決まり、好きなユーザーから下に10人分を画像にして保存できます。</p>
     </section>
@@ -36,7 +36,7 @@
         <b>参加のしくみ</b>
         <p>下の投稿に「いいね」すると参加者として表示され、いいねを外すと一覧からも外れます。鍵アカウントなど情報を取得できないユーザーは、一番下に「特定できないユーザー」として表示されます。データはこのページを開いている間だけメモリ上に保持され、保存されません。</p>
       </div>
-      <a class="secondary-btn lb-link" href="https://yay.space/post/615227650" target="_blank" rel="noopener">いいねする投稿を開く</a>
+      <a class="secondary-btn lb-link" data-yay-external href="https://yay.space/post/615227650" target="_blank" rel="noopener">いいねする投稿を開く</a>
     </section>
 
     <section class="panel lb-status" aria-live="polite">
@@ -78,7 +78,7 @@
     </section>
     <p id="starNote" class="map-disclaimer hidden">＊ 一部の項目（ログイン連続日数・フォロー数・登録日）を取得できなかったアカウントは、その項目を0として計算しています。</p>
     <section id="unknownPanel" class="panel lb-unknown hidden">
-      <div class="section-head"><div><div class="eyebrow">UNIDENTIFIABLE</div><h3>特定できないユーザー <span id="unknownCount"></span></h3></div></div>
+      <div class="section-head"><div><div class="eyebrow">特定できないユーザー</div><h3>特定できないユーザー <span id="unknownCount"></span></h3></div></div>
       <p class="subtle">鍵アカウントなどでタイムラインを見られないため、順位には含めていません。</p>
       <ul id="unknownList" class="lb-unknown-list"></ul>
     </section>
@@ -101,8 +101,8 @@
 
     <footer><span>Yay! リーダーボード</span><span>公開情報のみ · ログイン不要 · データは保存されません</span><div id="creatorCredit" class="creator-credit" aria-live="polite">制作者情報を読み込み中…</div></footer>
   </main>
-  <script src="yay-api.js"></script>
-  <script src="site.js"></script>
-  <script src="leaderboard.js"></script>
+  <script src="yay-api.js?v=20261124c"></script>
+  <script src="site.js?v=20261124c"></script>
+  <script src="leaderboard.js?v=20261124c"></script>
 </body>
 </html>

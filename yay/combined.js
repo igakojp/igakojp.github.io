@@ -154,7 +154,7 @@
     const all=sortedUsers(),limit=Number($("topLimit")?.value||50),filter=($("userFilter")?.value||"").trim().toLowerCase();
     const ranked=all.slice(0,limit),rows=ranked.filter(u=>String(u.id).includes(filter)||u.nickname.toLowerCase().includes(filter));
     const showNames=$("showUsernames")?.checked!==false;
-    $("mapUserCount").textContent=`Top ${limit} · ${fmt(rows.length)} / ${fmt(all.length)} 人`;
+    $("mapUserCount").textContent=`上位${limit}人 · ${fmt(rows.length)} / ${fmt(all.length)} 人`;
     if(!rows.length){$("interactionMap").innerHTML=`<div class="empty-state">${all.length?"検索条件に一致するユーザーはいません。":"ユーザーを発見すると、ここに総合交流マップが表示されます。"}</div>`;}
     else {
       const {width,height,cx,cy,points}=mapPositions(rows);
@@ -231,8 +231,8 @@
       const glow=ctx.createRadialGradient(cx,cy,80,cx,cy,1100);glow.addColorStop(0,"rgba(65,190,255,.24)");glow.addColorStop(1,"rgba(5,16,44,0)");ctx.fillStyle=glow;ctx.fillRect(0,0,W,H);
       const nick=u=>String(u?.nickname||`User ${u?.id??""}`),clip=(t,n)=>{const a=Array.from(t);return a.length>n?a.slice(0,n-1).join("")+"…":t;};
       const font=px=>`${px}px system-ui, "Noto Sans JP", sans-serif`;
-      ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillStyle="#fff";ctx.font=`800 ${font(58)}`;ctx.fillText(`総合交流マップ · Top ${users.length}`,cx,72);
-      ctx.fillStyle="#c8eaff";ctx.font=font(28);ctx.fillText(`${state.profile?.nickname||`Yay! User ${state.userId}`} · ${new Date().toLocaleDateString("ja-JP")}`,cx,125);
+      ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillStyle="#fff";ctx.font=`800 ${font(58)}`;ctx.fillText(`総合交流マップ · 上位${users.length}人`,cx,72);
+      ctx.fillStyle="#c8eaff";ctx.font=font(28);ctx.fillText(`${state.profile?.nickname||`Yay! ユーザー ${state.userId}`} · ${new Date().toLocaleDateString("ja-JP")}`,cx,125);
       [400,720,900].forEach(r=>{ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.strokeStyle="rgba(164,225,255,.16)";ctx.lineWidth=3;ctx.stroke();});
       points.forEach(p=>{ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(p.x,p.y);ctx.strokeStyle="rgba(168,226,255,.27)";ctx.lineWidth=3;ctx.stroke();});
       async function loadImage(url){if(!url)return null;for(const src of [url,`https://proxy.cors.dev/${url}`])try{const r=await fetch(src,{mode:"cors",credentials:"omit"});if(!r.ok)continue;const b=await r.blob();if(!b.type.startsWith("image/"))continue;const obj=URL.createObjectURL(b);objs.push(obj);const img=new Image();img.src=obj;await new Promise((ok,no)=>{img.onload=ok;img.onerror=no;});return img;}catch{}return null;}

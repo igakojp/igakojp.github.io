@@ -171,3 +171,34 @@ document.addEventListener("DOMContentLoaded", () => {
   if (cur) nav.scrollLeft = Math.max(0, cur.offsetLeft - (nav.clientWidth - cur.offsetWidth) / 2);
   nav.addEventListener("scroll", upd, { passive: true }); addEventListener("resize", upd); upd();
 });
+
+/* Connect the tools: every link to a yay.space user, post, circle or conversation opens in this site's own
+ * viewer (profile/…) instead, which shows more than yay.space does. Links that exist to do something on
+ * yay.space itself (like "like this post to join") carry data-yay-external and are left alone.
+ * The viewer page handles its own links, and its "Yay! で開く" buttons keep going to yay.space. */
+(() => {
+  "use strict";
+  if (window.__profileBase) return;
+  const RE = /^https?:\/\/(?:www\.)?yay\.space\/(user|post|group|conversation)\/(\d+)(?:\/(album|reviews))?\/?(?:[?#].*)?$/;
+  const viewerUrl = route => /^https?:$/.test(location.protocol)
+    ? new URL(`profile/${route}`, location.href).href
+    : new URL(`profile/index.html#/${route}`, location.href).href;
+  function fix(a) {
+    if (!a || a.dataset.yayExternal != null || a.dataset.yayLinked) return;
+    const m = (a.getAttribute("href") || "").match(RE);
+    if (!m) return;
+    a.dataset.yayOriginal = a.href;
+    a.href = viewerUrl(`${m[1]}/${m[2]}${m[3] ? `/${m[3]}` : ""}`);
+    a.dataset.yayLinked = "1";
+    if (!a.title) a.title = "Yay! ユーザー情報で開く";
+  }
+  const scan = root => { if (root.matches?.("a[href]")) fix(root); root.querySelectorAll?.("a[href]").forEach(fix); };
+  const start = () => {
+    scan(document.body);
+    new MutationObserver(list => { for (const m of list) for (const n of m.addedNodes) if (n.nodeType === 1) scan(n); })
+      .observe(document.body, { childList: true, subtree: true });
+    // a link made and clicked in the same moment is still caught here
+    document.addEventListener("click", e => fix(e.target.closest?.("a[href]")), true);
+  };
+  if (document.body) start(); else document.addEventListener("DOMContentLoaded", start);
+})();

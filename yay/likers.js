@@ -17,6 +17,7 @@
     listEl = el("div", { className: "pc-picklist", tabIndex: 0 }); moreEl = el("p", { className: "subtle" });
     const close = el("button", { type: "button", className: "secondary-btn", textContent: "閉じる" });
     const link = el("a", { href: POST_URL, target: "_blank", rel: "noopener", textContent: "この投稿を開く", className: "lk-link" });
+    link.dataset.yayExternal = "1"; // opened to like the post on yay.space, so it stays there
     modal = el("div", { className: "pc-modal lk hidden", role: "dialog" },
       el("div", { className: "pc-modal-card panel" },
         el("div", { className: "pc-modal-head" }, el("b", { textContent: "いいねした人から探す" }), close),

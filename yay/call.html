@@ -5,14 +5,14 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#ffffff">
   <title>Yay! 通話マップ</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="yay-theme.css">
+  <link rel="stylesheet" href="style.css?v=20261124c">
+  <link rel="stylesheet" href="yay-theme.css?v=20261124c">
 </head>
 <body>
   <div class="ambient ambient-a"></div><div class="ambient ambient-b"></div>
   <header class="topbar">
     <a class="brand" href="https://yay.space/" target="_blank" rel="noopener"><img class="brand-logo" src="https://yay.space/images/logotype.svg" alt="Yay!"><span><b>通話マップ</b></span></a>
-    <form class="yay-search" action="profile/index.html" method="get" role="search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg><input name="q" placeholder="ユーザーを検索（ID・URL）" aria-label="ユーザーを検索（ユーザーID、プロフィールURL、投稿URL）" autocomplete="off" enterkeyhint="search"></form>
+    <form class="yay-search" action="profile/index.html" method="get" role="search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg><input name="q" placeholder="ユーザーを検索" aria-label="ユーザーを検索（ユーザーID、プロフィールURL、投稿URL）" autocomplete="off" enterkeyhint="search"></form>
     <nav class="section-nav" aria-label="マップ切り替え">
       <a class="section-link" href="interaction.html">交流マップ</a>
       <a class="section-link" href="review.html">レターマップ</a>
@@ -28,7 +28,7 @@
 
   <main class="shell">
     <section class="intro">
-      <div class="eyebrow">YAY! PUBLIC CALL MAP</div>
+      <div class="eyebrow">Yay! 公開通話マップ</div>
       <h1>誰がこのアカウントと<br><span>通話しているかを見つけよう。</span></h1>
       <p>公開タイムラインの通話投稿を確認し、通話に参加したユーザーをマップで表示します。</p>
     </section>
@@ -78,7 +78,7 @@
       <div class="content-grid">
         <article class="panel ranking-panel">
           <div class="section-head"><div><div class="eyebrow">通話ネットワーク</div><h3>通話に参加したユーザー</h3></div><span id="mapUserCount" class="subtle">0 人</span></div>
-          <div class="map-toolbar"><input id="userFilter" type="search" placeholder="ユーザー名・IDで検索" aria-label="ユーザー検索"><label class="top-limit">表示人数 <select id="topLimit"><option value="10">Top 10</option><option value="20">Top 20</option><option value="30">Top 30</option><option value="40">Top 40</option><option value="50" selected>Top 50</option></select></label><label class="username-toggle"><input id="showUsernames" type="checkbox" checked><span>ユーザー名を表示</span></label><span id="mapHint">読み込み中もリアルタイムで更新 · ノードを選択して詳細を表示</span></div><div id="interactionMap" class="interaction-map"><div class="empty-state">分析を開始すると、ここに通話マップが表示されます。</div></div><p class="map-disclaimer">※ 公開タイムラインの post_type が call の投稿のみを確認し、conference_call_users に含まれるユーザーを集計します。個人ごとの実際の参加時間はAPIから確認できません。</p><div id="rankingList" class="ranking-list hidden"></div>
+          <div class="map-toolbar"><input id="userFilter" type="search" placeholder="ユーザー名・IDで検索" aria-label="ユーザー検索"><label class="top-limit">表示人数 <select id="topLimit"><option value="10">上位10人</option><option value="20">上位20人</option><option value="30">上位30人</option><option value="40">上位40人</option><option value="50" selected>上位50人</option></select></label><label class="username-toggle"><input id="showUsernames" type="checkbox" checked><span>ユーザー名を表示</span></label><span id="mapHint">読み込み中もリアルタイムで更新 · ノードを選択して詳細を表示</span></div><div id="interactionMap" class="interaction-map"><div class="empty-state">分析を開始すると、ここに通話マップが表示されます。</div></div><p class="map-disclaimer">※ 公開タイムラインの post_type が call の投稿のみを確認し、conference_call_users に含まれるユーザーを集計します。個人ごとの実際の参加時間はAPIから確認できません。</p><div id="rankingList" class="ranking-list hidden"></div>
         </article>
         
       </div>
@@ -90,8 +90,8 @@
 
     <footer><span>Yay! 通話マップ</span><span>公開情報のみ · ログイン不要 · DMは取得しません</span><div id="creatorCredit" class="creator-credit" aria-live="polite">制作者情報を読み込み中…</div></footer>
   </main>
-  <script src="yay-api.js"></script>
-  <script src="site.js"></script>
-  <script src="call.js"></script>
+  <script src="yay-api.js?v=20261124c"></script>
+  <script src="site.js?v=20261124c"></script>
+  <script src="call.js?v=20261124c"></script>
 </body>
 </html>

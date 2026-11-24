@@ -148,7 +148,7 @@
   function renderMap(){
     const all=sortedScores(),limit=Number($("topLimit")?.value||50),filter=($("userFilter")?.value||"").trim().toLowerCase();
     const rows=all.slice(0,limit).filter(u=>String(u.id).includes(filter)||u.nickname.toLowerCase().includes(filter));
-    $("mapUserCount").textContent=`Top ${limit} · ${fmt(rows.length)} / ${fmt(all.length)} 人`;
+    $("mapUserCount").textContent=`上位${limit}人 · ${fmt(rows.length)} / ${fmt(all.length)} 人`;
     if(!rows.length){$("interactionMap").innerHTML=`<div class="empty-state">${all.length?"検索条件に一致するユーザーはいません。":"通話投稿が見つかると、参加ユーザーがここに表示されます。"}</div>`;return;}
     const {width,height,cx,cy,points}=mapPositions(rows);
     const lines=points.map(p=>`<line x1="${cx}" y1="${cy}" x2="${p.x}" y2="${p.y}" class="map-link"/>`).join("");
@@ -236,7 +236,7 @@
       const ctx=canvas.getContext("2d");ctx.scale(.5,.5);const bg=ctx.createLinearGradient(0,0,W,H);bg.addColorStop(0,"#173e6c");bg.addColorStop(1,"#071a35");ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
       const glow=ctx.createRadialGradient(cx,cy,80,cx,cy,1100);glow.addColorStop(0,"rgba(65,190,255,.24)");glow.addColorStop(1,"rgba(5,16,44,0)");ctx.fillStyle=glow;ctx.fillRect(0,0,W,H);
       ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillStyle="#fff";ctx.font="800 58px system-ui, sans-serif";ctx.fillText("通話に参加したユーザー",cx,72);
-      ctx.fillStyle="#c8eaff";ctx.font="28px system-ui";ctx.fillText(`${state.profile.nickname||`Yay! User ${state.userId}`} · ${fmt(state.seenCalls.size)} 通話 · ${new Date().toLocaleDateString("ja-JP")}`,cx,125);
+      ctx.fillStyle="#c8eaff";ctx.font="28px system-ui";ctx.fillText(`${state.profile.nickname||`Yay! ユーザー ${state.userId}`} · ${fmt(state.seenCalls.size)} 通話 · ${new Date().toLocaleDateString("ja-JP")}`,cx,125);
       [400,720,900].forEach(r=>{ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.strokeStyle="rgba(164,225,255,.16)";ctx.lineWidth=3;ctx.stroke();});
       points.forEach(p=>{ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(p.x,p.y);ctx.strokeStyle="rgba(168,226,255,.27)";ctx.lineWidth=3;ctx.stroke();});
       async function loadImage(url){if(!url)return null;for(const src of [url,`https://proxy.cors.dev/${url}`])try{const r=await fetch(src,{mode:"cors",credentials:"omit"});if(!r.ok)continue;const b=await r.blob();if(!b.type.startsWith("image/"))continue;const obj=URL.createObjectURL(b),img=new Image();img.src=obj;await new Promise((ok,no)=>{img.onload=ok;img.onerror=no;});return {img,obj};}catch{}return null;}
