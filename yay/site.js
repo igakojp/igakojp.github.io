@@ -203,3 +203,17 @@ document.addEventListener("DOMContentLoaded", () => {
   };
   if (document.body) start(); else document.addEventListener("DOMContentLoaded", start);
 })();
+
+/* Open a tool for a given user straight from a link: interaction.html?user=123 fills the input and starts.
+ * The card makers (ユーザー証 / 自己紹介カード) are only filled in, because they ask you to confirm it is your own account. */
+window.addEventListener("load", () => {
+  const id = new URLSearchParams(location.search).get("user");
+  if (!id || !/^\d{1,12}$/.test(id)) return;
+  const input = document.getElementById("userInput") || document.getElementById("lcInput") || document.getElementById("pcInput");
+  if (!input) return;
+  input.value = id;
+  input.dispatchEvent(new Event("input", { bubbles: true }));
+  const start = document.getElementById("analyzeBtn") || document.getElementById("startBtn");
+  if (start && input.id === "userInput") setTimeout(() => start.click(), 150);
+  else input.focus();
+});
