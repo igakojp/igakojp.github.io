@@ -1122,7 +1122,16 @@
     },
     async searchPosts(L, q) {
       const d = await getJson(`/v2/posts/search?keyword=${enc(q)}&number=50${searchOpts.media ? "&only_media=true" : ""}${L.cursor ? `&from_post_id=${L.cursor}` : ""}`);
-      nextFrom(L, d, d.posts || []);
+      const foundPosts = d.posts || [];
+
+      // Check only the first page: show the phrase badge only when all 50 posts
+      // returned for the initial search are reported.
+      if (!L.items.length && !L.cursor) {
+        L.searchAllReported = foundPosts.length === 50 &&
+          foundPosts.every(p => Number(p?.reported_count) > 0);
+      }
+
+      nextFrom(L, d, foundPosts);
     },
     async searchUsers(L, q) {
       const d = await getJson(`/v1/web/users/search?${searchOpts.scope === "biography" ? "biography" : "nickname"}=${enc(q)}&number=100${searchOpts.noGomi ? "&not_recent_gomimushi=true" : ""}${L.cursor ? `&from_id=${L.cursor}` : ""}`);
@@ -1416,7 +1425,10 @@
     if (q) {
       const L = feed(`search:${type}:${q}:${type === "posts" ? searchOpts.media : type === "users" ? `${searchOpts.scope}:${searchOpts.noGomi}` : ""}`);
       const row = type === "posts" ? (p => postCard(p)) : type === "users" ? (u => `<ul class="fl-list">${personRow2(u)}</ul>`) : groupCard;
-      body = feedBlock("search", L, row, type === "users" ? "人" : "件", "見つかりませんでした。");
+      const reportedPhraseBadge = type === "posts" && L.searchAllReported
+        ? `<div class="ys-reported-phrase" role="status">${ic("alert")}<span>通報されたフレーズ</span></div>`
+        : "";
+      body = reportedPhraseBadge + feedBlock("search", L, row, type === "users" ? "人" : "件", "見つかりませんでした。");
       pairs = [["search", L, type === "posts" ? "searchPosts" : type === "users" ? "searchUsers" : "searchGroups", q]];
     }
     app.innerHTML = `${crumbs([["検索"], ...(q ? [[`「${q}」`]] : [])])}${subnav("search/posts/")}
@@ -1582,3 +1594,25 @@
   else if (query) resolveInput(query).then(r => go(r, true), x => { go("", true); $("upError").textContent = x.message; $("upError").classList.remove("hidden"); });
   else render();
 })();
+
+/* Yay! ユーザー情報 — styled after yay.space's own profile pages:
+ * white header with the logo in the middle, light grey page, one white rounded card with the banner,
+ * an avatar overlapping it, and tabs with a pink underline. Stand-alone (does not load ../style.css). */
+:root{
+  --pink:#e849be;--pink-soft:#fde8f6;--text:#212121;--text2:#2d2d2d;--gray:#757575;--light:#c6c6c6;--line:#eeeeee;
+  --bg:#f6f6f6;--card:#fff;--shadow:0 1px 2px rgba(0,0,0,.16);
+  --font:Roboto,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP",Meiryo,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+html,body{overflow-x:hidden}
+@supports (overflow:clip){html,body{overflow-x:clip}}
+/* the shared header scrolls away on phones so the profile tabs can stick to the top */
+@media (max-width:720px){.topbar{position:relative!important}}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--text);font:400 15px/1.6 var(--font)}
+img,video{max-width:100%}
+a{color:inherit}
+button{font:inherit;color:inherit;touch-action:manipulation}
+.hidden{display:none!important}
+.up-muted{color:var(--gray)}
