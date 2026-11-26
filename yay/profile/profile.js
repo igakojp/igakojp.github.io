@@ -1,11 +1,3 @@
-
-
-
-
-
-
-
-
 /* Yay! ユーザー情報: a public profile viewer laid out like yay.space, using the same URL names.
  *   profile/                          → search
  *   profile/user/{id}                 → all posts
@@ -1130,16 +1122,7 @@
     },
     async searchPosts(L, q) {
       const d = await getJson(`/v2/posts/search?keyword=${enc(q)}&number=50${searchOpts.media ? "&only_media=true" : ""}${L.cursor ? `&from_post_id=${L.cursor}` : ""}`);
-      const foundPosts = d.posts || [];
-
-      // Check only the first page: show the phrase badge only when all 50 posts
-      // returned for the initial search are reported.
-      if (!L.items.length && !L.cursor) {
-        L.searchAllReported = foundPosts.length === 50 &&
-          foundPosts.every(p => Number(p?.reported_count) > 0);
-      }
-
-      nextFrom(L, d, foundPosts);
+      nextFrom(L, d, d.posts || []);
     },
     async searchUsers(L, q) {
       const d = await getJson(`/v1/web/users/search?${searchOpts.scope === "biography" ? "biography" : "nickname"}=${enc(q)}&number=100${searchOpts.noGomi ? "&not_recent_gomimushi=true" : ""}${L.cursor ? `&from_id=${L.cursor}` : ""}`);
@@ -1433,10 +1416,16 @@
     if (q) {
       const L = feed(`search:${type}:${q}:${type === "posts" ? searchOpts.media : type === "users" ? `${searchOpts.scope}:${searchOpts.noGomi}` : ""}`);
       const row = type === "posts" ? (p => postCard(p)) : type === "users" ? (u => `<ul class="fl-list">${personRow2(u)}</ul>`) : groupCard;
-      const reportedPhraseBadge = type === "posts" && L.searchAllReported
-        ? `<div class="ys-reported-phrase" role="status">${ic("alert")}<span>通報されたフレーズ</span></div>`
-        : "";
-      body = reportedPhraseBadge + feedBlock("search", L, row, type === "users" ? "人" : "件", "見つかりませんでした。");
+      // 最初の50件がすべて通報済みなら「通報されたワード」バッジを出す
+      let reportedBadge = "";
+      if (type === "posts") {
+        const first = L.items.slice(0, 50);
+        const enough = first.length === 50 || (L.done && first.length > 0);
+        if (enough && first.every(p => Number(p.reported_count) > 0)) {
+          reportedBadge = `<div class="ys-reported-word">${ic("alert")}<span><b>「${esc(q)}」は通報されたワードです</b><small>検索結果の最初の${num(first.length)}件がすべて通報されています</small></span></div>`;
+        }
+      }
+      body = reportedBadge + feedBlock("search", L, row, type === "users" ? "人" : "件", "見つかりませんでした。");
       pairs = [["search", L, type === "posts" ? "searchPosts" : type === "users" ? "searchUsers" : "searchGroups", q]];
     }
     app.innerHTML = `${crumbs([["検索"], ...(q ? [[`「${q}」`]] : [])])}${subnav("search/posts/")}
@@ -1602,27 +1591,3 @@
   else if (query) resolveInput(query).then(r => go(r, true), x => { go("", true); $("upError").textContent = x.message; $("upError").classList.remove("hidden"); });
   else render();
 })();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
